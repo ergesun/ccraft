@@ -17,3 +17,8 @@ DEFINE_bool(stop_glogging_if_full_disk, true, "设置是否在磁盘已满时避
 DEFINE_bool(glogtostderr, false, "设置日志消息是否转到标准输出而不是日志文件");
 DEFINE_bool(alsoglogtostderr, false, "设置日志消息除了日志文件之外是否去标准输出");
 DEFINE_bool(colorglogtostderr, true, "设置记录到标准输出的颜色消息（如果终端支持）");
+
+/**
+ * rpc server
+ */
+DEFINE_int32(internal_net_io_threads_cnt, 0, "设置用于node间通信的rpc服务的网络io处理线程个数。默认0为cpu核数的一半。");

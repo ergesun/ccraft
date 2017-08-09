@@ -9,7 +9,7 @@
 #include <gflags/gflags.h>
 
 /**
- * glog配置
+ * glog
  */
 DECLARE_string(glog_dir);
 DECLARE_bool(glog_prefix);
@@ -20,5 +20,10 @@ DECLARE_bool(stop_glogging_if_full_disk);
 DECLARE_bool(glogtostderr);
 DECLARE_bool(alsoglogtostderr);
 DECLARE_bool(colorglogtostderr);
+
+/**
+ * rpc server
+ */
+DECLARE_int32(net_io_threads_cnt);
 
 #endif //CCRAFT_GFLAGS_CONFIG_H
