@@ -38,6 +38,7 @@ else()
     message(STATUS "CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE}")
     set(LINK_DIRS
             ${SRC_ROOT}/common
+            ${SRC_ROOT}/net
             )
     link_directories(${LINK_DIRS})
 endif()
