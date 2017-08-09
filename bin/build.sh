@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#TODO(sunchao): To improve this script codes. By the way, my bash script coding ability is poor.
+
 BIN_DIR=$(cd `dirname $0`; pwd)
 CMAKELISTS_ROOT_DIR=${BIN_DIR}/..
 BUILD_OBJS_FOLDER="cmake-objs"
@@ -24,11 +26,11 @@ function print_usage {
 if [ 1 -eq $# ]; then
     if [ "--list-ut" = "$1" ]; then
         echo_green "[Unit tests]:"
-        ls ${CMAKELISTS_ROOT_DIR}/unit-test
+        ls ${CMAKELISTS_ROOT_DIR}/src/unit-test | grep -v "readme"
         exit 0
     elif [ "--list-tools" = "$1" ]; then
         echo_green "[Tools]:"
-        ls ${CMAKELISTS_ROOT_DIR}/tools
+        ls ${CMAKELISTS_ROOT_DIR}/src/tools
         exit 0
     fi
 fi
@@ -82,14 +84,11 @@ do
         if [ "$UT_STAT" != "" ]; then
             UT_MODULE=$p
             BUILD_PROJECT_TYPE="${BUILD_PROJECT_TYPE} - ${UT_MODULE}"
-            UT_STAT=""
         elif [ "$TL_STAT" != "" ]; then
             TL_MODULE=$p
             BUILD_PROJECT_TYPE="${BUILD_PROJECT_TYPE} - ${TL_MODULE}"
-            TL_STAT=""
         elif [ "$MAKE_ARGS_STAT" != "" ]; then
             MAKE_ARGS=$p
-            MAKE_ARGS_STAT=""
         else
             echo_red "Not support opt \"$p\""
             print_usage
@@ -109,7 +108,7 @@ if [ "${UT_STAT}" != "" ]; then
         FOUND_UT=
 
         #find . -maxdepth 1 -type d|xargs basename -a| grep -v -E '^$'| grep -v -E '^\.'
-        for f in `tree ${CMAKELISTS_ROOT_DIR}/unit-test -L 1 -d | awk '{print $2}'|grep -v -E "^$"|grep -v "directories"`
+        for f in `tree ${CMAKELISTS_ROOT_DIR}/src/unit-test -L 1 -d | awk '{print $2}'|grep -v -E "^$"|grep -v "directories"|grep -v "directory"`
         do
             if [ "$f" = "${UT_MODULE}" ]; then
                 FOUND_UT="1"
@@ -153,7 +152,7 @@ fi
 
 if [ "${UT_MODULE}" = "all" ]; then
     echo_yellow "[Phase 1]: start building all unit test targets..."
-    for f in `tree ${CMAKELISTS_ROOT_DIR}/unit-test -L 1 -d | awk '{print $2}'|grep -v -E "^$"|grep -v "directories"`
+    for f in `tree ${CMAKELISTS_ROOT_DIR}/src/unit-test -L 1 -d | awk '{print $2}'|grep -v -E "^$"|grep -v "directories"|grep -v "directory"`
     do
         CUR_BUILD_FLAG="${BUILD_FLAG} -DUT_MODULE=$f"
         echo_yellow " >>> building [${BUILD_PROJECT_TYPE}:$f, ${BUILD_TYPE_INFO}, ${BUILD_LOG_INFO}] target..."

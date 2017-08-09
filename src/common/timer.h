@@ -13,6 +13,7 @@
 
 #include "spin-lock.h"
 #include "common-def.h"
+#include "cctime.h"
 
 namespace ccraft {
 namespace common {
@@ -25,8 +26,8 @@ class Timer {
 public:
     typedef std::function<void(void *)> TimerCallback, *TimerCallbackPointer;
     struct EventId {
-        EventId(uctime_t w, TimerCallbackPointer h) : when(w), how(h) {}
-        uctime_t             when;
+        EventId(cctime_t w, TimerCallbackPointer h) : when(w), how(h) {}
+        cctime_t             when;
         TimerCallbackPointer how;
 
         bool operator<(const EventId &another) const {
@@ -60,7 +61,7 @@ public:
         }
     };
 
-    typedef std::multimap<uctime_t, Event> TimerEvents;
+    typedef std::multimap<cctime_t, Event> TimerEvents;
     typedef std::map<EventId, TimerEvents::iterator> EventsTable;
 
     Timer() = default;
@@ -82,14 +83,14 @@ public:
      * @param when 从epoch到触发的时间。
      * @return 返回订阅事件的id，可用于取消。
      */
-    EventId SubscribeEventAt(uctime_t when, Event &ev);
+    EventId SubscribeEventAt(cctime_t when, Event &ev);
 
     /**
      * 订阅事件：从现在开始指定的时间后触发。
      * @param duration 等待触发的时间。
      * @return 返回订阅事件的id，可用于取消。
      */
-    EventId SubscribeEventAfter(uctime_t duration, Event &ev);
+    EventId SubscribeEventAfter(cctime_t duration, Event &ev);
 
     /**
      * 取消指定事件的订阅。

@@ -33,71 +33,11 @@ typedef unsigned char uchar;
 
 namespace ccraft {
 namespace common {
+
 const int  CPUS_CNT = get_nprocs();
 const long CACHELINE_SIZE = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
 const long PAGE_SIZE = sysconf(_SC_PAGESIZE);
 
-typedef struct uctime_s {
-    uctime_s() : sec(-1), nsec(-1) {}
-
-    uctime_s(long s, long n) : sec(s), nsec(n) {}
-
-    explicit uctime_s(const struct timespec ts) {
-        sec = ts.tv_sec;
-        nsec = ts.tv_nsec;
-    }
-
-    uctime_s(const uctime_s &ut) {
-        this->sec = ut.sec;
-        this->nsec = ut.nsec;
-    }
-
-    uctime_s &operator=(const uctime_s &ut) {
-        this->sec = ut.sec;
-        this->nsec = ut.nsec;
-        return *this;
-    }
-
-    long sec;
-    long nsec;
-
-    long get_total_nsecs() const {
-        return sec * 1000000000 + nsec;
-    }
-} uctime_t;
-
-// arithmetic operators
-inline uctime_t &operator+=(uctime_t &l, const uctime_t &r) {
-    l.sec += r.sec + (l.nsec + r.nsec) / 1000000000L;
-    l.nsec += r.nsec;
-    l.nsec %= 1000000000L;
-    return l;
-}
-
-// comparators
-inline bool operator>(const uctime_t &a, const uctime_t &b) {
-    return (a.sec > b.sec) || (a.sec == b.sec && a.nsec > b.nsec);
-}
-
-inline bool operator<=(const uctime_t &a, const uctime_t &b) {
-    return !(operator>(a, b));
-}
-
-inline bool operator<(const uctime_t &a, const uctime_t &b) {
-    return (a.sec < b.sec) || (a.sec == b.sec && a.nsec < b.nsec);
-}
-
-inline bool operator>=(const uctime_t &a, const uctime_t &b) {
-    return !(operator<(a, b));
-}
-
-inline bool operator==(const uctime_t &a, const uctime_t &b) {
-    return a.sec == b.sec && a.nsec == b.nsec;
-}
-
-inline bool operator!=(const uctime_t &a, const uctime_t &b) {
-    return a.sec != b.sec || a.nsec != b.nsec;
-}
 } // namespace common
 } // namespace ccraft
 #endif //CCRAFT_COMMON_COMMON_DEF_H

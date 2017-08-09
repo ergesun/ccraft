@@ -12,11 +12,11 @@
 
 namespace ccraft {
 namespace common {
-uctime_t CommonUtils::GetCurrentTime() {
+cctime_t CommonUtils::GetCurrentTime() {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
 
-    return uctime_t(ts);
+    return cctime_t(ts);
 }
 
 int CommonUtils::SetNonBlocking(int fd) {

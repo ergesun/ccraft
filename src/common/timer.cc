@@ -38,7 +38,7 @@ void Timer::Stop() {
     m_cv.notify_one();
 }
 
-Timer::EventId Timer::SubscribeEventAt(uctime_t when, Event &ev) {
+Timer::EventId Timer::SubscribeEventAt(cctime_t when, Event &ev) {
     assert(ev.callback);
     auto evId = EventId(when, ev.callback);
     SpinLock l(&m_thread_safe_sl);
@@ -61,7 +61,7 @@ Timer::EventId Timer::SubscribeEventAt(uctime_t when, Event &ev) {
     return EventId(when, ev.callback);
 }
 
-Timer::EventId Timer::SubscribeEventAfter(uctime_t duration, Event &ev) {
+Timer::EventId Timer::SubscribeEventAfter(cctime_t duration, Event &ev) {
     assert(ev.callback);
     auto now = CommonUtils::GetCurrentTime();
     now += duration;

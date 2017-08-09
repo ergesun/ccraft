@@ -7,6 +7,7 @@
 #define CCRAFT_COMMON_COMMON_UTILS_H
 
 #include "common-def.h"
+#include "cctime.h"
 #include "mem-pool.h"
 
 namespace ccraft {
@@ -18,7 +19,7 @@ public:
      * 获取当前系统时间(unix epoch到现在的秒+纳秒数)。
      * @return
      */
-    static uctime_t GetCurrentTime();
+    static cctime_t GetCurrentTime();
 
     /**
      * 设置fd为非阻塞。

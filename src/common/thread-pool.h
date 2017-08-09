@@ -54,13 +54,13 @@ public:
      * 等待所有都完成或者指定的时间到了。
      * @param duration_since_epoch epoch开始到现在的duration。
      */
-    void WaitAllUntilTimeAt(uctime_s duration_since_epoch);
+    void WaitAllUntilTimeAt(cctime_s duration_since_epoch);
 
     /**
      * 等待所有都完成或者指定的时间到了。
      * @param duration 从现在开始最多等待的持续时间。
      */
-    void WaitAllUntilAfter(uctime_s duration);
+    void WaitAllUntilAfter(cctime_s duration);
 
 private:
     void proc();

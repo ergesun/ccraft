@@ -1,0 +1,7 @@
+# 定义服务实例的端口
+# thrift server
+9905
+
+# http server
+8088
+

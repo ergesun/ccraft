@@ -11,9 +11,10 @@
 #include <unordered_set>
 #include <memory>
 #include <list>
+#include <map>
 #include <sstream>
 
-#include "timer.h"
+#include "spin-lock.h"
 
 // TODO(sunchao): 添加一个和时间相关的统计机制，动态的对常驻对象数量、扩张系数等进行调整。
 
@@ -156,7 +157,6 @@ public:
     MemPool(uint32_t torc,uint32_t sorc, uint32_t borc, uint32_t tpt, uint32_t bipt, uint32_t bupt);
     ~MemPool();
 
-    /**************通用简单接口***********************/
     /**
      * 获取一块指定大小的内存。
      * 注意：不要释放返回的MemObject，只需要调用MemObject::Put。

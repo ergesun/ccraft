@@ -33,5 +33,6 @@
 cmake-build-debug
 
 # My build
-build
 cmake-objs
+third_party
+build

@@ -1,0 +1,70 @@
+#!/bin/bash
+CONF_DIR=$(cd `dirname $0`; pwd)
+
+echo "
+#####################################################################################
+## log配置项
+#####################################################################################
+# glog的保存路径
+# TODO(sunchao): 确认log path
+--glog_dir=/export/logs/access-control-center
+
+# 设置日志前缀是否应该添加到每行输出
+--glog_prefix=true
+
+# 设置最大日志文件大小（以MB为单位）
+--max_glog_size=100
+
+# TODO(sunchao): 确认下这个配置
+# 设置可以缓冲日志的最大秒数，0指实时输出
+--glogbufsecs=0
+
+# 设置log输出级别(包含)：INFO = 0, WARNING = 1, ERROR = 2,  FATAL = 3
+--mingloglevel=0
+
+# 设置是否在磁盘已满时避免日志记录到磁盘
+--stop_glogging_if_full_disk=true
+
+# 设置日志消息是否转到标准输出而不是日志文件
+--glogtostderr=false
+
+# 设置日志消息除了日志文件之外是否去标准输出
+--alsoglogtostderr=false
+
+# 设置记录到标准输出的颜色消息（如果终端支持）
+--colorglogtostderr=true
+
+#####################################################################################
+## thrift server配置项
+#####################################################################################
+# 监听的端口
+--thriftserver_port=${THRIFT_SERV_PORT}
+
+# 服务的常驻线程数
+--thriftserver_resident_threads_cnt=32
+
+# 服务的上限线程数，0为无限制
+--thriftserver_pending_threads_cnt=64
+
+#####################################################################################
+## http server service配置项
+#####################################################################################
+# 监听的端口
+--httpserver_port=${HTTP_SERV_PORT}
+
+# 监听的线程数
+--httpserver_threads_cnt=1
+
+# 是否允许地址端口重用
+--httpserver_reuseaddr=true
+
+# 允许的最大已连接队列的连接数
+--httpserver_max_conns_cnt=128
+
+#####################################################################################
+## acc配置项
+#####################################################################################
+# 业务配置项位置
+--acc_biz_conf_path=${BIZ_CONF_FILE_PATH}
+
+" > ${ACC_CONFIG_GEN_PATH}

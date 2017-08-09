@@ -40,7 +40,7 @@ void ThreadPool::WaitAll() {
     }
 }
 
-void ThreadPool::WaitAllUntilTimeAt(uctime_s duration_since_epoch) {
+void ThreadPool::WaitAllUntilTimeAt(cctime_s duration_since_epoch) {
     std::unique_lock<std::mutex> l(m_mtxActiveWorkerCnt);
     using namespace std::chrono;
     time_point<system_clock, nanoseconds> tp(nanoseconds(duration_since_epoch.get_total_nsecs()));
@@ -51,7 +51,7 @@ void ThreadPool::WaitAllUntilTimeAt(uctime_s duration_since_epoch) {
     }
 }
 
-void ThreadPool::WaitAllUntilAfter(uctime_s duration) {
+void ThreadPool::WaitAllUntilAfter(cctime_s duration) {
     auto now = common::CommonUtils::GetCurrentTime();
     now += duration;
 
