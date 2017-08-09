@@ -5,4 +5,5 @@ add_library(common SHARED ${SRCS}
                             blocking-queue.h
                             buffer.h
                             cctime.h
+                            errors.h
                             )

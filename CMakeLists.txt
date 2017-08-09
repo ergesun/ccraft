@@ -29,6 +29,7 @@ set(EXTERN_COMPILE_THIRDPARTY_ROOT ${PROJECT_SOURCE_DIR}/third_party)
 
 # 第三方库
 include_directories(${EXTERN_COMPILE_THIRDPARTY_ROOT}/include)
+message(STATUS "EXTERN_COMPILE_THIRDPARTY_ROOT = ${EXTERN_COMPILE_THIRDPARTY_ROOT}")
 link_directories(${EXTERN_COMPILE_THIRDPARTY_ROOT}/lib)
 
 #add_subdirectory(${BACKEND_ROOT}/src/common)

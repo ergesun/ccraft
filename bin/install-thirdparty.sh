@@ -26,7 +26,9 @@ COMPONENT_DOWN_ROOT=${THIRDPARTY_DOWN_ROOT}/glog-0.3.4
 
 unzip v0.3.4
 cd ${COMPONENT_DOWN_ROOT}
-./configure --prefix=${THIRDPARTY_ROOT}
+#export LDFLAGS=-L${THIRDPARTY_ROOT}/lib
+#export CPPFLAGS=-I${THIRDPARTY_ROOT}/include
+env CPPFLAGS=-I${THIRDPARTY_ROOT}/include LDFLAGS=-L${THIRDPARTY_ROOT}/lib ./configure --prefix=${THIRDPARTY_ROOT}
 make -j4
 make install
 
