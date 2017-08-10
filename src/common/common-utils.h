@@ -43,6 +43,8 @@ public:
      * @return
      */
     static common::Buffer* GetNewBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize);
+
+    static int GetPhysicalCoresNumber();
 }; // class CommonUtils
 }  // namespace common
 }  // namespace ccraft

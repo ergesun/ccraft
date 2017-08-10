@@ -49,7 +49,7 @@
 /**
  * 每个超大对象槽保留的个数上限
  */
-#define ONE_SLOT_BULK_OBJECT_RESIDENT_CNT     (common::CPUS_CNT * 4)
+#define ONE_SLOT_BULK_OBJECT_RESIDENT_CNT     (PHYSICAL_CPUS_CNT * 4)
 /**
  * 可留用保存的超大对象的大小上限
  */

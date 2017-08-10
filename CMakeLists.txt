@@ -17,7 +17,7 @@ set(CMAKE_CXX_STANDARD 11)
 # 添加gcc flags
 ## -Wno-unused-result：忽略未接返回值的warning
 ## -Wno-unused-function：忽略定义的函数未使用的警告
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unused-function -Wno-unused-variable")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unused-function -Wno-unused-variable -Wno-unused-result")
 
 # 显示make详细信息
 #set(CMAKE_VERBOSE_MAKEFILE ON)

@@ -17,7 +17,7 @@ namespace ccraft {
         public:
             virtual ~ISocketService() {}
 
-            virtual bool Start(uint16_t ioThreadsCnt = (uint16_t)(common::CPUS_CNT / 2),
+            virtual bool Start(uint16_t ioThreadsCnt = (uint16_t)(common::LOGIC_CPUS_CNT / 2),
                                NonBlockingEventModel m = NonBlockingEventModel::Posix) = 0;
 
             virtual bool Stop() = 0;

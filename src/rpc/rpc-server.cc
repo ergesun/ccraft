@@ -16,6 +16,10 @@ namespace ccraft {
         RpcServer::RpcServer(uint16_t workThreadsCnt, uint16_t netIOThreadsCnt, int16_t port, common::MemPool *mp)
                     : m_iWorkThreadsCnt(workThreadsCnt), m_iNetIOThreadsCnt(netIOThreadsCnt) {
             CHECK(mp);
+            if (0 == workThreadsCnt) {
+                m_iWorkThreadsCnt = (uint16_t)(common::PHYSICAL_CPUS_CNT * 2);
+            }
+
             m_pMemPool = mp;
             auto nat = new net::net_addr_t("0.0.0.0", port);
             std::shared_ptr<net::net_addr_t> sspNat(nat);
@@ -27,7 +31,15 @@ namespace ccraft {
                                                                         sspMgr);
         }
 
+        RpcServer::~RpcServer() {
+            DELETE_PTR(m_pSocketService);
+        }
+
         void RpcServer::Start() {
+            if (!m_bStopped) {
+                return;
+            }
+
             m_bStopped = false;
             if (!m_pSocketService->Start(m_iNetIOThreadsCnt)) {
                 LOGFFUN << "start socket service failed!";
@@ -38,6 +50,10 @@ namespace ccraft {
         }
 
         void RpcServer::Stop() {
+            if (m_bStopped) {
+                return;
+            }
+
             m_bStopped = true;
             if (m_pSocketService->Stop()) {
                 throw std::runtime_error("cannot stop RpcServer's SocketService");
@@ -47,31 +63,30 @@ namespace ccraft {
         }
 
         void RpcServer::recv_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
+            m_pWorkThreadPool->AddTask(std::bind(&RpcServer::proc_msg, this, std::placeholders::_1), sspNM);
+        }
+
+        void RpcServer::proc_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
             switch (sspNM->GetType()) {
                 case net::NotifyMessageType::Message: {
-                    m_pWorkThreadPool->AddTask(std::bind(&RpcServer::proc_msg, this, std::placeholders::_1), sspNM);
+
                     break;
                 }
                 case net::NotifyMessageType::Worker: {
                     net::WorkerNotifyMessage *wnm = dynamic_cast<net::WorkerNotifyMessage*>(sspNM.get());
                     if (wnm) {
+                        LOGEFUN << "rc = " << (int)wnm->GetCode() << ", message = " << wnm->What();
                     }
                     break;
                 }
                 case net::NotifyMessageType::Server: {
                     net::ServerNotifyMessage *snm = dynamic_cast<net::ServerNotifyMessage*>(sspNM.get());
                     if (snm) {
+                        LOGEFUN << "rc = " << (int)snm->GetCode() << ", message = " << snm->What();
                     }
-                    break;
+
+                    throw std::runtime_error("rpc server crushed!");
                 }
-            }
-        }
-
-        void RpcServer::proc_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
-            while (!m_bStopped) {
-                // 这里Pop有锁具有屏障作用就不需要担心m_bStopped不更新了。
-                //auto msg = m_bqMessagePtrs.Pop();
-
             }
         }
     }

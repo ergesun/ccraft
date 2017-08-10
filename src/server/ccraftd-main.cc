@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <csignal>
 #include <condition_variable>
+#include <thread>
 
 #include "../common/common-def.h"
 #include "../common/errors.h"
@@ -116,19 +117,18 @@ void wait_all_stopped() {
 int
 main(int argc, char *argv[])
 try {
-    /**
-     * 不要删除这个。
-     */
-    umask(0);
     if (argc != 2) {
         LOGEFUN << "you must just start app with --flagfile=\"xxx\" args";
         return -1;
     }
 
+    /**
+     * 不要删除这个。
+     */
+    umask(0);
     init_gflags_glog(&argc, &argv);
-
     register_signal();
-
+    ccraft::common::initialize();
     // create acc
     //m_pAccInst = new jcloud::acc::ACC();
 

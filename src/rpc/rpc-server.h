@@ -25,11 +25,22 @@ namespace ccraft {
     namespace rpc {
         class RpcServer : public IService {
         public:
+            //typedef std::function<void()>
+
+            /**
+             *
+             * @param workThreadsCnt default is [cpu Hyper-Threading threads number] * 2
+             * @param netIOThreadsCnt
+             * @param port
+             * @param mp
+             */
             RpcServer(uint16_t workThreadsCnt, uint16_t netIOThreadsCnt, int16_t port, common::MemPool *mp = nullptr);
             ~RpcServer();
 
             void Start() override;
             void Stop() override;
+
+            //void RegisterRpc(uint16_t id, )
 
         private:
             void recv_msg(std::shared_ptr<net::NotifyMessage> sspNM);
@@ -40,6 +51,7 @@ namespace ccraft {
             uint16_t                                                        m_iWorkThreadsCnt  = 0;
             uint16_t                                                        m_iNetIOThreadsCnt = 0;
             net::ISocketService                                            *m_pSocketService   = nullptr;
+            // mem pool为关联关系，无需本类释放。
             common::MemPool                                                *m_pMemPool         = nullptr;
             common::ThreadPool<std::shared_ptr<net::NotifyMessage>>        *m_pWorkThreadPool  = nullptr;
         };

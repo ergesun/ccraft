@@ -13,6 +13,7 @@ BUILD_OBJS_DIR=${BIN_DIR}/../${BUILD_OBJS_FOLDER}
 function print_usage {
     echo_red "Usage: build COMMAND."
     echo_yellow "where COMMAND is one of:"
+    echo_yellow "  -gen         \t generate protobuf IDLs before build(default not)."
     echo_yellow "  -m           \t make args. eg: -m -j8"
     echo_yellow "  -d           \t build with debug info."
     echo_yellow "  -dl          \t build with debug log."
@@ -150,8 +151,20 @@ if [ "${TL_STAT}" != "" ]; then
     BUILD_FLAG="${BUILD_FLAG} -DTL_MODULE=${TL_MODULE}"
 fi
 
+if [ "$GEN_IDLS" != "" ]; then
+   echo_yellow "[Phase 1]: generating protobuf IDLs..."
+   echo_yellow "------------------------------------------------------------------------------------"
+   echo " "
+   ${BIN_DIR}/generate-protobuf-idls.sh -l cpp -o ${CMAKELISTS_ROOT_DIR}/be/src
+fi
+
 if [ "${UT_MODULE}" = "all" ]; then
-    echo_yellow "[Phase 1]: start building all unit test targets..."
+    if [ "$GEN_IDLS" = "" ]; then
+        echo_yellow "[Phase 1]: start building all unit test targets..."
+    else
+        echo_yellow "[Phase 2]: start building all unit test targets..."
+    fi
+
     for f in `tree ${CMAKELISTS_ROOT_DIR}/src/unit-test -L 1 -d | awk '{print $2}'|grep -v -E "^$"|grep -v "directories"|grep -v "directory"`
     do
         CUR_BUILD_FLAG="${BUILD_FLAG} -DUT_MODULE=$f"
@@ -165,7 +178,12 @@ if [ "${UT_MODULE}" = "all" ]; then
         fi
     done
 else
-    echo_yellow "[Phase 1]: building [${BUILD_PROJECT_TYPE}, ${BUILD_TYPE_INFO}, ${BUILD_LOG_INFO}] target..."
+    if [ "$GEN_IDLS" = "" ]; then
+        echo_yellow "[Phase 1]: building [${BUILD_PROJECT_TYPE}, ${BUILD_TYPE_INFO}, ${BUILD_LOG_INFO}] target..."
+    else
+        echo_yellow "[Phase 2]: building [${BUILD_PROJECT_TYPE}, ${BUILD_TYPE_INFO}, ${BUILD_LOG_INFO}] target..."
+    fi
+
     echo_yellow "------------------------------------------------------------------------------------"
     echo " "
 

@@ -112,10 +112,15 @@ typedef unsigned char uchar;
 
 namespace ccraft {
 namespace common {
+extern int LOGIC_CPUS_CNT;
+extern int PHYSICAL_CPUS_CNT;
 
-const int  CPUS_CNT = get_nprocs();
+#ifdef __linux__
+void initialize();
+
 const long CACHELINE_SIZE = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
 const long PAGE_SIZE = sysconf(_SC_PAGESIZE);
+#endif
 
 class FuncInOutLogger {
 public:

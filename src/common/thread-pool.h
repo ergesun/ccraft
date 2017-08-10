@@ -56,7 +56,7 @@ public:
      */
     ThreadPool(int threads_cnt = 0) {
         m_iActiveWorkersCnt.store(0);
-        threads_cnt = threads_cnt > 0 ? threads_cnt : common::CPUS_CNT * 2;
+        threads_cnt = threads_cnt > 0 ? threads_cnt : common::LOGIC_CPUS_CNT * 2;
         m_vThreadps.reserve(threads_cnt);
         for (int i = 0; i < threads_cnt; ++i) {
             m_vThreadps.push_back(new std::thread(std::bind(&ThreadPool::proc, this)));

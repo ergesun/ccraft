@@ -43,7 +43,7 @@ namespace ccraft {
              * @param m 模式。
              * @return 成功true,失败false.
              */
-            bool Start(uint16_t ioThreadsCnt = (uint16_t)(common::CPUS_CNT / 2), NonBlockingEventModel m = NonBlockingEventModel::Posix) override;
+            bool Start(uint16_t ioThreadsCnt = (uint16_t)(common::LOGIC_CPUS_CNT / 2), NonBlockingEventModel m = NonBlockingEventModel::Posix) override;
 
             bool Stop() override;
 

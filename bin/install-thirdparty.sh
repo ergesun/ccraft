@@ -43,3 +43,20 @@ mkdir ${COMPONENT_DOWN_ROOT}/build; cd ${COMPONENT_DOWN_ROOT}/build
 cmake -DGTEST_LANG_CXX11=1 -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0 -DCMAKE_INSTALL_PREFIX=${THIRDPARTY_ROOT} ..
 make -j4
 make install
+
+######################################################################################################################
+# pb
+cd ${THIRDPARTY_DOWN_ROOT}
+COMPONENT_DOWN_ROOT=${THIRDPARTY_DOWN_ROOT}/protobuf-3.3.2
+
+tar -zxvf v3.3.2
+cd ${COMPONENT_DOWN_ROOT}
+## add curl -k
+rm -rf autogen.sh
+cp ${BIN_DIR}/resources/autogen.sh .
+./autogen.sh -k
+./configure --prefix=${THIRDPARTY_ROOT}
+make -j4
+make check
+sudo make install
+sudo ldconfig # refresh shared library cache.
