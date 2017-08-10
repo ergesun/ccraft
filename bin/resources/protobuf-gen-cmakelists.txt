@@ -1,0 +1,3 @@
+aux_source_directory(${SRC_ROOT}/codegen SRCS)
+add_library(protobufgen SHARED ${SRCS})
+

@@ -36,3 +36,6 @@ cmake-build-debug
 cmake-objs
 third_party
 build
+
+# gen
+codegen

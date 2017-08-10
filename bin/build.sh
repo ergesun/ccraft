@@ -155,7 +155,7 @@ if [ "$GEN_IDLS" != "" ]; then
    echo_yellow "[Phase 1]: generating protobuf IDLs..."
    echo_yellow "------------------------------------------------------------------------------------"
    echo " "
-   ${BIN_DIR}/generate-protobuf-idls.sh -l cpp -o ${CMAKELISTS_ROOT_DIR}/be/src
+   ${BIN_DIR}/generate-protobuf-idls.sh -l cpp -o ${CMAKELISTS_ROOT_DIR}/src/codegen
 fi
 
 if [ "${UT_MODULE}" = "all" ]; then

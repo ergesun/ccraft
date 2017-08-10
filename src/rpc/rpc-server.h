@@ -15,6 +15,7 @@
 #include "../common/blocking-queue.h"
 #include "../common/thread-pool.h"
 
+// TODO(sunchao): fix rpc using protobuf service. Now we just use protobuf data serialize feature.
 namespace ccraft {
     namespace common {
         class MemPool;
@@ -54,6 +55,7 @@ namespace ccraft {
             // mem pool为关联关系，无需本类释放。
             common::MemPool                                                *m_pMemPool         = nullptr;
             common::ThreadPool<std::shared_ptr<net::NotifyMessage>>        *m_pWorkThreadPool  = nullptr;
+            //std::vector<>
         };
     }
 }

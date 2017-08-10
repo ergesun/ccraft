@@ -1,0 +1,26 @@
+syntax="proto3";
+//option cc_generic_services = true;
+
+package ccraftrpc;
+
+message OpLogEntry {
+    uint32 term         = 1;
+    uint64 index        = 2;
+    uint32 type         = 3;
+    bytes  key          = 4;
+    bytes  value        = 5;
+}
+
+message AppendOpLogRequest {
+    uint32                term         = 1;
+    string                leaderId     = 2;
+    uint64                prevLogIndex = 3;
+    uint32                prevLogTerm  = 4;
+    repeated OpLogEntry   entries      = 5;
+    uint64                leaderCommit = 6;
+}
+
+message AppendOpLogResponse {
+    uint32 term = 1;
+    bool   success = 2;
+}

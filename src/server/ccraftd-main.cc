@@ -10,7 +10,6 @@
 #include <sys/stat.h>
 #include <csignal>
 #include <condition_variable>
-#include <thread>
 
 #include "../common/common-def.h"
 #include "../common/errors.h"

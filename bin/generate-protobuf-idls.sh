@@ -3,6 +3,9 @@
 BIN_DIR=$(cd `dirname $0`; pwd)
 CMAKELISTS_ROOT_DIR=${BIN_DIR}/..
 
+PROTOBUF_IDL_DIR_PATH=${CMAKELISTS_ROOT_DIR}/protobuf
+THIRDPARTY_BIN_PATH=${CMAKELISTS_ROOT_DIR}/third_party/bin
+
 LANG=cpp
 OUT_DIR="/tmp"
 
@@ -13,7 +16,7 @@ function print_usage {
   echo_red "Usage: generate thrift IDLs COMMAND."
   echo_yellow "where COMMAND is one of:"
   echo_yellow "  -l \t gen language(cpp、java and so on)."
-  echo_yellow "  -o \t output path(refer to \"thrift -o)\"."
+  echo_yellow "  -o \t output path."
   echo_yellow "  -h \t show help."
 }
 
@@ -66,35 +69,26 @@ echo_pink "output dir is \"${OUT_DIR}\""
 
 echo_green "------------------------------------------------------------------------------------"
 
+mkdir -p ${OUT_DIR}
+
 echo_yellow "generating..."
 echo " "
 
 HAS_WARN=
 
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${CMAKELISTS_ROOT_DIR}/third_party/lib
-for f in $(ls ${CMAKELISTS_ROOT_DIR}/be/thrift-idls)
+for f in $(ls ${CMAKELISTS_ROOT_DIR}/protobuf)
 do
-    #thrift --gen ${LANG} -o ${CMAKELISTS_ROOT_DIR}/be/src ${CMAKELISTS_ROOT_DIR}/be/thrift-idls/${f}
-    thrift --gen ${LANG} -o ${OUT_DIR} ${CMAKELISTS_ROOT_DIR}/be/thrift-idls/${f}
+    echo ${CMAKELISTS_ROOT_DIR}/protobuf/${f}
+    ${THIRDPARTY_BIN_PATH}/protoc -I${CMAKELISTS_ROOT_DIR}/protobuf --${LANG}_out=${OUT_DIR} ${CMAKELISTS_ROOT_DIR}/protobuf/${f}
     if [ "$?" -ne 0 ]; then
         echo_red "ERROR: gen error."
         exit 1
     fi
 done
 
-# 清除thrift自动生成的样例server以及handler文件。
-for f in $(ls ${CMAKELISTS_ROOT_DIR}/be/src/gen-cpp|grep "skeleton")
-do
-    SKELETON=${CMAKELISTS_ROOT_DIR}/be/src/gen-cpp/${f}
-    rm ${SKELETON}
-    if [ "$?" -ne 0 ]; then
-        echo_yellow "WARN: rm skeleton ${SKELETON} error."
-        HAS_WARN="1"
-    fi
-done
-
 if [ "$LANG" == "cpp" ]; then
-    cp ${BIN_DIR}/conf/thrift-gen-cmakelists.txt ${CMAKELISTS_ROOT_DIR}/be/src/gen-cpp/CMakeLists.txt
+    cp ${BIN_DIR}/resources/protobuf-gen-cmakelists.txt ${OUT_DIR}/CMakeLists.txt
     if [ "$?" -ne 0 ]; then
         echo_yellow "WARN: cp CMakeLists.txt error."
         HAS_WARN="1"
