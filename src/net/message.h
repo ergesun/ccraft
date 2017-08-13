@@ -20,7 +20,7 @@
 /**
  * 如果你需要为消息分配一个唯一的id(进程全局的)用于分发等目的，则开启此宏。
  */
-//#define WITH_MSG_ID
+#define WITH_MSG_ID
 
 /**
  * 如果你的消息交互非常非常频繁，频繁到(假如业务判定一个消息发出后10秒收到不应用层ACK就认为失效)每秒发送429496729个，
@@ -48,7 +48,6 @@ namespace ccraft {
         /**
          * 注意：payload上限为64MiB。
          * Derive Message的内存空间你可以选择通过内存池mp分配(这样做性能友好)，然后通过placement new来构建你的Message具体类对象。
-         * 你需要留下Message的Id，它用来唯一标识一个message，你可能需要用它来分发Message。
          */
         class Message {
         public:
@@ -74,7 +73,7 @@ namespace ccraft {
             struct Header {
                 uint32_t  magic; /* 校验的魔法数 */
 #ifdef WITH_MSG_ID
-                Id        id;    /* 序列号 */
+                Id        id;    /* 序号。发送新消息时 */
 #endif
                 uint32_t  len;   /* 数据部的长度 */
 

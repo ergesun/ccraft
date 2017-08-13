@@ -73,14 +73,14 @@ namespace ccraft {
                     break;
                 }
                 case net::NotifyMessageType::Worker: {
-                    net::WorkerNotifyMessage *wnm = dynamic_cast<net::WorkerNotifyMessage*>(sspNM.get());
+                    auto *wnm = dynamic_cast<net::WorkerNotifyMessage*>(sspNM.get());
                     if (wnm) {
                         LOGEFUN << "rc = " << (int)wnm->GetCode() << ", message = " << wnm->What();
                     }
                     break;
                 }
                 case net::NotifyMessageType::Server: {
-                    net::ServerNotifyMessage *snm = dynamic_cast<net::ServerNotifyMessage*>(sspNM.get());
+                    auto *snm = dynamic_cast<net::ServerNotifyMessage*>(sspNM.get());
                     if (snm) {
                         LOGEFUN << "rc = " << (int)snm->GetCode() << ", message = " << snm->What();
                     }
