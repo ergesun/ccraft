@@ -8,19 +8,20 @@
 #include "../net/socket-service-factory.h"
 #include "../net/net-protocal-stacks/msg-worker-managers/unique-worker-manager.h"
 #include "../net/rcv-message.h"
+#include "../common/buffer.h"
 
 #include "rpc-server.h"
+#include "protobuf-utils.h"
 
 namespace ccraft {
     namespace rpc {
-        RpcServer::RpcServer(uint16_t workThreadsCnt, uint16_t netIOThreadsCnt, int16_t port, common::MemPool *mp)
+        RpcServer::RpcServer(uint16_t workThreadsCnt, uint16_t netIOThreadsCnt, int16_t port)
                     : m_iWorkThreadsCnt(workThreadsCnt), m_iNetIOThreadsCnt(netIOThreadsCnt) {
-            CHECK(mp);
             if (0 == workThreadsCnt) {
                 m_iWorkThreadsCnt = (uint16_t)(common::PHYSICAL_CPUS_CNT * 2);
             }
 
-            m_pMemPool = mp;
+            m_pMemPool = new common::MemPool();
             auto nat = new net::net_addr_t("0.0.0.0", port);
             std::shared_ptr<net::net_addr_t> sspNat(nat);
             std::shared_ptr<net::INetStackWorkerManager> sspMgr = std::shared_ptr<net::INetStackWorkerManager>(new net::UniqueWorkerManager());
@@ -32,6 +33,7 @@ namespace ccraft {
         }
 
         RpcServer::~RpcServer() {
+            DELETE_PTR(m_pMemPool);
             DELETE_PTR(m_pSocketService);
         }
 
@@ -69,7 +71,15 @@ namespace ccraft {
         void RpcServer::proc_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
             switch (sspNM->GetType()) {
                 case net::NotifyMessageType::Message: {
+                    net::MessageNotifyMessage *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());
+                    auto rm = mnm->GetContent();
+                    if (LIKELY(rm)) {
+                        auto buffer = rm->GetDataBuffer();
 
+                        //ProtoBufUtils::Parse(buffer, );
+                    } else {
+                        LOGWFUN << "recv message is empty!";
+                    }
                     break;
                 }
                 case net::NotifyMessageType::Worker: {

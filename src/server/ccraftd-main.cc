@@ -24,7 +24,7 @@ using ccraft::common::FileUtils;
 
 //RpcService                     *m_pRpcInst = nullptr;
 //HttpServerService              *m_pHttpServerInst = nullptr;
-//jcloud::acc::ACC               *m_pAccInst = nullptr;
+//ACC               *m_pAccInst = nullptr;
 
 bool                            m_bAllStopped = false;
 std::mutex                      m_mtxRpc;
@@ -129,7 +129,7 @@ try {
     register_signal();
     ccraft::common::initialize();
     // create acc
-    //m_pAccInst = new jcloud::acc::ACC();
+    //m_pAccInst = new ACC();
 
     //std::string bizConfPath = FLAGS_acc_biz_conf_path.c_str();
     ////m_pAccInst->Init(bizConfPath);

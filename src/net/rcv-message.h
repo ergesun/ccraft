@@ -31,21 +31,23 @@ namespace ccraft {
             }
 
             /**
+             * 获取消息内容。
+             * 注: user无需释放。
+             * @return
+             */
+            inline const common::Buffer* GetDataBuffer() const {
+                return m_pBuffer;
+            }
+
+        private:
+            friend class PosixTcpNetStackWorker;
+            /**
              *
              * @param buffer
              * @param header 解析的header
              * @return 解析成功失败
              */
             static bool DecodeMsgHeader(common::Buffer *buffer, Header *header);
-
-            /**
-             * 获取消息内容。
-             * 注: user无需释放。
-             * @return
-             */
-            inline const common::Buffer* GetBuffer() const {
-                return m_pBuffer;
-            }
 
         private:
             common::Buffer             *m_pBuffer;

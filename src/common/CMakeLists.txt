@@ -5,4 +5,5 @@ add_library(common SHARED ${SRCS}
                             buffer.h
                             cctime.h
                             errors.h
+                            resource-pool.h
                             )

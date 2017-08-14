@@ -22,7 +22,7 @@ namespace ccraft {
              */
             SndMessage(common::MemPool *mp, net_peer_info_t peerInfo);
 
-#ifdef WITH_MSG_ID // 如果开启了这个，可能你回复消息的时候需要保持id不变，就需要用到此构造函数。
+#if WITH_MSG_ID // 如果开启了这个，可能你回复消息的时候需要保持id不变，就需要用到此构造函数。
             /**
              * 调用此构造用于发送指定id的消息。比如说你作为某个request的response时可能
              * 需要保证response的id和request一致以方便业务应用。

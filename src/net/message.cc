@@ -9,24 +9,14 @@
 
 namespace ccraft {
     namespace net {
-        common::spin_lock_t Message::s_freeBufferLock = UNLOCKED;
-        std::list<common::Buffer*> Message::s_freeBuffers = std::list<common::Buffer*>();
+        common::ResourcePool<common::Buffer> Message::s_freeBuffers = common::ResourcePool<common::Buffer>(2000);
 
         Message::Message(common::MemPool *mp) :
             m_pMemPool(mp) {
         }
 
         common::Buffer* Message::GetNewBuffer() {
-            common::SpinLock l(&s_freeBufferLock);
-            if (s_freeBuffers.empty()) {
-                return new common::Buffer();
-            } else {
-                auto begin = s_freeBuffers.begin();
-                auto buf = *begin;
-                s_freeBuffers.erase(begin);
-
-                return buf;
-            }
+            return s_freeBuffers.Get();
         }
 
         common::Buffer* Message::GetNewBuffer(uchar *pos, uchar *last, uchar *start, uchar *end,
@@ -49,9 +39,8 @@ namespace ccraft {
         }
 
         void Message::PutBuffer(common::Buffer *buffer) {
-            common::SpinLock l(&s_freeBufferLock);
             buffer->Put();
-            s_freeBuffers.push_back(buffer);
+            s_freeBuffers.Put(buffer);
         }
     } // namespace net
 } // namespace ccraft

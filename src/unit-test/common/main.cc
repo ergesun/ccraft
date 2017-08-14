@@ -46,5 +46,3 @@ TEST(CommonTest, SpinLockTest) {
     SpinLock sl3(&l, false);
     EXPECT_EQ(sl3.TryLock(), true);
 }
-
-

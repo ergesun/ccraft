@@ -76,7 +76,7 @@ public:
         }
     }
 
-    inline int32_t TotalLength() {
+    inline int32_t TotalLength() const {
         if (!Start || !End) {
             return 0;
         }
@@ -84,7 +84,7 @@ public:
         return (int32_t)((uintptr_t)End - (uintptr_t)Start) + 1;
     }
 
-    inline int32_t AvailableLength() {
+    inline int32_t AvailableLength() const {
         if (!Last || !Pos) {
             return 0;
         }
@@ -92,7 +92,7 @@ public:
         return (int32_t)((int64_t)(uintptr_t)Last - (int64_t)(uintptr_t)Pos) + 1;
     }
 
-    inline size_t UnusedSize() {
+    inline size_t UnusedSize() const {
         if (Last) {
             return (size_t)(End - Last);
         } else {
