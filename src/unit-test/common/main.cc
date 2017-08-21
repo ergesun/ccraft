@@ -24,7 +24,7 @@ TEST(CommonTest, HashTest) {
     uint32_t hashcode1;
 
     MurmurHash3_x86_32(key.c_str(), (int) (key.length()), 22, &hashcode1);
-    EXPECT_GT(hashcode1, 0);
+    EXPECT_GT(hashcode1, uint32_t(0));
     uint32_t hashcode2;
     MurmurHash3_x86_32(key.c_str(), (int) (key.length()), 22, &hashcode2);
     EXPECT_EQ(hashcode1, hashcode2);

@@ -8,40 +8,51 @@
 #include "message.h"
 
 namespace ccraft {
-    namespace net {
-        common::ResourcePool<common::Buffer> Message::s_freeBuffers = common::ResourcePool<common::Buffer>(2000);
+namespace net {
+common::spin_lock_t Message::s_freeBufferLock = UNLOCKED;
+std::list<common::Buffer*> Message::s_freeBuffers = std::list<common::Buffer*>();
 
-        Message::Message(common::MemPool *mp) :
-            m_pMemPool(mp) {
-        }
+Message::Message(common::MemPool *mp) :
+    m_pMemPool(mp) {
+}
 
-        common::Buffer* Message::GetNewBuffer() {
-            return s_freeBuffers.Get();
-        }
+common::Buffer* Message::GetNewBuffer() {
+    common::SpinLock l(&s_freeBufferLock);
+    if (s_freeBuffers.empty()) {
+        return new common::Buffer();
+    } else {
+        auto begin = s_freeBuffers.begin();
+        auto buf = *begin;
+        s_freeBuffers.erase(begin);
 
-        common::Buffer* Message::GetNewBuffer(uchar *pos, uchar *last, uchar *start, uchar *end,
-                                              common::MemPoolObject *mpo) {
-            auto buf = Message::GetNewBuffer();
-            buf->Refresh(pos, last, start, end, mpo);
-            return buf;
-        }
+        return buf;
+    }
+}
 
-        common::Buffer* Message::GetNewBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize) {
-            auto bufferStart = (uchar*)(mpo->Pointer());
-            auto bufferEnd = bufferStart + totalBufferSize - 1;
-            return Message::GetNewBuffer(nullptr, nullptr, bufferStart, bufferEnd, mpo);
-        }
+common::Buffer* Message::GetNewBuffer(uchar *pos, uchar *last, uchar *start, uchar *end,
+                                      common::MemPoolObject *mpo) {
+    auto buf = Message::GetNewBuffer();
+    buf->Refresh(pos, last, start, end, mpo);
+    return buf;
+}
 
-        common::Buffer* Message::GetNewAvailableBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize) {
-            auto bufferStart = (uchar*)(mpo->Pointer());
-            auto bufferEnd = bufferStart + totalBufferSize - 1;
-            return Message::GetNewBuffer(bufferStart, bufferEnd, bufferStart, bufferEnd, mpo);
-        }
+common::Buffer* Message::GetNewBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize) {
+    auto bufferStart = (uchar*)(mpo->Pointer());
+    auto bufferEnd = bufferStart + totalBufferSize - 1;
+    return Message::GetNewBuffer(nullptr, nullptr, bufferStart, bufferEnd, mpo);
+}
 
-        void Message::PutBuffer(common::Buffer *buffer) {
-            buffer->Put();
-            s_freeBuffers.Put(buffer);
-        }
-    } // namespace net
+common::Buffer* Message::GetNewAvailableBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize) {
+    auto bufferStart = (uchar*)(mpo->Pointer());
+    auto bufferEnd = bufferStart + totalBufferSize - 1;
+    return Message::GetNewBuffer(bufferStart, bufferEnd, bufferStart, bufferEnd, mpo);
+}
+
+void Message::PutBuffer(common::Buffer *buffer) {
+    common::SpinLock l(&s_freeBufferLock);
+    buffer->Put();
+    s_freeBuffers.push_back(buffer);
+}
+} // namespace net
 } // namespace ccraft
 

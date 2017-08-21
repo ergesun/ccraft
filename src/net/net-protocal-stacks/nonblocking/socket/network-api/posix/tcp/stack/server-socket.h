@@ -11,30 +11,31 @@
 #include "connection-socket.h"
 
 namespace ccraft {
-    namespace net {
-        class PosixTcpServerSocket : public PosixTcpConnectionSocket {
-        public:
-            PosixTcpServerSocket(net_addr_t *localAddr, int maxConns) : PosixTcpConnectionSocket(),
-                                                                         m_local_addr(*localAddr),
-                                                                         m_max_listen_conns(maxConns) {}
+namespace net {
+class PosixTcpServerSocket : public PosixTcpConnectionSocket {
+public:
+PosixTcpServerSocket(net_addr_t *localAddr, int maxConns) : PosixTcpConnectionSocket(),
+m_local_addr(*localAddr),
+m_max_listen_conns(maxConns) {}
 
-            /* basic interfaces */
-            bool Bind();
-            bool Listen();
-            int Accept4(__SOCKADDR_ARG __addr, socklen_t *__addr_len, int __flags = SOCK_NONBLOCK);
-            /* sock opts interfaces */
-            bool SetPortReuse();
+/* basic interfaces */
+bool Bind();
+bool Listen();
+int Accept(__SOCKADDR_ARG __addr, socklen_t *__addr_len);
+int Accept4(__SOCKADDR_ARG __addr, socklen_t *__addr_len, int __flags = SOCK_NONBLOCK);
+/* sock opts interfaces */
+bool SetPortReuse();
 
-        private:
-            inline bool Connect() {
-                throw new std::runtime_error("server socket doesn't support connect api.");
-            }
+private:
+inline bool Connect() {
+    throw new std::runtime_error("server socket doesn't support connect api.");
+}
 
-        private:
-            net_addr_t  m_local_addr;
-            int         m_max_listen_conns;
-        };
-    } // namespace net
+private:
+net_addr_t  m_local_addr;
+int         m_max_listen_conns;
+};
+} // namespace net
 } // namespace ccraft
 
 #endif //CCRAFT_NET_CORE_POSIX_TCPSERVERSOCKET_H

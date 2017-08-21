@@ -12,28 +12,29 @@
 #include "../../../../common-def.h"
 
 namespace ccraft {
-    namespace common {
-        class MemPool;
-    }
+namespace common {
+class MemPool;
+}
 
-    namespace net {
-        class AFileEventHandler;
+namespace net {
+class AFileEventHandler;
 
-        typedef std::function<void(AFileEventHandler*)> ConnectHandler, FinishHandler;
-        class AEventManager {
-        public:
-            AEventManager(common::MemPool *memPool, uint32_t maxEvents) :
-                m_pMemPool(memPool), m_iMaxEvents(maxEvents) {}
-            virtual ~AEventManager() = default;
-            virtual bool Start(NonBlockingEventModel m) = 0;
-            virtual bool Stop() = 0;
-            virtual int AddEvent(AFileEventHandler *socketEventHandler, int cur_mask, int mask) = 0;
+typedef std::function<bool(AFileEventHandler*)> ConnectFunc;
+typedef std::function<void(AFileEventHandler*)> ConnectHandler, FinishHandler;
+class AEventManager {
+public:
+    AEventManager(common::MemPool *memPool, uint32_t maxEvents) :
+        m_pMemPool(memPool), m_iMaxEvents(maxEvents) {}
+    virtual ~AEventManager() = default;
+    virtual bool Start(NonBlockingEventModel m) = 0;
+    virtual bool Stop() = 0;
+    virtual void AddEvent(AFileEventHandler *socketEventHandler, int cur_mask, int mask) = 0;
 
-        protected:
-            common::MemPool   *m_pMemPool;
-            uint32_t           m_iMaxEvents;
-        };
-    } // namespace net
+protected:
+    common::MemPool   *m_pMemPool;
+    uint32_t           m_iMaxEvents;
+};
+} // namespace net
 } // namespace ccraft
 
 #endif //CCRAFT_NET_CORE_NB_SOCKET_NA_EVENT_MANAGER_H

@@ -39,6 +39,26 @@ int CommonUtils::SetNonBlocking(int fd) {
     return 0;
 }
 
+int CommonUtils::SetBlocking(int fd) {
+    int opts;
+    int err;
+    if ((opts = fcntl(fd, F_GETFL)) == -1) {
+        err = errno;
+        std::cerr << "get fd opts err = " << err << std::endl;
+
+        return -1;
+    }
+
+    opts = opts & ~O_NONBLOCK;
+    if (fcntl(fd, F_SETFL, opts) == -1) {
+        err = errno;
+        std::cerr << "set fd BLOCKing err = " << err << std::endl;
+        return -1;
+    }
+
+    return 0;
+}
+
 void* CommonUtils::PosixMemAlign(size_t align, size_t size) {
     void *pln;
     if (posix_memalign(&pln, align, size)) {

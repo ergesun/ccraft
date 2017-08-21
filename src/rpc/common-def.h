@@ -6,8 +6,11 @@
 #ifndef CCRAFT_COMMON_DEF_H
 #define CCRAFT_COMMON_DEF_H
 
+#include "../net/snd-message.h"
+
 namespace ccraft {
 namespace rpc {
+
 }
 }
 

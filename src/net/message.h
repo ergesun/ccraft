@@ -43,112 +43,118 @@
 #endif
 
 namespace ccraft {
-    namespace common {
-        class Buffer;
+namespace common {
+class Buffer;
+}
+
+namespace net {
+class RcvMessage;
+
+/**
+ * 注意：payload上限为64MiB。
+ * Derive Message的内存空间你可以选择通过内存池mp分配(这样做性能友好)，然后通过placement new来构建你的Message具体类对象。
+ */
+class Message {
+public:
+#if WITH_MSG_ID
+#if BULK_MSG_ID
+    struct Id {
+        __time_t ts;  /* 时间戳，为了就是id回环了之后防重。 */
+        uint32_t seq; /* 消息的唯一标识 */
+
+        Id() : ts(0), seq(0) {}
+        Id(__time_t t, uint32_t i) : ts(t), seq(i) {}
+        Id(const Id &) = default;
+        Id& operator=(const Id &) = default;
+    };
+#elif BIG_MSG_ID
+    typedef uint64_t Id;
+#else
+    typedef uint32_t Id;
+#endif
+#endif
+
+    /**
+     * 消息头。
+     */
+    struct Header {
+        uint32_t  magic; /* 校验的魔法数 */
+#ifdef WITH_MSG_ID
+        Id        id;    /* 序号 */
+#endif
+        uint32_t  len;   /* 数据部的长度 */
+
+        Header() : magic(0), len(0) {}
+#ifdef WITH_MSG_ID
+        Header(Id i, uint32_t l) : id(i), len(l) {}
+#else
+        Header(uint32_t l) : len(l) {}
+#endif
+    };
+
+public:
+    /**
+     * 之后你需要设置mem pool。
+     */
+    Message() = default;
+    /**
+     *
+     * @param mp 内存池，以供缓冲buffer。
+     */
+    Message(common::MemPool *mp);
+    virtual ~Message() = default;
+
+#ifdef WITH_MSG_ID
+    /**
+     * 获取消息的唯一id。
+     * @return
+     */
+    inline Id GetId() const {
+        return m_header.id;
+    }
+#endif
+
+    inline net_peer_info_t GetPeerInfo() const {
+        return m_peerInfo;
     }
 
-    namespace net {
-        class RcvMessage;
+    /**
+     * 可能你需要根据这个来设计自己的payload的大小以对齐或如何，当然很可能你不在意，那就无需关注这个功能。
+     * @return
+     */
+    static uint32_t HeaderSize() {
+        return MSG_HEADER_SIZE;
+    }
 
-        /**
-         * 注意：payload上限为64MiB。
-         * Derive Message的内存空间你可以选择通过内存池mp分配(这样做性能友好)，然后通过placement new来构建你的Message具体类对象。
-         */
-        class Message {
-        public:
-#if WITH_MSG_ID
-#if BULK_MSG_ID
-            struct Id {
-                __time_t ts;  /* 时间戳，为了就是id回环了之后防重。 */
-                uint32_t seq; /* 消息的唯一标识 */
+    static common::Buffer* GetNewBuffer();
+    static common::Buffer* GetNewBuffer(uchar *pos, uchar *last, uchar *start, uchar *end,
+                                        common::MemPoolObject *mpo);
+    static common::Buffer* GetNewBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize);
+    static common::Buffer* GetNewAvailableBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize);
+    static void            PutBuffer(common::Buffer *buffer);
 
-                Id() : ts(0), seq(0) {}
-                Id(__time_t t, uint32_t i) : ts(t), seq(i) {}
-                Id(const Id &) = default;
-                Id& operator=(const Id &) = default;
-            };
-#elif BIG_MSG_ID
-            typedef uint64_t Id;
-#else
-            typedef uint32_t Id;
-#endif
-#endif
+protected:
+    Header              m_header;
+    common::MemPool    *m_pMemPool;
+    net_peer_info_t     m_peerInfo;
 
-            /**
-             * 消息头。
-             */
-            struct Header {
-                uint32_t  magic; /* 校验的魔法数 */
+private:
+    static common::spin_lock_t              s_freeBufferLock;
+    // TODO(sunchao): 做一个个数限制？
+    static std::list<common::Buffer*>       s_freeBuffers;
+}; // interface Message
 #ifdef WITH_MSG_ID
-                Id        id;    /* 序号 */
-#endif
-                uint32_t  len;   /* 数据部的长度 */
+#ifdef BULK_MSG_ID
+inline bool operator<(const Message::Id &a, const Message::Id &b) {
+    return (a.ts < b.ts) || (a.ts == b.ts && a.seq < b.seq);
+}
 
-                Header() : magic(0), len(0) {}
-#ifdef WITH_MSG_ID
-                Header(Id i, uint32_t l) : id(i), len(l) {}
-#else
-                Header(uint32_t l) : len(l) {}
-#endif
-            };
-
-        public:
-            /**
-             *
-             * @param mp 内存池，以供缓冲buffer。
-             */
-            Message(common::MemPool *mp);
-            virtual ~Message() = default;
-
-#ifdef WITH_MSG_ID
-            /**
-             * 获取消息的唯一id。
-             * @return
-             */
-            inline Id GetId() const {
-                return m_header.id;
-            }
-#endif
-
-            inline net_peer_info_t GetPeerInfo() const {
-                return m_peerInfo;
-            }
-
-            /**
-             * 可能你需要根据这个来设计自己的payload的大小以对齐或如何，当然很可能你不在意，那就无需关注这个功能。
-             * @return
-             */
-            static uint32_t HeaderSize() {
-                return MSG_HEADER_SIZE;
-            }
-
-            static common::Buffer* GetNewBuffer();
-            static common::Buffer* GetNewBuffer(uchar *pos, uchar *last, uchar *start, uchar *end,
-                                                common::MemPoolObject *mpo);
-            static common::Buffer* GetNewBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize);
-            static common::Buffer* GetNewAvailableBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize);
-            static void            PutBuffer(common::Buffer *buffer);
-
-        protected:
-            Header              m_header;
-            common::MemPool    *m_pMemPool;
-            net_peer_info_t     m_peerInfo;
-
-        private:
-            static common::ResourcePool<common::Buffer>             s_freeBuffers;
-        }; // interface Message
-#if WITH_MSG_ID
-#if BULK_MSG_ID
-        inline bool operator<(const Message::Id &a, const Message::Id &b) {
-            return (a.ts < b.ts) || (a.ts == b.ts && a.seq < b.seq);
-        }
-
-        inline bool operator==(const Message::Id &a, const Message::Id &b) {
-            return a.ts == b.ts && a.seq == b.seq;
-        }
+inline bool operator==(const Message::Id &a, const Message::Id &b) {
+    return a.ts == b.ts && a.seq == b.seq;
+}
 #endif
 #endif
-    } // namespace net
+} // namespace net
 } // namespace ccraft
 
 #if WITH_MSG_ID

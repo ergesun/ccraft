@@ -9,21 +9,23 @@
 #include "../../abstract-file-event-handler.h"
 
 namespace ccraft {
-    namespace net {
-        class PosixLocalReadEventHandler : public AFileEventHandler {
-        public:
-            PosixLocalReadEventHandler(int fd);
-            ~PosixLocalReadEventHandler();
+namespace net {
+class PosixLocalReadEventHandler : public AFileEventHandler {
+public:
+    PosixLocalReadEventHandler(int fd);
+    ~PosixLocalReadEventHandler();
 
-            bool HandleReadEvent() override;
-            bool HandleWriteEvent() override;
+    bool Initialize() override;
 
-            ANetStackMessageWorker *GetStackMsgWorker() override;
+    bool HandleReadEvent() override;
+    bool HandleWriteEvent() override;
 
-        private:
-            int m_fd;
-        };
-    } // namespace net
+    ANetStackMessageWorker *GetStackMsgWorker() override;
+
+private:
+    int m_fd;
+};
+} // namespace net
 } // namespace ccraft
 
 #endif //CCRAFT_NET_CORE_NPS_NB_NA_SIMPLE_EVENT_HANDLER_H

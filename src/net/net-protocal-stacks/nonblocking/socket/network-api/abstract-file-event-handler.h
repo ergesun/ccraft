@@ -11,39 +11,45 @@
 #include "../../../../../common/common-def.h"
 
 namespace ccraft {
-    namespace net {
-        class EventWorker;
-        class ANetStackMessageWorker;
-        class AFileEventHandler : public IEventHandler {
-        public:
-            AFileEventHandler() = default;
-            AFileEventHandler(FileDescriptor *socketDesc) : m_socketDesc(socketDesc) {}
+namespace net {
+class EventWorker;
+class ANetStackMessageWorker;
+class AFileEventHandler : public IEventHandler {
+public:
+    AFileEventHandler() = default;
+    explicit AFileEventHandler(FileDescriptor *socketDesc) : m_socketDesc(socketDesc) {}
 
-            virtual ~AFileEventHandler() = default;
-            inline FileDescriptor* GetSocketDescriptor() {
-                return m_socketDesc;
-            }
+    virtual ~AFileEventHandler() = default;
+    /**
+     * 必须先调用此函数进行初始化。
+     * @return
+     */
+    virtual bool Initialize() = 0;
 
-            inline void SetOwnWorker(EventWorker* ew) {
-                m_pOwnEvWorker = ew;
-            }
-
-            inline EventWorker* GetOwnWorker() {
-                return m_pOwnEvWorker;
-            }
-
-            virtual ANetStackMessageWorker* GetStackMsgWorker() = 0;
-
-        protected:
-            inline void SetSocketDescriptor(FileDescriptor *psd) {
-                m_socketDesc = psd;
-            }
-
-        private:
-            FileDescriptor *m_socketDesc = nullptr;
-            EventWorker    *m_pOwnEvWorker = nullptr;
-        };
+    inline FileDescriptor* GetSocketDescriptor() {
+        return m_socketDesc;
     }
+
+    inline void SetOwnWorker(EventWorker* ew) {
+        m_pOwnEvWorker = ew;
+    }
+
+    inline EventWorker* GetOwnWorker() {
+        return m_pOwnEvWorker;
+    }
+
+    virtual ANetStackMessageWorker* GetStackMsgWorker() = 0;
+
+protected:
+    inline void SetSocketDescriptor(FileDescriptor *psd) {
+        m_socketDesc = psd;
+    }
+
+private:
+    FileDescriptor *m_socketDesc = nullptr;
+    EventWorker    *m_pOwnEvWorker = nullptr;
+};
+}
 }
 
 #endif //CCRAFT_NET_CORE_SOCKETAPI_SOCKET_EVENT_HANDLER_H

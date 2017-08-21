@@ -3,10 +3,16 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#include "message-codec.h"
+#include <gtest/gtest.h>
 
-namespace ccraft {
-    namespace net {
 
-    } // namespace net
-} // namespace ccraft
+
+int main(int argc, char **argv) {
+    testing::InitGoogleTest(&argc, argv);
+
+    return RUN_ALL_TESTS();
+}
+
+TEST(NetTest, ServerTest) {
+
+}

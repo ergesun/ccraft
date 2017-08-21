@@ -33,5 +33,7 @@ add_library(net SHARED
         isocket-service.h
         abstract-socket-service.h
         iencoder.h
+        net-protocal-stacks/nonblocking/socket/network-api/posix/tcp/connect-messages/connect-request-message.h
+        net-protocal-stacks/nonblocking/socket/network-api/posix/tcp/connect-messages/connect-response-message.h
         )
 

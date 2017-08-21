@@ -9,9 +9,11 @@
 #include "../net/net-protocal-stacks/msg-worker-managers/unique-worker-manager.h"
 #include "../net/rcv-message.h"
 #include "../common/buffer.h"
+#include "protobuf-utils.h"
+#include "../common/codec-utils.h"
 
 #include "rpc-server.h"
-#include "protobuf-utils.h"
+
 
 namespace ccraft {
     namespace rpc {
@@ -21,19 +23,20 @@ namespace ccraft {
                 m_iWorkThreadsCnt = (uint16_t)(common::PHYSICAL_CPUS_CNT * 2);
             }
 
-            m_pMemPool = new common::MemPool();
+            m_pSocketServerMemPool = new common::MemPool();
             auto nat = new net::net_addr_t("0.0.0.0", port);
             std::shared_ptr<net::net_addr_t> sspNat(nat);
             std::shared_ptr<net::INetStackWorkerManager> sspMgr = std::shared_ptr<net::INetStackWorkerManager>(new net::UniqueWorkerManager());
             m_pSocketService = net::SocketServiceFactory::CreateService(net::SocketProtocal::Tcp,
                                                                         sspNat,
-                                                                        m_pMemPool,
+                                                                        m_pSocketServerMemPool,
                                                                         std::bind(&RpcServer::recv_msg, this, std::placeholders::_1),
                                                                         sspMgr);
+            m_hmHandlers.reserve(100);
         }
 
         RpcServer::~RpcServer() {
-            DELETE_PTR(m_pMemPool);
+            DELETE_PTR(m_pSocketServerMemPool);
             DELETE_PTR(m_pSocketService);
         }
 
@@ -64,6 +67,11 @@ namespace ccraft {
             DELETE_PTR(m_pWorkThreadPool);
         }
 
+        void RpcServer::RegisterRpc(uint16_t id, IRpcHandler *handler) {
+            assert(handler);
+            m_hmHandlers[id] = handler;
+        }
+
         void RpcServer::recv_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
             m_pWorkThreadPool->AddTask(std::bind(&RpcServer::proc_msg, this, std::placeholders::_1), sspNM);
         }
@@ -75,7 +83,12 @@ namespace ccraft {
                     auto rm = mnm->GetContent();
                     if (LIKELY(rm)) {
                         auto buffer = rm->GetDataBuffer();
+                        auto handlerId = ByteOrderUtils::ReadUInt16(buffer->Pos);
+                        buffer->MoveHeadBack(2);
+                        auto handler = m_hmHandlers[handlerId];
+                        if (!handler) {
 
+                        }
                         //ProtoBufUtils::Parse(buffer, );
                     } else {
                         LOGWFUN << "recv message is empty!";

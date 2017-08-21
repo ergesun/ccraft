@@ -33,12 +33,16 @@ message(STATUS "EXTERN_COMPILE_THIRDPARTY_ROOT = ${EXTERN_COMPILE_THIRDPARTY_ROO
 link_directories(${EXTERN_COMPILE_THIRDPARTY_ROOT}/lib)
 
 #add_subdirectory(${BACKEND_ROOT}/src/common)
-#add_subdirectory(${UT_ROOT}/common)
+#add_subdirectory(${UT_ROOT}/net)
 if(${PROJECT_TYPE} MATCHES "UT")
     add_definitions(-DGTEST_LANG_CXX11=1 -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)
     if(${UT_MODULE} MATCHES "common")
         add_subdirectory(${SRC_ROOT}/common)
+    elseif(${UT_MODULE} MATCHES "net")
+        add_subdirectory(${SRC_ROOT}/common)
+        add_subdirectory(${SRC_ROOT}/net)
     endif()
+
     message(STATUS "UT_ROOT/UT_MODULE = ${UT_ROOT}/${UT_MODULE}")
     if(${CMAKE_BUILD_TYPE} MATCHES "Release")
         set(BUILD_OUTPUT_ROOT_DIR ${PROJECT_SOURCE_DIR}/build/ut/release)

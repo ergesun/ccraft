@@ -9,18 +9,18 @@
 #include <google/protobuf/message.h>
 
 namespace ccraft {
-    namespace common {
-        class MemPool;
-        class Buffer;
-    }
+namespace common {
+class MemPool;
+class Buffer;
+}
 
-    namespace rpc {
-        class ProtoBufUtils {
-        public:
-            static bool Parse(const common::Buffer *from, google::protobuf::Message *to);
-            static void Serialize(const google::protobuf::Message *from, common::Buffer *to, common::MemPool *mp);
-        };
-    }
+namespace rpc {
+class ProtoBufUtils {
+public:
+    static bool Parse(const common::Buffer *from, google::protobuf::Message *to);
+    static void Serialize(const google::protobuf::Message *from, common::Buffer *to, common::MemPool *mp);
+};
+}
 }
 
 #endif //CCRAFT_PROTOBUF_UTILS_H

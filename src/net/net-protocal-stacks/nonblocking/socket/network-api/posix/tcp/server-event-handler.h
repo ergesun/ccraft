@@ -13,37 +13,42 @@
 #include "../../../event-drivers/ievent-driver.h"
 #include "../../abstract-event-manager.h"
 #include "../../../../../../notify-message.h"
+#include "../../../../../../../common/thread-pool.h"
 
 namespace ccraft {
-    namespace common {
-        class MemPool;
-    }
+namespace common {
+class MemPool;
+}
 
-    namespace net {
-        class PosixTcpServerEventHandler : public AFileEventHandler {
-        public:
-            PosixTcpServerEventHandler(EventWorker *ew, net_addr_t *nat, ConnectHandler onConnect, common::MemPool *memPool,
-                                       NotifyMessageCallbackHandler msgCallbackHandler);
-            ~PosixTcpServerEventHandler();
+namespace net {
+class PosixTcpServerEventHandler : public AFileEventHandler {
+public:
+    PosixTcpServerEventHandler(EventWorker *ew, net_addr_t *nat,
+        ConnectHandler stackConnectHandler, ConnectFunc onLogicConnect,
+        common::MemPool *memPool, NotifyMessageCallbackHandler msgCallbackHandler);
+    ~PosixTcpServerEventHandler() override;
 
-            bool HandleReadEvent() override;
-            bool HandleWriteEvent() override;
+    bool Initialize() override;
+    bool HandleReadEvent() override;
+    bool HandleWriteEvent() override;
 
-            ANetStackMessageWorker *GetStackMsgWorker() override;
+    ANetStackMessageWorker *GetStackMsgWorker() override;
 
-        private:
-            inline void handle_message(NotifyMessage* nm);
+private:
+    inline void handle_message(NotifyMessage* nm);
 
-        private:
-            PosixTcpServerSocket             *m_pSrvSocket;
-            ConnectHandler                    m_onConnect;
-            /**
-             * 关联关系，外部创建者会释放，本类无需释放。
-             */
-            common::MemPool                  *m_pMemPool;
-            NotifyMessageCallbackHandler      m_msgCallbackHandler;
-        };
-    } // namespace net
+private:
+    PosixTcpServerSocket             *m_pSrvSocket;
+    ConnectHandler                    m_onStackConnect;
+    ConnectFunc                       m_onLogicConnect;
+    /**
+     * 关联关系，外部创建者会释放，本类无需释放。
+     */
+    common::MemPool                  *m_pMemPool;
+    NotifyMessageCallbackHandler      m_msgCallbackHandler;
+    common::ThreadPool<void*>        *m_tp;
+};
+} // namespace net
 } // namespace ccraft
 
 #endif //CCRAFT_NET_CORE_POSIXTCPCONNECTION_H

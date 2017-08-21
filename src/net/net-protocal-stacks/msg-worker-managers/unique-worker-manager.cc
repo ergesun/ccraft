@@ -8,43 +8,45 @@
 #include "unique-worker-manager.h"
 
 namespace ccraft {
-    namespace net {
-        AFileEventHandler* UniqueWorkerManager::GetWorkerEventHandler(net_peer_info_t npt) {
-            common::SpinLock l(&m_sl);
-            return lookup_worker(npt);
-        }
+namespace net {
+AFileEventHandler* UniqueWorkerManager::GetWorkerEventHandler(net_peer_info_t logicNpt) {
+    common::SpinLock l(&m_sl);
+    return lookup_worker(logicNpt);
+}
 
-        bool UniqueWorkerManager::PutWorkerEventHandler(AFileEventHandler *workerEventHandler) {
-            common::SpinLock l(&m_sl);
-            auto npt = workerEventHandler->GetSocketDescriptor()->GetPeerInfo();
-            auto handler = lookup_worker(npt);
-            if (handler) {
-                return false;
-            } else {
-                m_hmap_workers[npt] = workerEventHandler;
+bool UniqueWorkerManager::PutWorkerEventHandler(AFileEventHandler *workerEventHandler) {
+    common::SpinLock l(&m_sl);
+    auto lnpt = workerEventHandler->GetSocketDescriptor()->GetLogicPeerInfo();
+    auto handler = lookup_worker(lnpt);
+    bool res;
+    if (handler) {
+        res = false;
+    } else {
+        m_hmap_workers[lnpt] = workerEventHandler;
+        res = true;
+    }
 
-                return true;
-            }
-        }
+    return res;
+}
 
-        AFileEventHandler* UniqueWorkerManager::RemoveWorkerEventHandler(net_peer_info_t npt) {
-            common::SpinLock l(&m_sl);
-            auto handler = lookup_worker(npt);
-            if (handler) {
-                m_hmap_workers.erase(npt);
-                return handler;
-            } else {
-                return nullptr;
-            }
-        }
+AFileEventHandler* UniqueWorkerManager::RemoveWorkerEventHandler(net_peer_info_t logicNpt) {
+    common::SpinLock l(&m_sl);
+    auto handler = lookup_worker(logicNpt);
+    if (handler) {
+        m_hmap_workers.erase(logicNpt);
+        return handler;
+    } else {
+        return nullptr;
+    }
+}
 
-        inline AFileEventHandler *UniqueWorkerManager::lookup_worker(net_peer_info_t &npt) {
-            auto p = m_hmap_workers.find(npt);
-            if (m_hmap_workers.end() != p) {
-                return p->second;
-            }
+inline AFileEventHandler *UniqueWorkerManager::lookup_worker(net_peer_info_t &logicNpt) {
+    auto p = m_hmap_workers.find(logicNpt);
+    if (m_hmap_workers.end() != p) {
+        return p->second;
+    }
 
-            return nullptr;
-        }
-    }  // namespace net
+    return nullptr;
+}
+}  // namespace net
 }  // namespace ccraft

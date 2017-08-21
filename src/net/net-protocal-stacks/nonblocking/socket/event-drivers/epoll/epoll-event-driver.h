@@ -9,37 +9,37 @@
 #include "../ievent-driver.h"
 
 namespace ccraft {
-    namespace net {
-        class EpollEventDriver : public IEventDriver {
-        public:
-            ~EpollEventDriver();
-            /**
-             * nevent在kernel 2.6.8之后是被忽略的，参考man 2 epoll_create
-             * @param max_events
-             * @return
-             */
-            int Init(int max_events) override;
+namespace net {
+class EpollEventDriver : public IEventDriver {
+public:
+    ~EpollEventDriver();
+    /**
+     * nevent在kernel 2.6.8之后是被忽略的，参考man 2 epoll_create
+     * @param max_events
+     * @return
+     */
+    int Init(int max_events) override;
 
-            int AddEvent(AFileEventHandler *socketEventHandler, int cur_mask, int mask) override;
+    int AddEvent(AFileEventHandler *socketEventHandler, int cur_mask, int mask) override;
 
-            int DeleteEvent(AFileEventHandler *socketEventHandler, int cur_mask, int del_mask) override;
+    int DeleteEvent(AFileEventHandler *socketEventHandler, int cur_mask, int del_mask) override;
 
-            int DeleteHandler(AFileEventHandler *socketEventHandler) override;
+    int DeleteHandler(AFileEventHandler *socketEventHandler) override;
 
-            /**
-             * 获取epoll的事件。
-             * @param events 出参，大小至少为init传入的max_events。
-             * @param tp 阻塞等待的时间，若为nullptr为阻塞调用(epoll_wait(..., -1))。
-             * @return 获取到的事件个数。
-             */
-            int EventWait(std::vector<NetEvent> *events, struct timeval *tp) override;
+    /**
+     * 获取epoll的事件。
+     * @param events 出参，大小至少为init传入的max_events。
+     * @param tp 阻塞等待的时间，若为nullptr为阻塞调用(epoll_wait(..., -1))。
+     * @return 获取到的事件个数。
+     */
+    int EventWait(std::vector<NetEvent> *events, struct timeval *tp) override;
 
-        private:
-            int m_epfd;
-            int m_max_events;
-            struct epoll_event *m_events;
-        }; // class EpollEventDriver
-    } // namespace net
+private:
+    int m_epfd;
+    int m_max_events;
+    struct epoll_event *m_events;
+}; // class EpollEventDriver
+} // namespace net
 } // namespace ccraft
 
 #endif //CCRAFT_NET_CORE_EPOLL_EVENT_DRIVER_H
