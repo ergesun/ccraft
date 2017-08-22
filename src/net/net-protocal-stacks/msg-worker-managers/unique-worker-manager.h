@@ -18,7 +18,7 @@ namespace net {
  */
 class UniqueWorkerManager : public INetStackWorkerManager {
 public:
-    ~UniqueWorkerManager() = default;
+    ~UniqueWorkerManager();
 
     /**
      * 获取一个worker。
@@ -39,7 +39,7 @@ public:
      * @param logicNpt
      * @return 被移除的worker。如果不存在则为nullptr。
      */
-    AFileEventHandler* RemoveWorkerEventHandler(net_peer_info_t logicNpt) override;
+    AFileEventHandler* RemoveWorkerEventHandler(net_peer_info_t logicNpt, net_peer_info_t realNpt) override;
 
 private:
     inline AFileEventHandler *lookup_worker(net_peer_info_t &logicNpt);
@@ -50,6 +50,7 @@ private:
      * logic peer -> handler
      */
     std::unordered_map<net_peer_info_t, AFileEventHandler*>          m_hmap_workers;
+    std::unordered_map<net_peer_info_t, net_peer_info_t>             m_hmap_rp_lp;
 }; // class UniqueWorkerManager
 }  // namespace net
 }  // namespace ccraft

@@ -195,8 +195,8 @@ bool PosixTcpNetStackWorker::Recv(bool breakWhenRecvOne) {
 
 bool PosixTcpNetStackWorker::Send() {
 #define Put_Send_Buffer()                          \
-Message::PutBuffer(m_pSendingBuffer);      \
-m_pSendingBuffer = nullptr;
+        Message::PutBuffer(m_pSendingBuffer);      \
+        m_pSendingBuffer = nullptr;
 
     int err;
     size_t size;
@@ -240,8 +240,8 @@ m_pSendingBuffer = nullptr;
 
 void PosixTcpNetStackWorker::handshake(RcvMessage *rm) {
 #define COMPLETE_AND_FIRE()                   \
-m_bConnHandShakeCompleted = true;     \
-m_initWaitCv.notify_one();
+        m_bConnHandShakeCompleted = true;     \
+        m_initWaitCv.notify_one();
 
     switch (m_connState) {
         case ConnectionState::ConnectSe: {
@@ -256,7 +256,7 @@ m_initWaitCv.notify_one();
                 memcpy(whatPtr, buffer->Pos, (size_t)whatLen);
                 *(whatPtr + whatLen) = 0;
                 whatMpo->Put();
-                fprintf(stderr, "%s", whatPtr);
+                LOGEFUN << "handshake failed in phase ConnectSe with err msg " << whatPtr;
                 COMPLETE_AND_FIRE();
             } else {
                 auto crm = new ConnectResponseMessage(m_pMemPool, ConnectResponseMessage::Status::OK, "");
@@ -297,7 +297,7 @@ m_initWaitCv.notify_one();
             // just server
             auto buffer = rm->GetDataBuffer();
             if (UNLIKELY(2 != buffer->AvailableLength())) { // 长度有问题至少也的2;
-                fprintf(stderr, "client connecting buffer is corrupt.\n");
+                LOGEFUN << "client connecting buffer is corrupt.";
                 auto crm = new ConnectResponseMessage(m_pMemPool, ConnectResponseMessage::Status::ERROR, "");
                 InsertMessage(crm);
                 Send();
@@ -361,7 +361,7 @@ m_initWaitCv.notify_one();
             break;
         }
         default: {
-            fprintf(stderr, "handshake recv unexpected state %d\n", (int)m_connState);
+            LOGEFUN << "handshake recv unexpected state " << (int)m_connState;
             auto crm = new ConnectResponseMessage(m_pMemPool, ConnectResponseMessage::Status::ERROR,
                                                   "handshake recv unexpected state.");
             if (InsertMessage(crm)) {

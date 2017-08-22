@@ -33,7 +33,8 @@ bool PosixTcpServerSocket::Bind() {
 bool PosixTcpServerSocket::Listen() {
     auto rc = (0 == listen(m_fd, m_max_listen_conns));
     if (!rc) {
-        fprintf(stderr, "Error listen %d - %s\n", errno, strerror(errno));
+        auto err = errno;
+        LOGEFUN << "Error listen " << err << " - " << strerror(err);
     }
 
     return rc;
@@ -42,7 +43,8 @@ bool PosixTcpServerSocket::Listen() {
 bool PosixTcpServerSocket::SetPortReuse() {
     auto rc = (0 == setsockopt(m_fd, SOL_SOCKET, SO_REUSEPORT, &m_local_addr.port, sizeof(int)));
     if (!rc) {
-        fprintf(stderr, "Error SetPortReuse %d - %s\n", errno, strerror(errno));
+        auto err = errno;
+        LOGEFUN << "Error SetPortReuse " << err << " - " << strerror(err);
     }
 
     return rc;

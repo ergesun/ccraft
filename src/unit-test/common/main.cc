@@ -15,6 +15,7 @@ using namespace ccraft::common;
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
+    ccraft::common::initialize();
 
     return RUN_ALL_TESTS();
 }

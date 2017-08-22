@@ -73,7 +73,8 @@ bool PosixTcpServerEventHandler::HandleReadEvent() {
             } else {
                 auto snm = new ServerNotifyMessage(ServerNotifyMessageCode::Error, "broken server fd, accept err!");
                 handle_message(snm);
-                std::cerr << __func__ << ": accept errno = " << err << ", msg = " << strerror(err) << std::endl;
+
+                LOGEFUN << "accept errno = " << err << ", msg = " << strerror(err);
                 return false;
             }
         } else {
@@ -93,7 +94,7 @@ bool PosixTcpServerEventHandler::HandleReadEvent() {
                     m_onStackConnect(connEventHandler);
                 } else {
                     delete connEventHandler;
-                    fprintf(stderr, "connection %s:%d initialize failed!\n", peerAddr.addr.c_str(), port);
+                    LOGEFUN << "connection " << peerAddr.addr.c_str() << ":" << port << " initialize failed!";
                     // 本端当前不回收，等待对端关闭/断开(open keep-alive opt)时回收。否则会有二次回收的问题。
                     //m_onFinish(connEventHandler);
                 }

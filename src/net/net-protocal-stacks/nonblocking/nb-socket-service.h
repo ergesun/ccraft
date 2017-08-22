@@ -24,6 +24,7 @@ class AEventManager;
 
 /**
  * 支持Tcp/Udp(暂未实现)协议的收发server。
+ * TODO(sunchao): 扩展为可listen多个端口？
  */
 class NBSocketService : public ASocketService {
 public:
@@ -32,6 +33,7 @@ public:
      * @param nlt 如果为空，则是为仅仅一个服务于client的服务，否则为server信息，会开启server的服务。
      * @param sspMgr  worker的管理策略。
      * @param memPool 内存池。
+     * @param sspMgr
      */
     NBSocketService(SocketProtocal sp, std::shared_ptr<net_addr_t> sspNat, uint16_t logicPort,
                     std::shared_ptr<INetStackWorkerManager> sspMgr,
@@ -46,11 +48,11 @@ public:
      */
     bool Start(uint16_t ioThreadsCnt, NonBlockingEventModel m) override;
 
+    /**
+     * 一旦stop，就不能再用了(不可以重新start再用)。
+     * @return
+     */
     bool Stop() override;
-
-    bool Connect(net_peer_info_t &npt) override;
-
-    bool Disconnect(net_peer_info_t &npt) override;
 
     /**
      * 一旦发送成功，则m的所有权便属于了框架，user无需也不可以再管理此SndMessage，m生命周期由框架控制。
@@ -61,6 +63,7 @@ public:
     bool SendMessage(SndMessage *m) override;
 
 private:
+    bool connect(net_peer_info_t &npt);
     void on_stack_connect(AFileEventHandler *handler);
     bool on_logic_connect(AFileEventHandler *handler);
     void on_finish(AFileEventHandler *handler);

@@ -23,35 +23,35 @@ typedef std::function<bool(AFileEventHandler*)> ValidHandlerFunc;
  */
 class PosixEventManager : public AEventManager {
 public:
-PosixEventManager(SocketProtocal sp, std::shared_ptr<net_addr_t> sspNat, common::MemPool *memPool, uint32_t maxEvents,
-    uint32_t connWorkersCnt, ConnectHandler stackConnectHandler, ConnectFunc logicConnectHandler,
-FinishHandler finishHandler, NotifyMessageCallbackHandler msgCallbackHandler);
+    PosixEventManager(SocketProtocal sp, std::shared_ptr<net_addr_t> sspNat, common::MemPool *memPool, uint32_t maxEvents,
+        uint32_t connWorkersCnt, ConnectHandler stackConnectHandler, ConnectFunc logicConnectHandler,
+    FinishHandler finishHandler, NotifyMessageCallbackHandler msgCallbackHandler);
 
-~PosixEventManager() override;
+    ~PosixEventManager() override;
 
-bool Start(NonBlockingEventModel m) override;
-bool Stop() override;
+    bool Start(NonBlockingEventModel m) override;
+    bool Stop() override;
 
-void AddEvent(AFileEventHandler *socketEventHandler, int cur_mask, int mask) override;
-
-private:
-void worker_loop(EventWorker *ew);
-inline void process_event(NetEvent *netEvent);
+    void AddEvent(AFileEventHandler *socketEventHandler, int cur_mask, int mask) override;
 
 private:
-SocketProtocal                                     m_sp;
-std::shared_ptr<net_addr_t>                        m_sspNat;
-uint32_t                                           m_iConnWorkersCnt;
-int32_t                                            m_iCurWorkerIdx = -1;
-bool                                               m_bStopped = true;
-AFileEventHandler                                 *m_pServerEventHandler = nullptr;
-std::pair<std::thread*, EventWorker*>              m_pListenWorkerEventLoopCtx;
-std::vector<std::pair<std::thread*, EventWorker*>> m_vConnsWorkerEventLoopCtxs;
-common::spin_lock_t                                m_slSelectEvents = UNLOCKED;
-ConnectHandler                                     m_onStackConnect;
-ConnectFunc                                        m_onLogicConnect;
-FinishHandler                                      m_onFinish;
-NotifyMessageCallbackHandler                       m_msgCallback;
+    void worker_loop(EventWorker *ew);
+    inline void process_event(NetEvent *netEvent);
+
+private:
+    SocketProtocal                                           m_sp;
+    std::shared_ptr<net_addr_t>                              m_sspNat;
+    uint32_t                                                 m_iConnWorkersCnt;
+    int32_t                                                  m_iCurWorkerIdx = -1;
+    bool                                                     m_bStopped = true;
+    AFileEventHandler                                       *m_pServerEventHandler = nullptr;
+    std::pair<std::thread*, EventWorker*>                    m_pListenWorkerEventLoopCtx;
+    std::vector<std::pair<std::thread*, EventWorker*>>       m_vConnsWorkerEventLoopCtxs;
+    common::spin_lock_t                                      m_slSelectEvents = UNLOCKED;
+    ConnectHandler                                           m_onStackConnect;
+    ConnectFunc                                              m_onLogicConnect;
+    FinishHandler                                            m_onFinish;
+    NotifyMessageCallbackHandler                             m_msgCallback;
 };
 } // namespace net
 } // namespace ccraft

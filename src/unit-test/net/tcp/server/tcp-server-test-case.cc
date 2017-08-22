@@ -20,7 +20,7 @@ net::ISocketService     *TcpServerTest::s_ss = nullptr;
 common::MemPool         *TcpServerTest::m_mp = nullptr;
 
 void TcpServerTest::Run() {
-    auto nat = new ccraft::net::net_addr_t("127.0.0.1", 2210);
+    auto nat = new ccraft::net::net_addr_t("0.0.0.0", 2210);
     std::shared_ptr<ccraft::net::net_addr_t> ssp_npt(nat);
     m_mp = new ccraft::common::MemPool();
     std::shared_ptr<ccraft::net::INetStackWorkerManager> sspMgr =
