@@ -19,28 +19,28 @@ class MemPool;
 namespace net {
 class PosixTcpConnectionEventHandler : public AFileEventHandler {
 public:
-PosixTcpConnectionEventHandler(PosixTcpClientSocket *pSocket, common::MemPool *memPool,
-    NotifyMessageCallbackHandler msgCallbackHandler, uint16_t logicPort,
-    ConnectFunc onLogicConnect);
-PosixTcpConnectionEventHandler(net_addr_t &peerAddr, int sfd, common::MemPool *memPool,
-NotifyMessageCallbackHandler msgCallbackHandler, ConnectFunc onLogicConnect);
-~PosixTcpConnectionEventHandler() override;
+    PosixTcpConnectionEventHandler(PosixTcpClientSocket *pSocket, common::MemPool *memPool,
+        NotifyMessageCallbackHandler msgCallbackHandler, uint16_t logicPort,
+        ConnectFunc onLogicConnect);
+    PosixTcpConnectionEventHandler(net_addr_t &peerAddr, int sfd, common::MemPool *memPool,
+    NotifyMessageCallbackHandler msgCallbackHandler, ConnectFunc onLogicConnect);
+    ~PosixTcpConnectionEventHandler() override;
 
-bool Initialize() override;
+    bool Initialize() override;
 
-bool HandleReadEvent() override;
-bool HandleWriteEvent() override;
+    bool HandleReadEvent() override;
+    bool HandleWriteEvent() override;
 
-ANetStackMessageWorker *GetStackMsgWorker() override;
-PosixTcpClientSocket* GetSocket() const {
-    return m_pClientSocket;
-}
+    ANetStackMessageWorker *GetStackMsgWorker() override;
+    PosixTcpClientSocket* GetSocket() const {
+        return m_pClientSocket;
+    }
 
 private:
-PosixTcpClientSocket   *m_pClientSocket = nullptr;
-PosixTcpNetStackWorker *m_pNetStackWorker = nullptr;
-common::MemPool        *m_pMemPool;
-uint16_t                m_iLogicPort;
+    PosixTcpClientSocket   *m_pClientSocket = nullptr;
+    PosixTcpNetStackWorker *m_pNetStackWorker = nullptr;
+    common::MemPool        *m_pMemPool;
+    uint16_t                m_iLogicPort;
 };
 } // namespace net
 } // namespace ccraft

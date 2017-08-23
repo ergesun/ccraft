@@ -11,7 +11,7 @@ namespace ccraft {
 namespace rpc {
 bool ProtoBufUtils::Parse(const common::Buffer *from, google::protobuf::Message *to) {
     google::protobuf::LogSilencer logSilencer;
-    if (UNLIKELY(!to->ParseFromArray(from->Pos, from->AvailableLength()))) {
+    if (UNLIKELY(!to->ParseFromArray(from->GetPos(), from->AvailableLength()))) {
         LOGWFUN << "Missing fields in protocol buffer of " << to->GetTypeName().c_str() << ": " <<
                 to->InitializationErrorString().c_str();
         return false;
@@ -44,7 +44,7 @@ void ProtoBufUtils::Serialize(const google::protobuf::Message *from, common::Buf
                 << ": " << from->InitializationErrorString().c_str();
     }
 
-    from->SerializeToArray(to->Pos, from->ByteSize());
+    from->SerializeToArray(to->GetPos(), from->ByteSize());
 }
 }
 }

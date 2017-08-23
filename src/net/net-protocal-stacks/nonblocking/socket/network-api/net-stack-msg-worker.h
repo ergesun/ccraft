@@ -26,7 +26,7 @@ namespace net {
  * 事件管理器有事件了会调用读写。
  */
 class ANetStackMessageWorker {
-    protected:
+protected:
     enum class NetWorkerState {
         StartToRcvHeader = 0,
             RcvingHeader,
@@ -34,7 +34,7 @@ class ANetStackMessageWorker {
             RcvingPayload
     };
 
-    public:
+public:
     /**
      *
      * @param maxCacheMessageCnt 消息缓冲队列的最大消息个数。0为无限制。
@@ -76,12 +76,13 @@ class ANetStackMessageWorker {
         return m_pEventHandler;
     }
 
-    protected:
+protected:
     static std::function<void(RcvMessage*)> s_release_rm_handle;
-    static RcvMessage* get_new_rcv_message(common::MemPool *mp, net_peer_info_t peerInfo, Message::Header h, common::Buffer *buffer);
-    static void release_rcv_message(RcvMessage *rm);
+    static RcvMessage* getNewRcvMessage(common::MemPool *mp, net_peer_info_t peerInfo, Message::Header h,
+                                        common::Buffer *buffer);
+    static void releaseRcvMessage(RcvMessage *rm);
 
-    protected:
+protected:
     common::MemPool                    *m_pMemPool;
     common::Buffer                     *m_pHeaderBuffer;
     common::BlockingQueue<SndMessage*> *m_bqMessages;

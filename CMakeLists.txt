@@ -32,8 +32,8 @@ include_directories(${EXTERN_COMPILE_THIRDPARTY_ROOT}/include)
 message(STATUS "EXTERN_COMPILE_THIRDPARTY_ROOT = ${EXTERN_COMPILE_THIRDPARTY_ROOT}")
 link_directories(${EXTERN_COMPILE_THIRDPARTY_ROOT}/lib)
 
-##add_subdirectory(${BACKEND_ROOT}/src/common)
-#---------------------------------for clion debug ut-------------------------------------------
+###add_subdirectory(${BACKEND_ROOT}/src/common)
+##---------------------------------for clion debug ut-------------------------------------------
 #add_definitions(-DGTEST_LANG_CXX11=1 -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)
 #add_subdirectory(${SRC_ROOT}/common)
 #add_subdirectory(${SRC_ROOT}/net)
@@ -42,7 +42,7 @@ link_directories(${EXTERN_COMPILE_THIRDPARTY_ROOT}/lib)
 #set(LIBRARY_OUTPUT_PATH ${BUILD_OUTPUT_ROOT_DIR}/lib)
 #set(EXECUTABLE_OUTPUT_PATH ${BUILD_OUTPUT_ROOT_DIR})
 #add_subdirectory(${UT_ROOT}/net)
-#----------------------------------------------------------------------------------------------
+##----------------------------------------------------------------------------------------------
 
 if(${PROJECT_TYPE} MATCHES "UT")
     add_definitions(-DGTEST_LANG_CXX11=1 -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)

@@ -60,6 +60,7 @@ private:
     common::MemPool                                            *m_pRpcMemPool           = nullptr;
     common::ThreadPool<std::shared_ptr<net::NotifyMessage>>    *m_pWorkThreadPool       = nullptr;
     std::unordered_map<uint16_t, IRpcHandler*>                  m_hmHandlers;
+    uint16_t                                                    m_iport;
 };
 }
 }

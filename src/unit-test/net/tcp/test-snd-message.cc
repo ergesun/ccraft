@@ -17,12 +17,12 @@ TestSndMessage::TestSndMessage(common::MemPool *mp, net::net_peer_info_t &&socke
     net::SndMessage(mp, std::move(socketInfo), id), m_str(msg) {}
 #endif
 
-uint32_t TestSndMessage::GetDerivePayloadLength() {
+uint32_t TestSndMessage::getDerivePayloadLength() {
     return m_str.length();
 }
 
-void TestSndMessage::EncodeDerive(common::Buffer *b) {
-    memcpy(b->Pos, m_str.c_str(), m_str.length());
+void TestSndMessage::encodeDerive(common::Buffer *b) {
+    memcpy(b->GetPos(), m_str.c_str(), m_str.length());
 }
 }
 }

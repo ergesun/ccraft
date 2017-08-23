@@ -11,31 +11,31 @@
 #include "../../../../common-def.h"
 
 namespace ccraft {
-    namespace net {
-        class EventDriverFactory {
-        public:
-            static IEventDriver* GetNewDriver(NonBlockingEventModel m) {
-                IEventDriver *eventDriver = nullptr;
-                if (NonBlockingEventModel::DPDK == m) {
+namespace net {
+class EventDriverFactory {
+public:
+    static IEventDriver* GetNewDriver(NonBlockingEventModel m) {
+        IEventDriver *eventDriver = nullptr;
+        if (NonBlockingEventModel::DPDK == m) {
 #ifdef HAVE_DPDK
-                    // eventDriver = new DPDKDriver(cct);
+            // eventDriver = new DPDKDriver(cct);
 #endif
-                } else {
+        } else {
 #ifdef __linux__ // HAVE_EPOLL
-                    eventDriver = new EpollEventDriver();
+            eventDriver = new EpollEventDriver();
 #else
-                    #ifdef (defined(__APPLE__) && defined(MAC_OS_X_VERSION_10_6)) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined (__NetBSD__) // HAVE_KQUEUE
-                // eventDriver = new KqueueDriver();
+            #ifdef (defined(__APPLE__) && defined(MAC_OS_X_VERSION_10_6)) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined (__NetBSD__) // HAVE_KQUEUE
+        // eventDriver = new KqueueDriver();
 #else
-                // eventDriver = new SelectDriver();
+        // eventDriver = new SelectDriver();
 #endif
 #endif
-                }
+        }
 
-                return eventDriver;
-            }
-        };
-    }  // namespace net
+        return eventDriver;
+    }
+};
+}  // namespace net
 }  // namespace ccraft
 
 #endif //CCRAFT_NET_CORE_NB_SOCKET_ED_FACTORY_H

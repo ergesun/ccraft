@@ -73,9 +73,13 @@ TEST(NetTest, ServerTest) {
     auto *tsm3 = new ccraft::test::TestSndMessage(&g_memPool, ccraft::net::net_peer_info_t(peerInfo), "3 ---client request: hello server!");
     EXPECT_EQ(netService1->SendMessage(tsm3), true);
 
-    //EXPECT_EQ(netService1->Disconnect(peerInfo), true);
-    auto *tsm13 = new ccraft::test::TestSndMessage(&g_memPool, ccraft::net::net_peer_info_t(peerInfo), "1-3 ---client request: hello server!");
-    EXPECT_EQ(netService1->SendMessage(tsm13), true);
+    for (int i = 0; i < 100; ++i) {
+        std::stringstream ss;
+        ss << "1-" << i + 3 << " ---client request: hello server!";
+        auto *tsm13 = new ccraft::test::TestSndMessage(&g_memPool, ccraft::net::net_peer_info_t(peerInfo), ss.str());
+        EXPECT_EQ(netService1->SendMessage(tsm13), true);
+        usleep(1000 * 50);
+    }
 }
 
 void recv_msg(std::shared_ptr<ccraft::net::NotifyMessage> sspNM) {
@@ -90,7 +94,7 @@ void recv_msg(std::shared_ptr<ccraft::net::NotifyMessage> sspNM) {
                         std::cout << "response = "  << respBuf->Pos << ", " << "message id is { ts = " << rm->GetId().ts
                                   << ", seq = " << rm->GetId().seq << "}" << std::endl;
 #else
-                        std::cout << "response = "  << respBuf->Pos << ", " << "message id is " << rm->GetId() << "." << std::endl;
+                        std::cout << "response = "  << respBuf->GetPos() << ", " << "message id is " << rm->GetId() << "." << std::endl;
 #endif
 #else
                 std::cout << "response = "  << respBuf->Pos << "." << std::endl;

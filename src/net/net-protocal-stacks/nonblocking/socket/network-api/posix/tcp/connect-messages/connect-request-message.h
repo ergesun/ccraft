@@ -18,12 +18,12 @@ public:
         SndMessage(mp, net_peer_info_s()), m_logicPort(std::move(logicPort)) {}
 
 protected:
-    uint32_t GetDerivePayloadLength() override {
+    uint32_t getDerivePayloadLength() override {
         return sizeof(uint16_t)/*logic port*/;
     }
 
-    void EncodeDerive(common::Buffer *b) override {
-        ByteOrderUtils::WriteUInt16(b->Pos, (uint16_t)m_logicPort);
+    void encodeDerive(common::Buffer *b) override {
+        ByteOrderUtils::WriteUInt16(b->GetPos(), (uint16_t)m_logicPort);
     }
 
 private:

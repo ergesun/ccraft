@@ -10,32 +10,37 @@
 
 namespace ccraft {
 namespace rpc {
-uint32_t RpcResponse::GetDerivePayloadLength() {
-    if (m_pMsg) {
+uint32_t RpcResponse::getDerivePayloadLength() {
+    if (m_pMsg.get()) {
         return sizeof(CodeType) + sizeof(uint16_t) + m_pMsg->ByteSize();
     } else {
         return sizeof(CodeType) + sizeof(uint16_t);
     }
 }
 
-void RpcResponse::EncodeDerive(common::Buffer *b) {
-    ByteOrderUtils::WriteUInt16(b->Pos, (CodeType)m_code);
-    b->Pos += sizeof(CodeType);
-    ByteOrderUtils::WriteUInt16(b->Pos, m_iHandlerId);
-    b->Pos += sizeof(uint16_t);
-    ProtoBufUtils::Serialize(m_pMsg.get(), b);
+void RpcResponse::encodeDerive(common::Buffer *b) {
+    ByteOrderUtils::WriteUInt16(b->GetPos(), (CodeType)m_code);
+    b->MoveHeadBack(sizeof(CodeType));
+    ByteOrderUtils::WriteUInt16(b->GetPos(), m_iHandlerId);
+    b->MoveHeadBack(sizeof(uint16_t));
+    if (m_pMsg.get()) {
+        ProtoBufUtils::Serialize(m_pMsg.get(), b);
+    }
 }
 
-uint32_t RpcErrorResponse::GetDerivePayloadLength() {
+uint32_t RpcErrorResponse::getDerivePayloadLength() {
     return sizeof(CodeType) + sizeof(uint16_t) + m_sContent.length();
 }
 
-void RpcErrorResponse::EncodeDerive(common::Buffer *b) {
-    ByteOrderUtils::WriteUInt16(b->Pos, (CodeType)m_code);
-    b->Pos += sizeof(CodeType);
-    ByteOrderUtils::WriteUInt16(b->Pos, m_iHandlerId);
-    b->Pos += sizeof(uint16_t);
-    memcpy(b->Pos, m_sContent.c_str(), m_sContent.length());
+void RpcErrorResponse::encodeDerive(common::Buffer *b) {
+    ByteOrderUtils::WriteUInt16(b->GetPos(), (CodeType)m_code);
+    b->MoveHeadBack(sizeof(CodeType));
+    ByteOrderUtils::WriteUInt16(b->GetPos(), m_iHandlerId);
+    b->MoveHeadBack(sizeof(uint16_t));
+    auto contentLen = m_sContent.length();
+    if (contentLen > 0) {
+        memcpy(b->GetPos(), m_sContent.c_str(), contentLen);
+    }
 }
 } // namespace rpc
 } // namespace ccraft

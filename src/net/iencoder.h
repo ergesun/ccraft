@@ -9,20 +9,20 @@
 #include "../common/mem-pool.h"
 
 namespace ccraft {
-    namespace common {
-        class Buffer;
-    }
+namespace common {
+class Buffer;
+}
 
-    namespace net {
-        /**
-         * 编码器接口。
-         */
-        class IEncoder {
-        public:
-            virtual ~IEncoder() {}
-            virtual common::Buffer* Encode() = 0;
-        }; // interface IEncoder
-    } // namespace net
+namespace net {
+/**
+ * 编码器接口。
+ */
+class IEncoder {
+public:
+    virtual ~IEncoder() {}
+    virtual common::Buffer* Encode() = 0;
+}; // interface IEncoder
+} // namespace net
 } // namespace ccraft
 
 #endif //CCRAFT_NET_CORE_ICODEC_H

@@ -41,7 +41,7 @@ SndMessage::SndMessage(common::MemPool *mp, net_peer_info_t &&peerInfo, Id id) :
 #endif
 
 common::Buffer* SndMessage::Encode() {
-    auto deriveBufferSize = GetDerivePayloadLength();
+    auto deriveBufferSize = getDerivePayloadLength();
     if (UNLIKELY(deriveBufferSize <= 0)) {
         throw std::runtime_error("message payload cannot less than 0 bytes");
     }
@@ -58,31 +58,31 @@ common::Buffer* SndMessage::Encode() {
     auto memPoolObject = m_pMemPool->Get(totalBufferSize);
     auto buf = Message::GetNewAvailableBuffer(memPoolObject, totalBufferSize);
     SndMessage::encode_header(buf, m_header);
-    EncodeDerive(buf);
+    encodeDerive(buf);
 
-    buf->Pos = buf->Start;
+    buf->SetPos(buf->GetStart());
     return buf;
 }
 
 void SndMessage::encode_header(common::Buffer *b, Header &h) {
-    ByteOrderUtils::WriteUInt32(b->Pos, h.magic);
-    b->Pos += sizeof(h.magic);
+    ByteOrderUtils::WriteUInt32(b->GetPos(), h.magic);
+    b->MoveHeadBack(sizeof(h.magic));
 #if WITH_MSG_ID
 #if BULK_MSG_ID
-    ByteOrderUtils::WriteUInt64(b->Pos, (uint64_t)(h.id.ts));
-    b->Pos += sizeof(uint64_t);
-    ByteOrderUtils::WriteUInt32(b->Pos, h.id.seq);
-    b->Pos += sizeof(h.id.seq);
+    ByteOrderUtils::WriteUInt64(b->GetPos(), (uint64_t)(h.id.ts));
+    b->MoveHeadBack(sizeof(uint64_t));
+    ByteOrderUtils::WriteUInt32(b->GetPos(), h.id.seq);
+    b->MoveHeadBack(sizeof(h.id.seq));
 #elif BIG_MSG_ID
-    ByteOrderUtils::WriteUInt64(b->Pos, h.id);
-    b->Pos += sizeof(h.id);
+    ByteOrderUtils::WriteUInt64(b->GetPos(), h.id);
+    b->MoveHeadBack(sizeof(h.id));
 #else
-    ByteOrderUtils::WriteUInt32(b->Pos, h.id);
-    b->Pos += sizeof(h.id);
+    ByteOrderUtils::WriteUInt32(b->GetPos(), h.id);
+    b->MoveHeadBack(sizeof(h.id));
 #endif
 #endif
-    ByteOrderUtils::WriteUInt32(b->Pos, h.len);
-    b->Pos += sizeof(h.len);
+    ByteOrderUtils::WriteUInt32(b->GetPos(), h.len);
+    b->MoveHeadBack(sizeof(h.len));
 }
 
 #if WITH_MSG_ID

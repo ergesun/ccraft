@@ -15,7 +15,8 @@
 
 namespace ccraft {
 namespace net {
-std::function<void(RcvMessage*)> ANetStackMessageWorker::s_release_rm_handle = std::bind(&ANetStackMessageWorker::release_rcv_message,
+std::function<void(RcvMessage*)> ANetStackMessageWorker::s_release_rm_handle = std::bind(
+    &ANetStackMessageWorker::releaseRcvMessage,
                                                                                          std::placeholders::_1);
 ANetStackMessageWorker::ANetStackMessageWorker(AFileEventHandler *eventHandler, common::MemPool *memPool,
                                                NotifyMessageCallbackHandler msgCallbackHandler, uint32_t maxCacheMessageCnt) {
@@ -68,14 +69,14 @@ bool ANetStackMessageWorker::InsertMessage(SndMessage *m) {
     return m_bqMessages->TryPush(m);
 }
 
-RcvMessage* ANetStackMessageWorker::get_new_rcv_message(common::MemPool *mp, net_peer_info_t peerInfo,
-                                                        Message::Header h, common::Buffer *buffer) {
+RcvMessage* ANetStackMessageWorker::getNewRcvMessage(common::MemPool *mp, net_peer_info_t peerInfo,
+                                                     Message::Header h, common::Buffer *buffer) {
     auto rmMpo = mp->Get(sizeof(RcvMessage));
     auto rcvMessage = new(rmMpo->Pointer()) RcvMessage(rmMpo, mp, std::move(peerInfo), h, buffer);
     return rcvMessage;
 }
 
-void ANetStackMessageWorker::release_rcv_message(RcvMessage *rm) {
+void ANetStackMessageWorker::releaseRcvMessage(RcvMessage *rm) {
     rm->~RcvMessage();
 }
 } // namespace net

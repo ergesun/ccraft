@@ -59,13 +59,13 @@ protected:
      * 负载的最大长度为MAX_MSG_PAYLOAD_SIZE。
      * @return
      */
-    virtual uint32_t GetDerivePayloadLength() = 0;
+    virtual uint32_t getDerivePayloadLength() = 0;
 
     /**
      * 派生类需要实现的对自己内容的编码。
      * @param b
      */
-    virtual void EncodeDerive(common::Buffer *b) = 0;
+    virtual void encodeDerive(common::Buffer *b) = 0;
 
 private:
     static void encode_header(common::Buffer *b, Header &h);

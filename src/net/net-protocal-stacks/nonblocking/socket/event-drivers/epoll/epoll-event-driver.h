@@ -12,7 +12,7 @@ namespace ccraft {
 namespace net {
 class EpollEventDriver : public IEventDriver {
 public:
-    ~EpollEventDriver();
+    ~EpollEventDriver() override;
     /**
      * nevent在kernel 2.6.8之后是被忽略的，参考man 2 epoll_create
      * @param max_events

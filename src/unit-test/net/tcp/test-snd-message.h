@@ -22,8 +22,8 @@ public:
 #endif
 
 protected:
-    uint32_t GetDerivePayloadLength() override;
-    void EncodeDerive(common::Buffer *b) override;
+    uint32_t getDerivePayloadLength() override;
+    void encodeDerive(common::Buffer *b) override;
 
 private:
     std::string    m_str;

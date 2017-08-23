@@ -29,8 +29,8 @@ struct NetEvent {
  * be used for worst condition.
  */
 class IEventDriver {
-    public:
-    virtual ~IEventDriver() {}
+public:
+    virtual ~IEventDriver() = default;
 
     /**
      *

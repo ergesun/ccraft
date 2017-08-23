@@ -24,14 +24,14 @@ public:
         SndMessage(mp, net_peer_info_s()), m_stat(stat), m_sWhat(std::move(what)) {}
 
 protected:
-    uint32_t GetDerivePayloadLength() override {
+    uint32_t getDerivePayloadLength() override {
         return sizeof(uint16_t)/*Status*/ + m_sWhat.length()/*what*/;
     }
 
-    void EncodeDerive(common::Buffer *b) override {
-        ByteOrderUtils::WriteUInt16(b->Pos, (uint16_t)m_stat);
-        b->Pos += sizeof(uint16_t);
-        memcpy(b->Pos, m_sWhat.c_str(), m_sWhat.length());
+    void encodeDerive(common::Buffer *b) override {
+        ByteOrderUtils::WriteUInt16(b->GetPos(), (uint16_t)m_stat);
+        b->MoveHeadBack(sizeof(uint16_t));
+        memcpy(b->GetPos(), m_sWhat.c_str(), m_sWhat.length());
     }
 
 private:

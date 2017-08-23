@@ -11,6 +11,11 @@
 #include "connect-messages/connect-response-message.h"
 #include "connect-messages/connect-request-message.h"
 
+#define CheckAndInitBufferPos(b)                                                                                    \
+        if (!b->GetPos()) {                                                                                         \
+            b->SetPos(b->GetStart());                                                                               \
+        }
+
 #define NotifyWorkerBrokenMessage()                                                                                 \
         auto wnm = get_broken_worker_message(strerror(err));                                                        \
         HandleMessage(wnm);
@@ -42,6 +47,7 @@
             rc = false;                                                                                             \
             NotifyWorkerPeerClosedMessage();                                                                        \
         } else if (n > 0) {                                                                                         \
+            CheckAndInitBufferPos(m_pHeaderBuffer);                                                                 \
             m_pHeaderBuffer->MoveTailBack((uint32_t)n);                                                             \
             ParseHeader();                                                                                          \
         } else {                                                                                                    \
@@ -59,7 +65,7 @@
             }                                                                                                       \
             m_rcvState = NetWorkerState::StartToRcvHeader;                                                          \
             auto peer = m_pEventHandler->GetSocketDescriptor()->GetLogicPeerInfo();                                 \
-            auto rcvMessage = get_new_rcv_message(m_pMemPool, peer, m_header, m_payloadBuffer);                     \
+            auto rcvMessage = getNewRcvMessage(m_pMemPool, peer, m_header, m_payloadBuffer);                        \
             /* TODO(sunchao): 此指针需要加锁以防止析够后还会被handle message使用而导致崩溃。*/                            \
             if (LIKELY(ConnectionState::Connected == m_connState)) {                                                \
                 auto mnm = new MessageNotifyMessage(rcvMessage, s_release_rm_handle);                               \
@@ -78,6 +84,7 @@
             rc = false;                                                                                             \
             NotifyWorkerPeerClosedMessage();                                                                        \
         } else if (n > 0) {                                                                                         \
+            CheckAndInitBufferPos(m_payloadBuffer);                                                                 \
             m_payloadBuffer->MoveTailBack((uint32_t)n);                                                             \
             CheckPayload();                                                                                         \
         } else {                                                                                                    \
@@ -152,16 +159,43 @@ bool PosixTcpNetStackWorker::Recv(bool breakWhenRecvOne) {
         switch (m_rcvState) {
             case NetWorkerState::StartToRcvHeader:{
                 m_pHeaderBuffer->BZero();
-                auto n = m_pSocket->Read(m_pHeaderBuffer->Start, (size_t)m_pHeaderBuffer->TotalLength(), err);
-                ProcessAfterRcvHeader();
+                auto n = m_pSocket->Read(m_pHeaderBuffer->GetStart(), (size_t)m_pHeaderBuffer->TotalLength(), err);
+                //ProcessAfterRcvHeader();
+
+                if (0 == n) {
+                    rc = false;
+                    NotifyWorkerPeerClosedMessage();
+                } else if (n > 0) {
+                    CheckAndInitBufferPos(m_pHeaderBuffer);
+                    m_pHeaderBuffer->MoveTailBack((uint32_t)n);
+                    if (m_pHeaderBuffer->AvailableLength() == m_pHeaderBuffer->TotalLength()) {
+                        auto headerRc = RcvMessage::DecodeMsgHeader(m_pHeaderBuffer, &m_header);
+                        if (!headerRc) {
+                            LOGEFUN << "Decode message header failed!";
+                            rc = false;
+                            NotifyWorkerBrokenMessage();
+                        } else {
+                            m_rcvState = NetWorkerState::StartToRcvPayload;
+                        }
+                    } else {
+                        interrupt = true;
+                        m_rcvState = NetWorkerState::RcvingHeader;
+                    }
+                } else {
+                    interrupt = true;
+                    if (EAGAIN != err) {
+                        rc = false;
+                        NotifyWorkerBrokenMessage();
+                    }
+                }
                 break;
             }
             case NetWorkerState::RcvingHeader:{
                 void *pos;
-                if (LIKELY(m_pHeaderBuffer->Last)) {
-                    pos = m_pHeaderBuffer->Last + 1;
+                if (LIKELY(m_pHeaderBuffer->GetLast())) {
+                    pos = m_pHeaderBuffer->GetLast() + 1;
                 } else {
-                    pos = m_pHeaderBuffer->Start;
+                    pos = m_pHeaderBuffer->GetStart();
                 }
 
                 auto n = m_pSocket->Read(pos, m_pHeaderBuffer->UnusedSize(), err);
@@ -171,16 +205,16 @@ bool PosixTcpNetStackWorker::Recv(bool breakWhenRecvOne) {
             case NetWorkerState::StartToRcvPayload:{
                 auto mpo = m_pMemPool->Get(m_header.len);
                 m_payloadBuffer = Message::GetNewBuffer(mpo, m_header.len);
-                auto n = m_pSocket->Read(m_payloadBuffer->Start, (size_t)m_payloadBuffer->TotalLength(), err);
+                auto n = m_pSocket->Read(m_payloadBuffer->GetStart(), (size_t)m_payloadBuffer->TotalLength(), err);
                 ProcessAfterRcvPayload();
                 break;
             }
             case NetWorkerState::RcvingPayload:{
                 void *pos;
-                if (m_payloadBuffer->Last) {
-                    pos = m_payloadBuffer->Last + 1;
+                if (m_payloadBuffer->GetLast()) {
+                    pos = m_payloadBuffer->GetLast() + 1;
                 } else {
-                    pos = m_payloadBuffer->Start;
+                    pos = m_payloadBuffer->GetStart();
                 }
                 auto n = m_pSocket->Read(pos, m_payloadBuffer->UnusedSize(), err);
                 ProcessAfterRcvPayload();
@@ -205,7 +239,7 @@ bool PosixTcpNetStackWorker::Send() {
     while (rc && !interrupt) {
         size = m_pSendingBuffer ? (size_t)m_pSendingBuffer->AvailableLength() : 0;
         if (0 < size) {
-            auto n = m_pSocket->Write(m_pSendingBuffer->Pos, size, err);
+            auto n = m_pSocket->Write(m_pSendingBuffer->GetPos(), size, err);
             if (0 == n) {
                 rc = false;
                 Put_Send_Buffer();
@@ -247,13 +281,13 @@ void PosixTcpNetStackWorker::handshake(RcvMessage *rm) {
         case ConnectionState::ConnectSe: {
             // just client
             auto buffer = rm->GetDataBuffer();
-            auto res = ByteOrderUtils::ReadUInt16(buffer->Pos);
+            auto res = ByteOrderUtils::ReadUInt16(buffer->GetPos());
             if (ConnectResponseMessage::Status::OK != (ConnectResponseMessage::Status)res) {
-                buffer->Pos += sizeof(uint16_t);
+                buffer->MoveHeadBack(sizeof(uint16_t));
                 auto whatLen = buffer->AvailableLength();
                 auto whatMpo = m_pMemPool->Get((uint32_t)(whatLen + 1));
                 auto whatPtr = whatMpo->Pointer();
-                memcpy(whatPtr, buffer->Pos, (size_t)whatLen);
+                memcpy(whatPtr, buffer->GetPos(), (size_t)whatLen);
                 *(whatPtr + whatLen) = 0;
                 whatMpo->Put();
                 LOGEFUN << "handshake failed in phase ConnectSe with err msg " << whatPtr;
@@ -281,7 +315,7 @@ void PosixTcpNetStackWorker::handshake(RcvMessage *rm) {
         case ConnectionState::WaitLastACK: {
             // just client
             auto buffer = rm->GetDataBuffer();
-            auto res = ByteOrderUtils::ReadUInt16(buffer->Pos);
+            auto res = ByteOrderUtils::ReadUInt16(buffer->GetPos());
             s_release_rm_handle(rm);
             if (ConnectResponseMessage::Status::OK == (ConnectResponseMessage::Status)res) {
                 if (m_onLogicConnect(m_pEventHandler)) {
@@ -304,7 +338,7 @@ void PosixTcpNetStackWorker::handshake(RcvMessage *rm) {
                 s_release_rm_handle(rm);
                 COMPLETE_AND_FIRE();
             } else {
-                auto port = ByteOrderUtils::ReadUInt16(buffer->Pos);
+                auto port = ByteOrderUtils::ReadUInt16(buffer->GetPos());
                 std::string addrStr = GetEventHandler()->GetSocketDescriptor()->GetRealPeerInfo().nat.addr;
                 net_peer_info_t npt = {
                     {

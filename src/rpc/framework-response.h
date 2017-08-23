@@ -22,8 +22,8 @@ public:
         m_code(RpcCode::OK), m_iHandlerId(handlerId), m_pMsg(msg) {}
 
 protected:
-    uint32_t GetDerivePayloadLength() override;
-    void EncodeDerive(common::Buffer *b) override;
+    uint32_t getDerivePayloadLength() override;
+    void encodeDerive(common::Buffer *b) override;
 
 private:
     RpcCode                                         m_code;
@@ -37,9 +37,9 @@ public:
         m_code(code), m_iHandlerId(handlerId), m_sContent(std::move(content)) {}
 
 protected:
-    uint32_t GetDerivePayloadLength() override;
+    uint32_t getDerivePayloadLength() override;
 
-    void EncodeDerive(common::Buffer *b) override;
+    void encodeDerive(common::Buffer *b) override;
 
 private:
     RpcCode          m_code;

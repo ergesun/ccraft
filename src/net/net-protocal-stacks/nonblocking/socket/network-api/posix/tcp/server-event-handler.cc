@@ -36,7 +36,7 @@ PosixTcpServerEventHandler::PosixTcpServerEventHandler(EventWorker *ew, net_addr
     if (!m_pSrvSocket->Listen()) {
         throw std::runtime_error("listen err!");
     }
-    SetSocketDescriptor(m_pSrvSocket);
+    setSocketDescriptor(m_pSrvSocket);
     SetOwnWorker(ew);
     m_onStackConnect = std::move(stackConnectHandler);
     m_onLogicConnect = std::move(onLogicConnect);

@@ -10,21 +10,21 @@
 #include "../common-def.h"
 
 namespace ccraft {
-    namespace net {
-        class AFileEventHandler;
+namespace net {
+class AFileEventHandler;
 
-        /**
-         * worker管理器。
-         */
-        class INetStackWorkerManager {
-        public:
-            virtual ~INetStackWorkerManager() = default;
+/**
+ * worker管理器。
+ */
+class INetStackWorkerManager {
+public:
+    virtual ~INetStackWorkerManager() = default;
 
-            virtual AFileEventHandler *GetWorkerEventHandler(net_peer_info_t npt) = 0;
-            virtual bool PutWorkerEventHandler(AFileEventHandler *handler) = 0;
-            virtual AFileEventHandler* RemoveWorkerEventHandler(net_peer_info_t logicNpt, net_peer_info_t realNpt) = 0;
-        }; // interface INetStackWorkerManager
-    }  // namespace net
+    virtual AFileEventHandler *GetWorkerEventHandler(net_peer_info_t npt) = 0;
+    virtual bool PutWorkerEventHandler(AFileEventHandler *handler) = 0;
+    virtual AFileEventHandler* RemoveWorkerEventHandler(net_peer_info_t logicNpt, net_peer_info_t realNpt) = 0;
+}; // interface INetStackWorkerManager
+}  // namespace net
 } // namespace ccraft
 
 #endif //CCRAFT_NET_CORE_ICONNECTIONMANAGER_H

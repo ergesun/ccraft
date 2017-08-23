@@ -41,7 +41,7 @@ public:
     virtual ANetStackMessageWorker* GetStackMsgWorker() = 0;
 
 protected:
-    inline void SetSocketDescriptor(FileDescriptor *psd) {
+    inline void setSocketDescriptor(FileDescriptor *psd) {
         m_socketDesc = psd;
     }
 

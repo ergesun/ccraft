@@ -13,7 +13,7 @@ PosixTcpConnectionEventHandler::PosixTcpConnectionEventHandler(PosixTcpClientSoc
                                                                uint16_t logicPort, ConnectFunc onLogicConnect) :
     m_iLogicPort(logicPort) {
     m_pClientSocket = pSocket;
-    SetSocketDescriptor(m_pClientSocket);
+    setSocketDescriptor(m_pClientSocket);
 
     m_pNetStackWorker = new PosixTcpNetStackWorker(PosixTcpNetStackWorker::CreatorType::Client,
                                                    this, memPool, m_pClientSocket, std::move(msgCallbackHandler), m_iLogicPort, std::move(onLogicConnect));
@@ -24,7 +24,7 @@ PosixTcpConnectionEventHandler::PosixTcpConnectionEventHandler(net_addr_t &peerA
                                                                NotifyMessageCallbackHandler msgCallbackHandler,
                                                                ConnectFunc onLogicConnect) {
     m_pClientSocket = new PosixTcpClientSocket(peerAddr, sfd);
-    SetSocketDescriptor(m_pClientSocket);
+    setSocketDescriptor(m_pClientSocket);
 
     m_pNetStackWorker = new PosixTcpNetStackWorker(PosixTcpNetStackWorker::CreatorType::Server,
                                                    this, memPool, m_pClientSocket, std::move(msgCallbackHandler), std::move(onLogicConnect));
