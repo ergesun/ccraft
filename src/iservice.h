@@ -11,8 +11,8 @@ namespace ccraft {
  */
 class IService {
 public:
-    virtual void Start() = 0;
-    virtual void Stop() = 0;
+    virtual bool Start() = 0;
+    virtual bool Stop() = 0;
     virtual ~IService() {};
 };
 } // namespace ccraft

@@ -12,17 +12,15 @@ namespace ccraft {
 namespace rpc {
 uint32_t RpcResponse::getDerivePayloadLength() {
     if (m_pMsg.get()) {
-        return sizeof(CodeType) + sizeof(uint16_t) + m_pMsg->ByteSize();
+        return sizeof(CodeType) + m_pMsg->ByteSize();
     } else {
-        return sizeof(CodeType) + sizeof(uint16_t);
+        return sizeof(CodeType);
     }
 }
 
 void RpcResponse::encodeDerive(common::Buffer *b) {
     ByteOrderUtils::WriteUInt16(b->GetPos(), (CodeType)m_code);
     b->MoveHeadBack(sizeof(CodeType));
-    ByteOrderUtils::WriteUInt16(b->GetPos(), m_iHandlerId);
-    b->MoveHeadBack(sizeof(uint16_t));
     if (m_pMsg.get()) {
         ProtoBufUtils::Serialize(m_pMsg.get(), b);
     }

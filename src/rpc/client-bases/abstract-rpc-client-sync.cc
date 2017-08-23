@@ -3,11 +3,13 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#include "abstract-rpc-client.h"
+#include "abstract-rpc-client-sync.h"
 
 namespace ccraft {
     namespace rpc {
-        ARpcClient::ARpcClient(net::ISocketService *ss) : m_pSocketService(ss) {}
+        ARpcClientSync::ARpcClientSync(uint16_t socketServiceThreadsCnt, common::cctime_t timeout) {
+
+        }
 
     }
 }

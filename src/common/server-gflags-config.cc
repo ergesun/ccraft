@@ -19,6 +19,11 @@ DEFINE_bool(alsoglogtostderr, false, "设置日志消息除了日志文件之外
 DEFINE_bool(colorglogtostderr, true, "设置记录到标准输出的颜色消息（如果终端支持）");
 
 /**
+ * net common
+ */
+DEFINE_int32(net_server_handshake_threads_cnt, 16, "网络框架服务端处理握手的线程个数");
+
+/**
  * rpc server common
  */
 DEFINE_int32(internal_rpc_io_threads_cnt, 0, "设置用于node间通信的rpc服务的网络io处理线程个数。默认0为cpu核数的一半。");

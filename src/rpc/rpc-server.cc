@@ -43,9 +43,9 @@ RpcServer::~RpcServer() {
     DELETE_PTR(m_pSocketService);
 }
 
-void RpcServer::Start() {
-    if (!m_bStopped) {
-        return;
+bool RpcServer::Start() {
+    if (!m_bStopped || !m_bRegistered) {
+        return false;
     }
 
     m_bStopped = false;
@@ -55,11 +55,13 @@ void RpcServer::Start() {
     }
 
     m_pWorkThreadPool = new common::ThreadPool<std::shared_ptr<net::NotifyMessage>>(m_iWorkThreadsCnt);
+
+    return true;
 }
 
-void RpcServer::Stop() {
+bool RpcServer::Stop() {
     if (m_bStopped) {
-        return;
+        return true;
     }
 
     m_bStopped = true;
@@ -68,11 +70,23 @@ void RpcServer::Stop() {
     }
 
     DELETE_PTR(m_pWorkThreadPool);
+    return true;
 }
 
-void RpcServer::RegisterRpc(uint16_t id, IRpcHandler *handler) {
+bool RpcServer::RegisterRpc(uint16_t id, IRpcHandler *handler) {
+    if (m_bRegistered) {
+        return false;
+    }
+
     assert(handler);
     m_hmHandlers[id] = handler;
+
+    return true;
+}
+
+void RpcServer::FinishRegisterRpc() {
+    m_bRegistered = true;
+    hw_rw_memory_barrier();
 }
 
 void RpcServer::recv_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
@@ -87,7 +101,7 @@ void RpcServer::proc_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
             if (LIKELY(rm)) {
                 auto reqBuf = rm->GetDataBuffer();
                 auto handlerId = ByteOrderUtils::ReadUInt16(reqBuf->GetPos());
-                reqBuf->MoveHeadBack(2);
+                reqBuf->MoveHeadBack(sizeof(uint16_t));
                 auto handler = m_hmHandlers[handlerId];
                 if (!handler) {
                     LOGEFUN << "there is no handler for handler id " << handlerId;
@@ -111,7 +125,10 @@ void RpcServer::proc_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
                 }
 
                 auto res = handler->Handle(request);
-                auto respMessage = new RpcResponse(handlerId, res);
+                auto respMessage = new RpcResponse(res);
+                respMessage->SetId(rm->GetId());
+                respMessage->SetMemPool(m_pRpcMemPool);
+                respMessage->SetPeerInfo(rm->GetPeerInfo());
                 m_pSocketService->SendMessage(respMessage);
                 LOGDFUN2("handled message for handler id ", handlerId);
             } else {

@@ -28,7 +28,7 @@ class IRpcHandler;
 /**
  * [Message format]
  *    client -> server :  |net common header(Message::HeaderSize() bytes)|[handler id(2bytes)|protobuf msg(n bytes)]|
- *    server -> client :  |net common header(Message::HeaderSize() bytes)|[rpc 'OK' code(2bytes)|handler id(2bytes)|protobuf msg(n bytes, maybe 0 if no return value or rpc code is not 'OK')]|
+ *    server -> client :  |net common header(Message::HeaderSize() bytes)|[rpc code(2bytes)|protobuf msg(n bytes or 0 bytes if no return value)]|
  */
 class RpcServer : public IService {
 public:
@@ -42,11 +42,11 @@ public:
     RpcServer(uint16_t workThreadsCnt, uint16_t netIOThreadsCnt, uint16_t port);
     ~RpcServer() override;
 
-    void Start() override;
-    void Stop() override;
+    bool Start() override;
+    bool Stop() override;
 
-    void RegisterRpc(uint16_t id, IRpcHandler *handler);
-    void UnregisterRpc(uint16_t id);
+    bool RegisterRpc(uint16_t id, IRpcHandler *handler);
+    void FinishRegisterRpc();
 
 private:
     void recv_msg(std::shared_ptr<net::NotifyMessage> sspNM);
@@ -61,6 +61,7 @@ private:
     common::ThreadPool<std::shared_ptr<net::NotifyMessage>>    *m_pWorkThreadPool       = nullptr;
     std::unordered_map<uint16_t, IRpcHandler*>                  m_hmHandlers;
     uint16_t                                                    m_iport;
+    bool                                                        m_bRegistered           = false;
 };
 }
 }

@@ -22,6 +22,12 @@ DECLARE_bool(alsoglogtostderr);
 DECLARE_bool(colorglogtostderr);
 
 /**
+ * net common
+ */
+DECLARE_int32(net_server_handshake_threads_cnt);
+
+
+/**
  * rpc server common
  */
 DECLARE_int32(internal_rpc_io_threads_cnt);

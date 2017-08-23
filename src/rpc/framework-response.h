@@ -18,8 +18,8 @@ namespace rpc {
 typedef uint16_t CodeType;
 class RpcResponse : public net::SndMessage {
 public:
-    RpcResponse(uint16_t handlerId, std::shared_ptr<google::protobuf::Message> msg) :
-        m_code(RpcCode::OK), m_iHandlerId(handlerId), m_pMsg(msg) {}
+    RpcResponse(std::shared_ptr<google::protobuf::Message> msg) :
+        m_code(RpcCode::OK), m_pMsg(msg) {}
 
 protected:
     uint32_t getDerivePayloadLength() override;
@@ -27,40 +27,37 @@ protected:
 
 private:
     RpcCode                                         m_code;
-    uint16_t                                        m_iHandlerId;
     std::shared_ptr<google::protobuf::Message>      m_pMsg = nullptr;
 };
 
 class RpcErrorResponse : public net::SndMessage {
 public:
-    RpcErrorResponse(RpcCode code, uint16_t handlerId, std::string &&content) :
-        m_code(code), m_iHandlerId(handlerId), m_sContent(std::move(content)) {}
+    RpcErrorResponse(RpcCode code, std::string &&content) :
+        m_code(code), m_sContent(std::move(content)) {}
 
 protected:
     uint32_t getDerivePayloadLength() override;
-
     void encodeDerive(common::Buffer *b) override;
 
 private:
     RpcCode          m_code;
-    uint16_t         m_iHandlerId;
     std::string      m_sContent;
 };
 
 #define BadRpcHandlerIdResponse(id)                                                                 \
         std::stringstream   ss;                                                                     \
         ss << "Rpc handler id " << id << " isn't existent!";                                        \
-        auto badRpcHandlerIdResponse = new RpcErrorResponse(RpcCode::ErrorNoHandler, id, ss.str());
+        auto badRpcHandlerIdResponse = new RpcErrorResponse(RpcCode::ErrorNoHandler, ss.str());
 
 #define RpcServiceInternalErrorResponse(id)                                                                 \
         std::stringstream   ss;                                                                             \
-        ss << "Rpc service internal error!";                                                                \
-        auto rpcServiceInternalErrorResponse = new RpcErrorResponse(RpcCode::ErrorInternal, id, ss.str());
+        ss << "Rpc service handler id " << id << " internal error.";                                        \
+        auto rpcServiceInternalErrorResponse = new RpcErrorResponse(RpcCode::ErrorInternal, ss.str());
 
 #define BadRequestMsgResponse(id)                                                               \
         std::stringstream   ss;                                                                 \
-        ss << "Cannot parse request message!";                                                  \
-        auto badRequestMsgResponse = new RpcErrorResponse(RpcCode::ErrorMsg, id, ss.str());
+        ss << "Rpc handler id " << id << " Cannot parse request message!";                      \
+        auto badRequestMsgResponse = new RpcErrorResponse(RpcCode::ErrorMsg, ss.str());
 } // namespace rpc
 } // namespace ccraft
 

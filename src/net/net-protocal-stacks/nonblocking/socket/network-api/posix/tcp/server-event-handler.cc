@@ -7,6 +7,7 @@
 #include <iostream>
 #include <arpa/inet.h>
 
+#include "../../../../../../../common/server-gflags-config.h"
 #include "connection-event-handler.h"
 
 #include "server-event-handler.h"
@@ -42,7 +43,7 @@ PosixTcpServerEventHandler::PosixTcpServerEventHandler(EventWorker *ew, net_addr
     m_onLogicConnect = std::move(onLogicConnect);
     m_pMemPool = memPool;
     m_msgCallbackHandler = std::move(msgCallbackHandler);
-    m_tp = new common::ThreadPool<void*>(common::LOGIC_CPUS_CNT * 2);
+    m_tp = new common::ThreadPool<void*>(FLAGS_net_server_handshake_threads_cnt);
 }
 
 PosixTcpServerEventHandler::~PosixTcpServerEventHandler() {
