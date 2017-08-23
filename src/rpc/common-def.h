@@ -10,7 +10,13 @@
 
 namespace ccraft {
 namespace rpc {
-
+enum class RpcCode {
+    OK              = 0,
+    ErrorNoHandler  = 1,
+    ErrorMsg        = 2,
+    ErrorInternal   = 3,
+    ErrorUnknown    = 4
+};
 }
 }
 

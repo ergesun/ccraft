@@ -19,6 +19,11 @@ DEFINE_bool(alsoglogtostderr, false, "设置日志消息除了日志文件之外
 DEFINE_bool(colorglogtostderr, true, "设置记录到标准输出的颜色消息（如果终端支持）");
 
 /**
- * rpc server
+ * rpc server common
  */
-DEFINE_int32(internal_net_io_threads_cnt, 0, "设置用于node间通信的rpc服务的网络io处理线程个数。默认0为cpu核数的一半。");
+DEFINE_int32(internal_rpc_io_threads_cnt, 0, "设置用于node间通信的rpc服务的网络io处理线程个数。默认0为cpu核数的一半。");
+
+/**
+ * internal communication rpc
+ */
+DEFINE_int32(internal_rpc_logic_port, 2221, "设置用于node件通信的rpc服务的逻辑端口号。不要超过65535");

@@ -35,5 +35,16 @@ void ProtoBufUtils::Serialize(const google::protobuf::Message *from, common::Buf
     from->SerializeToArray(start, len);
     to->Refresh(start, start + len - 1, start, start + mo->Size() - 1, mo);
 }
+
+void ProtoBufUtils::Serialize(const google::protobuf::Message *from, common::Buffer *to) {
+    // SerializeToArray seems to always return true, so we explicitly check
+    // IsInitialized to make sure all required fields are set.
+    if (UNLIKELY(!from->IsInitialized())) {
+        LOGFFUN << "Missing fields in protocol buffer of type %s: %s (have %s)" << from->GetTypeName().c_str()
+                << ": " << from->InitializationErrorString().c_str();
+    }
+
+    from->SerializeToArray(to->Pos, from->ByteSize());
+}
 }
 }

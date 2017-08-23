@@ -31,21 +31,21 @@ public:
     Buffer& operator=(Buffer&) = delete;
 
     inline void Put() {
-        if (MpObject) {
-            MpObject->Put();
-        } else {
-            DELETE_ARR_PTR(this->Start);
-        }
-
         Refresh(nullptr, nullptr, nullptr, nullptr, nullptr);
     }
 
     inline void Refresh(uchar *pos, uchar *last, uchar *start, uchar *end, MemPoolObject *mpo) {
+        if (MpObject) {
+            MpObject->Put();
+        } else {
+            DELETE_ARR_PTR(Start);
+        }
+
+        MpObject = mpo;
         Pos = pos;
         Last = last;
         Start = start;
         End = end;
-        MpObject = mpo;
     }
 
     inline bool Valid() {
@@ -106,6 +106,10 @@ public:
         } else {
             return (size_t)(End - Start) + 1;
         }
+    }
+
+    inline void Reset() {
+        Refresh(nullptr, nullptr, nullptr, nullptr, nullptr);
     }
 
     uchar *Pos              = nullptr;

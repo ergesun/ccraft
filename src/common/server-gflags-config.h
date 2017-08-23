@@ -22,8 +22,14 @@ DECLARE_bool(alsoglogtostderr);
 DECLARE_bool(colorglogtostderr);
 
 /**
- * rpc server
+ * rpc server common
  */
-DECLARE_int32(net_io_threads_cnt);
+DECLARE_int32(internal_rpc_io_threads_cnt);
+
+/**
+ * internal communication rpc
+ */
+DECLARE_int32(internal_rpc_logic_port);
+
 
 #endif //CCRAFT_GFLAGS_CONFIG_H

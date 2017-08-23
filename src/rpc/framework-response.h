@@ -1,6 +1,7 @@
-//
-// Created by sunchao31 on 17-8-15.
-//
+/**
+ * This work copyright Chao Sun(qq:296449610) and licensed under
+ * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
+ */
 
 #ifndef CCRAFT_FRAMEWORK_RESPONSE_H
 #define CCRAFT_FRAMEWORK_RESPONSE_H
@@ -10,44 +11,57 @@
 #include "../net/snd-message.h"
 #include "../common/codec-utils.h"
 #include "../common/buffer.h"
+#include "common-def.h"
 
 namespace ccraft {
-    namespace rpc {
-#define CodeType uint16_t
-        class RpcResponse : public net::SndMessage {
-        public:
-            /**
-             * 不要超过CodeType_MAX
-             */
-            enum class Code {
-                BadHandlerId =   0
-            };
+namespace rpc {
+typedef uint16_t CodeType;
+class RpcResponse : public net::SndMessage {
+public:
+    RpcResponse(uint16_t handlerId, std::shared_ptr<google::protobuf::Message> msg) :
+        m_code(RpcCode::OK), m_iHandlerId(handlerId), m_pMsg(msg) {}
 
-        public:
-            RpcResponse(Code code, std::string &&content) :
-                m_code(code), m_sContent(std::move(content)) {}
+protected:
+    uint32_t GetDerivePayloadLength() override;
+    void EncodeDerive(common::Buffer *b) override;
 
-        protected:
-            uint32_t GetDerivePayloadLength() override {
-                return sizeof(Code) + m_sContent.length();
-            }
+private:
+    RpcCode                                         m_code;
+    uint16_t                                        m_iHandlerId;
+    std::shared_ptr<google::protobuf::Message>      m_pMsg = nullptr;
+};
 
-            void EncodeDerive(common::Buffer *b) override {
-                ByteOrderUtils::WriteUInt16(b->Pos, (CodeType)m_code);
-                b->Pos += sizeof(CodeType);
-                memcpy(b->Pos, m_sContent.c_str(), m_sContent.length());
-            }
+class RpcErrorResponse : public net::SndMessage {
+public:
+    RpcErrorResponse(RpcCode code, uint16_t handlerId, std::string &&content) :
+        m_code(code), m_iHandlerId(handlerId), m_sContent(std::move(content)) {}
 
-        private:
-            Code          m_code;
-            std::string   m_sContent;
-        };
+protected:
+    uint32_t GetDerivePayloadLength() override;
 
-#define BadRpcHandlerIdResponse(id)                                 \
-        std::stringstream   ss;                                     \
-        ss << "Rpc handler id " << id << " isn't existent!";        \
-        auto badRpcHandlerIdResponse = RpcResponse(RpcResponse::Code::BadHandlerId, ss.str());
-    }
-}
+    void EncodeDerive(common::Buffer *b) override;
+
+private:
+    RpcCode          m_code;
+    uint16_t         m_iHandlerId;
+    std::string      m_sContent;
+};
+
+#define BadRpcHandlerIdResponse(id)                                                                 \
+        std::stringstream   ss;                                                                     \
+        ss << "Rpc handler id " << id << " isn't existent!";                                        \
+        auto badRpcHandlerIdResponse = new RpcErrorResponse(RpcCode::ErrorNoHandler, id, ss.str());
+
+#define RpcServiceInternalErrorResponse(id)                                                                 \
+        std::stringstream   ss;                                                                             \
+        ss << "Rpc service internal error!";                                                                \
+        auto rpcServiceInternalErrorResponse = new RpcErrorResponse(RpcCode::ErrorInternal, id, ss.str());
+
+#define BadRequestMsgResponse(id)                                                               \
+        std::stringstream   ss;                                                                 \
+        ss << "Cannot parse request message!";                                                  \
+        auto badRequestMsgResponse = new RpcErrorResponse(RpcCode::ErrorMsg, id, ss.str());
+} // namespace rpc
+} // namespace ccraft
 
 #endif //CCRAFT_FRAMEWORK_RESPONSE_H

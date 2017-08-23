@@ -27,8 +27,8 @@ namespace rpc {
 class IRpcHandler;
 /**
  * [Message format]
- *    client -> server :  |++net common header(Message::HeaderSize() bytes)++|+handler id(2bytes)+|+++protobuf msg(n bytes)+++|
- *    server -> client :  |++net common header(Message::HeaderSize() bytes)++|++|
+ *    client -> server :  |net common header(Message::HeaderSize() bytes)|[handler id(2bytes)|protobuf msg(n bytes)]|
+ *    server -> client :  |net common header(Message::HeaderSize() bytes)|[rpc 'OK' code(2bytes)|handler id(2bytes)|protobuf msg(n bytes, maybe 0 if no return value or rpc code is not 'OK')]|
  */
 class RpcServer : public IService {
 public:
@@ -39,13 +39,14 @@ public:
      * @param port
      * @param mp
      */
-    RpcServer(uint16_t workThreadsCnt, uint16_t netIOThreadsCnt, int16_t port);
-    ~RpcServer();
+    RpcServer(uint16_t workThreadsCnt, uint16_t netIOThreadsCnt, uint16_t port);
+    ~RpcServer() override;
 
     void Start() override;
     void Stop() override;
 
     void RegisterRpc(uint16_t id, IRpcHandler *handler);
+    void UnregisterRpc(uint16_t id);
 
 private:
     void recv_msg(std::shared_ptr<net::NotifyMessage> sspNM);
@@ -56,7 +57,7 @@ private:
     uint16_t                                                    m_iWorkThreadsCnt       = 0;
     uint16_t                                                    m_iNetIOThreadsCnt      = 0;
     net::ISocketService                                        *m_pSocketService        = nullptr;
-    common::MemPool                                            *m_pSocketServerMemPool  = nullptr;
+    common::MemPool                                            *m_pRpcMemPool           = nullptr;
     common::ThreadPool<std::shared_ptr<net::NotifyMessage>>    *m_pWorkThreadPool       = nullptr;
     std::unordered_map<uint16_t, IRpcHandler*>                  m_hmHandlers;
 };

@@ -6,6 +6,8 @@
 #ifndef CCRAFT_RPC_HANDLER_H
 #define CCRAFT_RPC_HANDLER_H
 
+#include <memory>
+
 namespace ccraft {
     namespace common {
         class Buffer;
@@ -24,7 +26,8 @@ namespace ccraft {
              * @param b 对端的消息内容buffer。
              * @param sm 本端的响应消息体。
              */
-            virtual void handle(common::Buffer *b, net::SndMessage *sm) = 0;
+            virtual std::shared_ptr<google::protobuf::Message> Handle(std::shared_ptr<google::protobuf::Message> req) = 0;
+            virtual std::shared_ptr<google::protobuf::Message> CreateRequest();
         };
     }
 }

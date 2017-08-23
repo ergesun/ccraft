@@ -14,7 +14,7 @@
 #include "../common/common-def.h"
 #include "../common/errors.h"
 #include "../common/file-utils.h"
-#include "../common/gflags-config.h"
+#include "../common/server-gflags-config.h"
 
 using std::string;
 using std::stringstream;

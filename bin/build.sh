@@ -49,13 +49,15 @@ echo_yellow "[Phase 0]: parse params..."
 echo_yellow "------------------------------------------------------------------------------------"
 echo " "
 
-MAKE_ARGS_STAT=
+param_state=
+
+has_make_args=
 MAKE_ARGS=
 
-UT_STAT=
+has_ut=
 UT_MODULE=
 
-TL_STAT=
+has_tl=
 TL_MODULE=
 
 for p in "$@"
@@ -66,40 +68,46 @@ do
     elif [ "$p" = "-dl" ]; then
         BUILD_FLAG="${BUILD_FLAG} -DDEFINE_MACRO=ON"
         BUILD_LOG_INFO="DebugLog: on"
+        param_state=""
     elif [ "$p" == "-gen" ]; then
         GEN_IDLS="true"
     elif [ "$p" == "-ut" ]; then
         BUILD_FLAG="${BUILD_FLAG} -DPROJECT_TYPE=UT"
         BUILD_PROJECT_TYPE="ProjectType: ccraft unit-test"
-        UT_STAT="1"
+        has_ut="1"
+        param_state="ut"
     elif [ "$p" == "-tl" ]; then
         BUILD_FLAG="${BUILD_FLAG} -DPROJECT_TYPE=TOOLS"
         BUILD_PROJECT_TYPE="ProjectType: tools"
-        TL_STAT="1"
+        has_tl="1"
+        param_state="tl"
     elif [ "$p" == "-m" ]; then
-        MAKE_ARGS_STAT="1"
+        has_make_args="1"
+        param_state="make_args"
     elif [ "$p" == "-h" ]; then
+        param_state=""
         print_usage
         exit 0
     else
-        if [ "$UT_STAT" != "" ]; then
+        if [ "$param_state" == "ut" ]; then
             UT_MODULE=$p
             BUILD_PROJECT_TYPE="${BUILD_PROJECT_TYPE} - ${UT_MODULE}"
-        elif [ "$TL_STAT" != "" ]; then
+        elif [ "$param_state" == "tl" ]; then
             TL_MODULE=$p
             BUILD_PROJECT_TYPE="${BUILD_PROJECT_TYPE} - ${TL_MODULE}"
-        elif [ "$MAKE_ARGS_STAT" != "" ]; then
+        elif [ "$param_state" == "make_args" ]; then
             MAKE_ARGS=$p
         else
             echo_red "Not support opt \"$p\""
             print_usage
             exit 1
         fi
+        param_state=""
     fi
 done
 
 # check and configure ut module
-if [ "${UT_STAT}" != "" ]; then
+if [ "${has_ut}" != "" ]; then
     if [ "${UT_MODULE}" = "" ]; then
         echo_red "ERROR: you must input a unit_test module name if you want to do a unit_test!"
         exit 1
@@ -127,7 +135,7 @@ if [ "${UT_STAT}" != "" ]; then
 fi
 
 # check and configure tool
-if [ "${TL_STAT}" != "" ]; then
+if [ "${has_tl}" != "" ]; then
     if [ "${TL_MODULE}" = "" ]; then
         echo_red "ERROR: you must input a tool name!"
         exit 1

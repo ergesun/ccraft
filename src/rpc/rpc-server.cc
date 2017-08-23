@@ -12,31 +12,36 @@
 #include "protobuf-utils.h"
 #include "../common/codec-utils.h"
 
+#include "framework-response.h"
+#include "rpc-handler.h"
+
 #include "rpc-server.h"
+
 
 
 namespace ccraft {
     namespace rpc {
-        RpcServer::RpcServer(uint16_t workThreadsCnt, uint16_t netIOThreadsCnt, int16_t port)
+        RpcServer::RpcServer(uint16_t workThreadsCnt, uint16_t netIOThreadsCnt, uint16_t port)
                     : m_iWorkThreadsCnt(workThreadsCnt), m_iNetIOThreadsCnt(netIOThreadsCnt) {
             if (0 == workThreadsCnt) {
                 m_iWorkThreadsCnt = (uint16_t)(common::PHYSICAL_CPUS_CNT * 2);
             }
 
-            m_pSocketServerMemPool = new common::MemPool();
+            m_pRpcMemPool = new common::MemPool();
             auto nat = new net::net_addr_t("0.0.0.0", port);
             std::shared_ptr<net::net_addr_t> sspNat(nat);
             std::shared_ptr<net::INetStackWorkerManager> sspMgr = std::shared_ptr<net::INetStackWorkerManager>(new net::UniqueWorkerManager());
             m_pSocketService = net::SocketServiceFactory::CreateService(net::SocketProtocal::Tcp,
                                                                         sspNat,
-                                                                        m_pSocketServerMemPool,
+                                                                        port,
+                                                                        m_pRpcMemPool,
                                                                         std::bind(&RpcServer::recv_msg, this, std::placeholders::_1),
                                                                         sspMgr);
             m_hmHandlers.reserve(100);
         }
 
         RpcServer::~RpcServer() {
-            DELETE_PTR(m_pSocketServerMemPool);
+            DELETE_PTR(m_pRpcMemPool);
             DELETE_PTR(m_pSocketService);
         }
 
@@ -46,7 +51,7 @@ namespace ccraft {
             }
 
             m_bStopped = false;
-            if (!m_pSocketService->Start(m_iNetIOThreadsCnt)) {
+            if (!m_pSocketService->Start(m_iNetIOThreadsCnt, ccraft::net::NonBlockingEventModel::Posix)) {
                 LOGFFUN << "start socket service failed!";
                 throw std::runtime_error("start socket service failed!");
             }
@@ -79,17 +84,38 @@ namespace ccraft {
         void RpcServer::proc_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
             switch (sspNM->GetType()) {
                 case net::NotifyMessageType::Message: {
-                    net::MessageNotifyMessage *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());
+                    auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());
                     auto rm = mnm->GetContent();
                     if (LIKELY(rm)) {
-                        auto buffer = rm->GetDataBuffer();
-                        auto handlerId = ByteOrderUtils::ReadUInt16(buffer->Pos);
-                        buffer->MoveHeadBack(2);
+                        auto reqBuf = rm->GetDataBuffer();
+                        auto handlerId = ByteOrderUtils::ReadUInt16(reqBuf->Pos);
+                        reqBuf->MoveHeadBack(2);
                         auto handler = m_hmHandlers[handlerId];
                         if (!handler) {
-
+                            LOGEFUN << "there is no handler for handler id " << handlerId;
+                            BadRpcHandlerIdResponse(handlerId);
+                            m_pSocketService->SendMessage(badRpcHandlerIdResponse);
+                            return;
                         }
-                        //ProtoBufUtils::Parse(buffer, );
+
+                        auto request = handler->CreateRequest();
+                        if (!request.get()) {
+                            LOGEFUN << "cannot create request for handler id " << handlerId;
+                            RpcServiceInternalErrorResponse(handlerId);
+                            m_pSocketService->SendMessage(rpcServiceInternalErrorResponse);
+                            return;
+                        }
+                        if (!ProtoBufUtils::Parse(reqBuf, request.get())) {
+                            LOGEFUN << "cannot parse request for handler id " << handlerId;
+                            BadRequestMsgResponse(handlerId);
+                            m_pSocketService->SendMessage(badRequestMsgResponse);
+                            return;
+                        }
+
+                        auto res = handler->Handle(request);
+                        auto respMessage = new RpcResponse(handlerId, res);
+                        m_pSocketService->SendMessage(respMessage);
+                        LOGDFUN2("handled message for handler id ", handlerId);
                     } else {
                         LOGWFUN << "recv message is empty!";
                     }
