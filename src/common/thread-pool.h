@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include <atomic>
 
+#include "global-vars.h"
 #include "blocking-queue.h"
 #include "common-def.h"
 #include "spin-lock.h"
@@ -32,7 +33,7 @@ public:
          *
          * @param callback 回调函数
          */
-        Task(std::function<void(TaskCtxType)> callback) {
+        explicit Task(std::function<void(TaskCtxType)> callback) {
             action = callback;
         }
 
@@ -54,7 +55,7 @@ public:
      *
      * @param threads_cnt 线程个数。如果小于等于0则为cpu核数 * 2个。
      */
-    ThreadPool(int threads_cnt = 0) {
+    explicit ThreadPool(int threads_cnt = 0) {
         m_iActiveWorkersCnt.store(0);
         threads_cnt = threads_cnt > 0 ? threads_cnt : common::LOGIC_CPUS_CNT * 2;
         m_vThreadps.reserve(threads_cnt);

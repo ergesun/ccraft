@@ -62,8 +62,8 @@ private:
     void handshake(RcvMessage *rm);
 
 private:
-    static WorkerNotifyMessage* get_closed_by_peer_worker_message(std::string &&msg);
-    static WorkerNotifyMessage* get_broken_worker_message(std::string &&msg);
+    static WorkerNotifyMessage* get_closed_by_peer_worker_message(net::net_peer_info_t peer, std::string &&msg);
+    static WorkerNotifyMessage* get_broken_worker_message(net::net_peer_info_t peer, std::string &&msg);
 
 private:
     /**

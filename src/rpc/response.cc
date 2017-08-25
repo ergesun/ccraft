@@ -5,7 +5,7 @@
 
 #include <google/protobuf/message.h>
 
-#include "framework-response.h"
+#include "response.h"
 #include "protobuf-utils.h"
 
 namespace ccraft {

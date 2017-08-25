@@ -73,24 +73,5 @@ common::Buffer* CommonUtils::GetNewBuffer(common::MemPoolObject *mpo, uint32_t t
     auto bufferEnd = bufferStart + totalBufferSize - 1;
     return new common::Buffer(nullptr, nullptr, bufferStart, bufferEnd, mpo);
 }
-
-int CommonUtils::GetPhysicalCoresNumber() {
-    FILE * fp = nullptr;
-    char buffer[80] = "\0";
-    if (!(fp = popen("cat /proc/cpuinfo |grep \"core id\"|sort|uniq|wc -l", "r"))) {
-        auto err = errno;
-        throw std::runtime_error(strerror(err));
-    }
-
-    while (fread(buffer, 1, 80, fp), !feof(fp) && !ferror(fp)) {}
-    if (ferror(fp)) {
-        throw std::runtime_error("fread err occur!");
-    }
-
-    auto socketCnt = atoi(buffer);
-    pclose(fp);
-
-    return socketCnt;
-}
 } // namespace common
 } // namespace ccraft

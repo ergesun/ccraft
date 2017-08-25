@@ -17,14 +17,15 @@
         }
 
 #define NotifyWorkerBrokenMessage()                                                                                 \
-        auto wnm = get_broken_worker_message(strerror(err));                                                        \
+        auto peer = m_pEventHandler->GetSocketDescriptor()->GetRealPeerInfo();                                      \
+        auto wnm = get_broken_worker_message(std::move(peer), strerror(err));                                       \
         HandleMessage(wnm);
 
 #define NotifyWorkerPeerClosedMessage()                                                                             \
+        auto peer = m_pEventHandler->GetSocketDescriptor()->GetRealPeerInfo();                                      \
         std::stringstream ss;                                                                                       \
-        ss << "Closed by peer = " << m_pEventHandler->GetSocketDescriptor()->GetRealPeerInfo().nat.addr << ":"      \
-           << m_pEventHandler->GetSocketDescriptor()->GetRealPeerInfo().nat.port;                                   \
-        auto wnm = get_closed_by_peer_worker_message(ss.str());                                                     \
+        ss << "Closed by peer = " << peer.nat.addr << ":"  << peer.nat.port;                                        \
+        auto wnm = get_closed_by_peer_worker_message(std::move(peer), ss.str());                                    \
         HandleMessage(wnm);
 
 #define ParseHeader()                                                                                               \
@@ -160,34 +161,7 @@ bool PosixTcpNetStackWorker::Recv(bool breakWhenRecvOne) {
             case NetWorkerState::StartToRcvHeader:{
                 m_pHeaderBuffer->BZero();
                 auto n = m_pSocket->Read(m_pHeaderBuffer->GetStart(), (size_t)m_pHeaderBuffer->TotalLength(), err);
-                //ProcessAfterRcvHeader();
-
-                if (0 == n) {
-                    rc = false;
-                    NotifyWorkerPeerClosedMessage();
-                } else if (n > 0) {
-                    CheckAndInitBufferPos(m_pHeaderBuffer);
-                    m_pHeaderBuffer->MoveTailBack((uint32_t)n);
-                    if (m_pHeaderBuffer->AvailableLength() == m_pHeaderBuffer->TotalLength()) {
-                        auto headerRc = RcvMessage::DecodeMsgHeader(m_pHeaderBuffer, &m_header);
-                        if (!headerRc) {
-                            LOGEFUN << "Decode message header failed!";
-                            rc = false;
-                            NotifyWorkerBrokenMessage();
-                        } else {
-                            m_rcvState = NetWorkerState::StartToRcvPayload;
-                        }
-                    } else {
-                        interrupt = true;
-                        m_rcvState = NetWorkerState::RcvingHeader;
-                    }
-                } else {
-                    interrupt = true;
-                    if (EAGAIN != err) {
-                        rc = false;
-                        NotifyWorkerBrokenMessage();
-                    }
-                }
+                ProcessAfterRcvHeader();
                 break;
             }
             case NetWorkerState::RcvingHeader:{
@@ -409,12 +383,12 @@ void PosixTcpNetStackWorker::handshake(RcvMessage *rm) {
 #undef COMPLETE_AND_FIRE
 }
 
-WorkerNotifyMessage* PosixTcpNetStackWorker::get_closed_by_peer_worker_message(std::string &&msg) {
-    return new WorkerNotifyMessage(WorkerNotifyMessageCode::ClosedByPeer, std::move(msg));
+WorkerNotifyMessage* PosixTcpNetStackWorker::get_closed_by_peer_worker_message(net::net_peer_info_t peer, std::string &&msg) {
+    return new WorkerNotifyMessage(WorkerNotifyMessageCode::ClosedByPeer, std::move(peer), std::move(msg));
 }
 
-WorkerNotifyMessage* PosixTcpNetStackWorker::get_broken_worker_message(std::string &&msg) {
-    return new WorkerNotifyMessage(WorkerNotifyMessageCode::Error, std::move(msg));
+WorkerNotifyMessage* PosixTcpNetStackWorker::get_broken_worker_message(net::net_peer_info_t peer, std::string &&msg) {
+    return new WorkerNotifyMessage(WorkerNotifyMessageCode::Error, std::move(peer),  std::move(msg));
 }
 } // namespace net
 } // namespace ccraft

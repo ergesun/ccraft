@@ -15,16 +15,13 @@
 #include "../common/errors.h"
 #include "../common/file-utils.h"
 #include "../common/server-gflags-config.h"
+#include "../common/global-vars.h"
 
 using std::string;
 using std::stringstream;
 using std::map;
 
 using ccraft::common::FileUtils;
-
-//RpcService                     *m_pRpcInst = nullptr;
-//HttpServerService              *m_pHttpServerInst = nullptr;
-//ACC               *m_pAccInst = nullptr;
 
 bool                            m_bAllStopped = false;
 std::mutex                      m_mtxRpc;
@@ -146,6 +143,7 @@ try {
     LOGIFUN << "access control service is running!";
     wait_all_stopped();
 
+    ccraft::common::uninitialize();
     //DELETE_PTR(m_pRpcInst);
     //DELETE_PTR(m_pAccInst);
     //DELETE_PTR(m_pHttpServerInst);

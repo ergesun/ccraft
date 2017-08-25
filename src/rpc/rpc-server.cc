@@ -12,7 +12,7 @@
 #include "protobuf-utils.h"
 #include "../common/codec-utils.h"
 
-#include "framework-response.h"
+#include "response.h"
 #include "rpc-handler.h"
 
 #include "rpc-server.h"
@@ -22,7 +22,7 @@ namespace rpc {
 RpcServer::RpcServer(uint16_t workThreadsCnt, uint16_t netIOThreadsCnt, uint16_t port)
             : m_iWorkThreadsCnt(workThreadsCnt), m_iNetIOThreadsCnt(netIOThreadsCnt), m_iport(port) {
     if (0 == workThreadsCnt) {
-        m_iWorkThreadsCnt = (uint16_t)(common::PHYSICAL_CPUS_CNT * 2);
+        m_iWorkThreadsCnt = (uint16_t)(common::PHYSICAL_CPUS_CNT);
     }
 
     m_pRpcMemPool = new common::MemPool();
@@ -65,6 +65,7 @@ bool RpcServer::Stop() {
     }
 
     m_bStopped = true;
+    hw_rw_memory_barrier();
     if (m_pSocketService->Stop()) {
         throw std::runtime_error("cannot stop RpcServer's SocketService");
     }

@@ -63,15 +63,20 @@ private:
 
 class WorkerNotifyMessage : public NotifyMessage {
 public:
-    WorkerNotifyMessage(WorkerNotifyMessageCode code, std::string &&msg) :
-        NotifyMessage(NotifyMessageType::Worker, std::move(msg)), m_code(code) {}
+    WorkerNotifyMessage(WorkerNotifyMessageCode code, net::net_peer_info_t &&peer, std::string &&msg) :
+        NotifyMessage(NotifyMessageType::Worker, std::move(msg)), m_code(code), m_peer(std::move(peer)) {}
 
     inline WorkerNotifyMessageCode GetCode() {
         return m_code;
     }
 
+    inline net::net_peer_info_t GetPeer() {
+        return m_peer;
+    }
+
 private:
     WorkerNotifyMessageCode m_code;
+    net::net_peer_info_t    m_peer;
 };
 
 class RcvMessage;
@@ -80,7 +85,7 @@ public:
     MessageNotifyMessage(RcvMessage* rm, std::function<void(RcvMessage*)> releaseHandle) :
         NotifyMessage(NotifyMessageType::Message, ""), m_ref(rm) {}
 
-    ~MessageNotifyMessage() {
+    ~MessageNotifyMessage() override {
         if (m_releaseHandle) {
             m_releaseHandle(m_ref);
             m_ref = nullptr;

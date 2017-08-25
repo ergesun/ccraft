@@ -11,8 +11,11 @@
 #include <unordered_map>
 #include <memory>
 #include <condition_variable>
+#include <set>
 
 #include "../../common/cctime.h"
+#include "../../common/spin-lock.h"
+#include "../../net/common-def.h"
 
 namespace google {
 namespace protobuf {
@@ -21,6 +24,9 @@ class Message;
 }
 
 namespace ccraft {
+    namespace common {
+        class MemPool;
+    }
     namespace net {
         class ISocketService;
         class NotifyMessage;
@@ -36,30 +42,67 @@ namespace ccraft {
          */
         class ARpcClientSync {
         public:
-            ARpcClientSync(uint16_t socketServiceThreadsCnt, common::cctime_t timeout);
+            ARpcClientSync(uint16_t socketServiceThreadsCnt, common::cctime_t timeout, uint16_t logicPort);
+            virtual ~ARpcClientSync();
             bool Start();
             bool Stop();
             bool RegisterRpc(std::string &&rpcName, uint16_t id);
+            void FinishRegisterRpc();
 
         protected:
-            struct RpcCtx {
-                std::condition_variable             *cv;
-                std::mutex                          *mtx;
-                bool                                 ok;
+            class RpcCtx {
+            public:
+                RpcCtx() {
+                    cv = new std::condition_variable();
+                    mtx = new std::mutex();
+                }
+
+                ~RpcCtx() {
+                    DELETE_PTR(mtx);
+                    DELETE_PTR(cv);
+                }
+
+                void Release() {
+                    ssp_nm.reset();
+                }
+
+            public:
+                std::condition_variable             *cv        = nullptr;
+                std::mutex                          *mtx       = nullptr;
+                net::net_peer_info_t                 peer;
+                uint64_t                             id        = 0;
+                bool                                 complete  = false;
+                bool                                 timeout   = false;
                 std::shared_ptr<net::NotifyMessage>  ssp_nm;
             };
 
         protected:
-            bool sendMessage(std::string &&rpcName, std::shared_ptr<google::protobuf::Message> msg);
-            std::shared_ptr<net::NotifyMessage> recvMessage();
+            /**
+             *
+             * @param rpcName
+             * @param msg
+             * @return nullptr为失败，否则为成功。作为recvMessage的入参。
+             */
+            RpcCtx* sendMessage(std::string &&rpcName, std::shared_ptr<google::protobuf::Message> msg, net::net_peer_info_t &&peer);
+            std::shared_ptr<net::NotifyMessage> recvMessage(RpcCtx* rc);
 
         private:
-            net::ISocketService                             *m_pSocketService = nullptr;
-            bool                                             m_bRegistered = false;
-            std::unordered_map<std::string, int16_t>         m_hmapRpcs;
-            std::unordered_map<uint64_t, RpcCtx>             m_hmapRpcCtxs;
-        };
-    }
-}
+            void recv_net_msg(std::shared_ptr<net::NotifyMessage> sspNM);
+
+        private:
+            bool                                                           m_bStopped       = true;
+            net::ISocketService                                           *m_pSocketService = nullptr;
+            bool                                                           m_bRegistered    = false;
+            std::unordered_map<std::string, uint16_t>                      m_hmapRpcs;
+            std::unordered_map<uint64_t, RpcCtx*>                          m_hmapRpcCtxs;
+            std::unordered_map<net::net_peer_info_t, std::set<RpcCtx*>>   m_hmapPeerRpcs;
+            common::spin_lock_t                                            m_slRpcCtxs = UNLOCKED;
+            uint16_t                                                       m_iSSThreadsCnt;
+            common::cctime_t                                               m_timeout;
+            common::MemPool                                               *m_pMemPool;
+            common::ResourcePool<RpcCtx>                                   m_rpcCtxPool = common::ResourcePool<RpcCtx>(200);
+        }; // class ARpcClientSync
+    } // namespace rpc
+} // namespace ccraft
 
 #endif //CCRAFT_RPC_CLIENT_H

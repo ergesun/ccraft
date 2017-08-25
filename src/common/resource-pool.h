@@ -15,6 +15,10 @@
 
 namespace ccraft {
     namespace common {
+        /**
+         *
+         * @tparam T T must has a Release interface to free its resources.
+         */
         template <typename T>
         class ResourcePool {
         public:
@@ -49,6 +53,7 @@ namespace ccraft {
                 SpinLock l(&m_sl);
                 if (m_iCurResCnt < m_iMaxResCnt) {
                     m_freeRes.push_back(res);
+                    res->Release();
                 } else {
                     DELETE_PTR(res);
                 }

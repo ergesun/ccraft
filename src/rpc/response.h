@@ -3,8 +3,8 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_FRAMEWORK_RESPONSE_H
-#define CCRAFT_FRAMEWORK_RESPONSE_H
+#ifndef CCRAFT_RPC_RESPONSE_H
+#define CCRAFT_RPC_RESPONSE_H
 
 #include <sstream>
 
@@ -61,4 +61,4 @@ private:
 } // namespace rpc
 } // namespace ccraft
 
-#endif //CCRAFT_FRAMEWORK_RESPONSE_H
+#endif //CCRAFT_RPC_RESPONSE_H

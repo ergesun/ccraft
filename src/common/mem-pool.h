@@ -14,6 +14,7 @@
 #include <map>
 #include <sstream>
 
+#include "global-vars.h"
 #include "spin-lock.h"
 
 // TODO(sunchao): 添加一个和时间相关的统计机制，动态的对常驻对象数量、扩张系数等进行调整。
@@ -49,7 +50,7 @@
 /**
  * 每个超大对象槽保留的个数上限
  */
-#define ONE_SLOT_BULK_OBJECT_RESIDENT_CNT     (PHYSICAL_CPUS_CNT * 4)
+#define ONE_SLOT_BULK_OBJECT_RESIDENT_CNT     (common::PHYSICAL_CPUS_CNT * 4)
 /**
  * 可留用保存的超大对象的大小上限
  */

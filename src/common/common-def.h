@@ -6,10 +6,6 @@
 #ifndef CCRAFT_COMMON_COMMON_DEF_H
 #define CCRAFT_COMMON_COMMON_DEF_H
 
-#include <time.h>
-#include <sys/sysinfo.h>
-#include <unistd.h>
-#include <cstring>
 #include <string>
 #include <functional>
 
@@ -113,16 +109,6 @@ typedef unsigned char uchar;
 
 namespace ccraft {
 namespace common {
-extern int LOGIC_CPUS_CNT;
-extern int PHYSICAL_CPUS_CNT;
-
-#ifdef __linux__
-void initialize();
-
-const long CACHELINE_SIZE = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
-const long PAGE_SIZE = sysconf(_SC_PAGESIZE);
-#endif
-
 class FuncInOutLogger {
 public:
     FuncInOutLogger() = delete;

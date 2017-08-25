@@ -11,13 +11,14 @@
 namespace ccraft {
 namespace rpc {
 enum class RpcCode {
-    OK              = 0,
-    ErrorNoHandler  = 1,
-    ErrorMsg        = 2,
-    ErrorInternal   = 3,
-    ErrorUnknown    = 4
+    OK                   = 0,
+    ErrorNoHandler       = 1,
+    ErrorMsg             = 2,
+    ErrorInternal        = 3,
+    ErrorNoRegisteredRpc = 4,
+    ErrorUnknown         = 5
 };
-}
-}
+} // namespace rpc
+} // namespace ccraft
 
 #endif //CCRAFT_COMMON_DEF_H
