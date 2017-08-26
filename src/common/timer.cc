@@ -46,6 +46,8 @@ Timer::EventId Timer::SubscribeEventAt(cctime_t when, Event &ev) {
     auto findPos = m_mapSubscribedEvents.find(when);
     for (; findPos != m_mapSubscribedEvents.end(); ++findPos) {
         if (findPos->second.callback == ev.callback) {
+            evId.when.nsec = 0;
+            evId.when.sec = 0;
             return evId;
         }
     }

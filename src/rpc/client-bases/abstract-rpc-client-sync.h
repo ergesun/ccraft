@@ -13,7 +13,7 @@
 #include <condition_variable>
 #include <set>
 
-#include "../../common/cctime.h"
+#include "../../common/timer.h"
 #include "../../common/spin-lock.h"
 #include "../../net/common-def.h"
 
@@ -52,6 +52,12 @@ namespace ccraft {
         protected:
             class RpcCtx {
             public:
+                enum class State {
+                    Ok          = 0,
+                    Timeout     = 1,
+                    BrokenPipe  = 2
+                };
+            public:
                 RpcCtx() {
                     cv = new std::condition_variable();
                     mtx = new std::mutex();
@@ -72,7 +78,8 @@ namespace ccraft {
                 net::net_peer_info_t                 peer;
                 uint64_t                             id        = 0;
                 bool                                 complete  = false;
-                bool                                 timeout   = false;
+                State                                state     = State::Ok;
+                common::Timer::EventId               timer_ev;
                 std::shared_ptr<net::NotifyMessage>  ssp_nm;
             };
 
@@ -95,7 +102,7 @@ namespace ccraft {
             bool                                                           m_bRegistered    = false;
             std::unordered_map<std::string, uint16_t>                      m_hmapRpcs;
             std::unordered_map<uint64_t, RpcCtx*>                          m_hmapRpcCtxs;
-            std::unordered_map<net::net_peer_info_t, std::set<RpcCtx*>>   m_hmapPeerRpcs;
+            std::unordered_map<net::net_peer_info_t, std::set<RpcCtx*>>    m_hmapPeerRpcs;
             common::spin_lock_t                                            m_slRpcCtxs = UNLOCKED;
             uint16_t                                                       m_iSSThreadsCnt;
             common::cctime_t                                               m_timeout;

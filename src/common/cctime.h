@@ -9,7 +9,7 @@
 namespace ccraft {
 namespace common {
 typedef struct cctime_s {
-    cctime_s() : sec(-1), nsec(-1) {}
+    cctime_s() : sec(0), nsec(0) {}
 
     cctime_s(long s, long n) : sec(s), nsec(n) {}
 
@@ -64,6 +64,14 @@ inline bool operator>=(const cctime_t &a, const cctime_t &b) {
 
 inline bool operator==(const cctime_t &a, const cctime_t &b) {
     return a.sec == b.sec && a.nsec == b.nsec;
+}
+
+inline bool operator==(long tick, const cctime_t &b) {
+    return tick == b.get_total_nsecs();
+}
+
+inline bool operator==(const cctime_t &b, long tick) {
+    return tick == b.get_total_nsecs();
 }
 
 inline bool operator!=(const cctime_t &a, const cctime_t &b) {

@@ -47,7 +47,7 @@ namespace ccraft {
 
             m_bStopped = false;
             // TODO(sunchao): 等加了其他model，此处及类似的地方设置成可配置的。
-            m_pSocketService->Start(m_iSSThreadsCnt, net::NonBlockingEventModel::Posix);
+            return m_pSocketService->Start(m_iSSThreadsCnt, net::NonBlockingEventModel::Posix);
         }
 
         bool ARpcClientSync::Stop() {
@@ -57,7 +57,8 @@ namespace ccraft {
 
             m_bStopped = true;
             hw_rw_memory_barrier();
-            m_pSocketService->Stop();
+
+            return m_pSocketService->Stop();
         }
 
         bool ARpcClientSync::RegisterRpc(std::string &&rpcName, uint16_t id) {
@@ -74,13 +75,13 @@ namespace ccraft {
             hw_rw_memory_barrier();
         }
 
-        RpcCtx* ARpcClientSync::sendMessage(std::string &&rpcName, std::shared_ptr<google::protobuf::Message> msg,
+        ARpcClientSync::RpcCtx* ARpcClientSync::sendMessage(std::string &&rpcName, std::shared_ptr<google::protobuf::Message> msg,
                                              net::net_peer_info_t &&peer) {
             if (m_hmapRpcs.end() == m_hmapRpcs.find(rpcName)) {
                 throw BadRpcException((uint16_t)RpcCode::ErrorNoRegisteredRpc, std::move(rpcName));
             }
 
-            auto rcPeer = peer;
+            net::net_peer_info_t rcPeer = peer;
             auto rr = new RpcRequest(m_pMemPool, std::move(peer), m_hmapRpcs[rpcName], std::move(msg));
             if (UNLIKELY(!m_pSocketService->SendMessage(rr))) {
                 DELETE_PTR(rr);
@@ -95,9 +96,10 @@ namespace ccraft {
         }
 
         std::shared_ptr<net::NotifyMessage> ARpcClientSync::recvMessage(RpcCtx* rc) {
-            common::SpinLock l(&m_slRpcCtxs);
+            auto id = rc->id;
             {
-                m_hmapRpcCtxs[rc->id] = rc;
+                common::SpinLock l(&m_slRpcCtxs);
+                m_hmapRpcCtxs[id] = rc;
                 if (m_hmapPeerRpcs.end() == m_hmapPeerRpcs.find(rc->peer)) {
                     std::set<RpcCtx*> rpcs { rc };
                     m_hmapPeerRpcs[rc->peer] = std::move(rpcs);
@@ -106,8 +108,38 @@ namespace ccraft {
                 }
             }
 
+            static common::Timer::TimerCallback s_cb = [id, this](void*) {
+                RpcCtx *ctx = nullptr;
+                {
+                    common::SpinLock l(&m_slRpcCtxs);
+                    if (m_hmapRpcCtxs.end() == m_hmapRpcCtxs.find(id)) {
+                        LOGIFUN << "recv is not in Id<->RpcCtx map message for id " << id;
+                        return;
+                    }
+
+                    ctx = m_hmapRpcCtxs[id];
+                    m_hmapRpcCtxs.erase(id);
+                    m_hmapPeerRpcs[ctx->peer].erase(ctx);
+                    if (m_hmapPeerRpcs[ctx->peer].empty()) {
+                        m_hmapPeerRpcs.erase(ctx->peer);
+                    }
+                }
+                {
+                    std::unique_lock<std::mutex> ll(*(ctx->mtx));
+                    ctx->complete = true;
+                    ctx->state = RpcCtx::State::Timeout;
+                }
+
+                ctx->cv->notify_one();
+            };
+
             std::unique_lock<std::mutex> ll(*(rc->mtx));
-            //common::g_pTimer->SubscribeEventAfter()
+            common::Timer::Event ev(nullptr, &s_cb);
+            auto eventId = common::g_pTimer->SubscribeEventAfter(m_timeout, ev);
+            if (0 == eventId.when) {
+                throw RpcClientInternalException();
+            }
+
             while (!rc->complete) {
                 rc->cv->wait(ll);
             }
@@ -125,28 +157,29 @@ namespace ccraft {
                     auto rm = mnm->GetContent();
                     if (LIKELY(rm)) {
                         auto id = rm->GetId();
-                        RpcCtx *ctx = nullptr;
-                        common::SpinLock l(&m_slRpcCtxs);
+                        RpcCtx *rc = nullptr;
                         {
+                            common::SpinLock l(&m_slRpcCtxs);
                             if (m_hmapRpcCtxs.end() == m_hmapRpcCtxs.find(id)) {
-                                LOGWFUN << "recv is not in Id<->RpcCtx map message for id " << id;
+                                LOGIFUN << "recv is not in Id<->RpcCtx map message for id " << id;
                                 return;
                             }
 
-                            ctx = m_hmapRpcCtxs[id];
+                            rc = m_hmapRpcCtxs[id];
+                            common::g_pTimer->UnsubscribeEvent(rc->timer_ev);
                             m_hmapRpcCtxs.erase(id);
-                            m_hmapPeerRpcs[ctx->peer].erase(ctx);
-                            if (m_hmapPeerRpcs[ctx->peer].empty()) {
-                                m_hmapPeerRpcs.erase(ctx->peer);
+                            m_hmapPeerRpcs[rc->peer].erase(rc);
+                            if (m_hmapPeerRpcs[rc->peer].empty()) {
+                                m_hmapPeerRpcs.erase(rc->peer);
                             }
                         }
                         {
-                            std::unique_lock<std::mutex> ll(*(ctx->mtx));
-                            ctx->complete = true;
-                            ctx->ssp_nm = std::move(sspNM);
+                            std::unique_lock<std::mutex> ll(*(rc->mtx));
+                            rc->complete = true;
+                            rc->ssp_nm = std::move(sspNM);
                         }
 
-                        ctx->cv->notify_one();
+                        rc->cv->notify_one();
                         LOGDFUN2("handled message for id ", id);
                     } else {
                         LOGWFUN << "recv message is empty!";
@@ -158,15 +191,29 @@ namespace ccraft {
                     if (wnm) {
                         LOGEFUN << "rc = " << (int)wnm->GetCode() << ", message = " << wnm->What();
                         auto peer = wnm->GetPeer();
-                        common::SpinLock l(&m_slRpcCtxs);
                         {
-                            //for ()
+                            common::SpinLock l(&m_slRpcCtxs);
+                            if (m_hmapPeerRpcs.end() != m_hmapPeerRpcs.find(peer))
+                            for (auto rc : m_hmapPeerRpcs[peer]) {
+                                m_hmapRpcCtxs.erase(rc->id);
+                                common::g_pTimer->UnsubscribeEvent(rc->timer_ev);
+                                {
+                                    std::unique_lock<std::mutex> ll(*(rc->mtx));
+                                    rc->complete = true;
+                                    rc->state = RpcCtx::State::BrokenPipe;
+                                    rc->ssp_nm = std::move(sspNM);
+                                }
+                                rc->cv->notify_one();
+                            }
+
+                            m_hmapPeerRpcs[peer].clear();
+                            m_hmapPeerRpcs.erase(peer);
                         }
                     }
                     break;
                 }
-                default: {
-
+                case net::NotifyMessageType::Server: {
+                    LOGFFUN << "Rpc client shouldn't get NotifyMessageType::Server msg.";
                 }
             }
         }

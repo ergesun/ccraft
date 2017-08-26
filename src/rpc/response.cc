@@ -33,8 +33,6 @@ uint32_t RpcErrorResponse::getDerivePayloadLength() {
 void RpcErrorResponse::encodeDerive(common::Buffer *b) {
     ByteOrderUtils::WriteUInt16(b->GetPos(), (CodeType)m_code);
     b->MoveHeadBack(sizeof(CodeType));
-    ByteOrderUtils::WriteUInt16(b->GetPos(), m_iHandlerId);
-    b->MoveHeadBack(sizeof(uint16_t));
     auto contentLen = m_sContent.length();
     if (contentLen > 0) {
         memcpy(b->GetPos(), m_sContent.c_str(), contentLen);

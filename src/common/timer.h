@@ -25,10 +25,12 @@ namespace common {
 class Timer {
 public:
     typedef std::function<void(void *)> TimerCallback, *TimerCallbackPointer;
+    // TODO(sunchao): 优化EventId。
     struct EventId {
+        EventId() = default;
         EventId(cctime_t w, TimerCallbackPointer h) : when(w), how(h) {}
         cctime_t             when;
-        TimerCallbackPointer how;
+        TimerCallbackPointer how = nullptr;
 
         bool operator<(const EventId &another) const {
             return (this->when < another.when) || (this->how < another.how);
@@ -79,16 +81,16 @@ public:
     void Stop();
 
     /**
-     * 订阅事件：在指定的时间点触发。
+     * 订阅事件：在指定的时间点触发。同一时间点同一handler不可以重复订阅。
      * @param when 从epoch到触发的时间。
-     * @return 返回订阅事件的id，可用于取消。
+     * @return 返回订阅事件的id，可用于取消。如果id的when为0,则表示订阅失败。
      */
     EventId SubscribeEventAt(cctime_t when, Event &ev);
 
     /**
-     * 订阅事件：从现在开始指定的时间后触发。
+     * 订阅事件：从现在开始指定的时间后触发。同一时间点同一handler不可以重复订阅。
      * @param duration 等待触发的时间。
-     * @return 返回订阅事件的id，可用于取消。
+     * @return 返回订阅事件的id，可用于取消。如果id的when为0,则表示订阅失败。
      */
     EventId SubscribeEventAfter(cctime_t duration, Event &ev);
 

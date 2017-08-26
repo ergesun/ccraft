@@ -13,15 +13,23 @@
 
 namespace ccraft {
 namespace rpc {
-class BadRpcHandlerIdException : public std::exception {
+class RpcException : public std::exception {
 public:
-    explicit BadRpcHandlerIdException(uint16_t code, uint16_t handlerId) : m_iCode(code), m_iHandlerId(handlerId) {
+    RpcException() = default;
+
+protected:
+    std::string m_sWhat;
+};
+
+class BadRpcHandlerIdException : public RpcException {
+public:
+    BadRpcHandlerIdException(uint16_t code, uint16_t handlerId) : m_iCode(code), m_iHandlerId(handlerId) {
         std::stringstream ss;
         ss << "Bad handler id " << m_iHandlerId << ".";
         m_sWhat = ss.str();
     }
 
-    const char *what() const override {
+    const char *what() const noexcept override {
         return m_sWhat.c_str();
     }
 
@@ -34,12 +42,12 @@ public:
     }
 
 private:
-    uint16_t    m_iCode;
-    uint16_t    m_iHandlerId;
-    std::string m_sWhat;
+    uint16_t m_iCode;
+    uint16_t m_iHandlerId;
+
 };
 
-class BadRpcException : public std::exception {
+class BadRpcException : public RpcException {
 public:
     explicit BadRpcException(uint16_t code, std::string &&rpcName) : m_iCode(code), m_sRpcName(std::move(rpcName)) {
         std::stringstream ss;
@@ -47,7 +55,7 @@ public:
         m_sWhat = ss.str();
     }
 
-    const char *what() const override {
+    const char *what() const noexcept override {
         return m_sWhat.c_str();
     }
 
@@ -56,9 +64,20 @@ public:
     }
 
 private:
-    uint16_t    m_iCode;
+    uint16_t m_iCode;
     std::string m_sRpcName;
     std::string m_sWhat;
+};
+
+class RpcClientInternalException : public RpcException {
+public:
+    RpcClientInternalException() {
+        m_sWhat = "Rpc client internal error!";
+    }
+
+    const char *what() const noexcept override {
+        return m_sWhat.c_str();
+    }
 };
 }
 }
