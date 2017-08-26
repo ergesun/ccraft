@@ -9,6 +9,8 @@
 #include <functional>
 #include <memory>
 
+#include "common-def.h"
+
 namespace ccraft {
 namespace net {
 enum class NotifyMessageType {

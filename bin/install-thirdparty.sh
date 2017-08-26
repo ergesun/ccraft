@@ -58,5 +58,4 @@ cp ${BIN_DIR}/resources/autogen.sh .
 ./configure --prefix=${THIRDPARTY_ROOT}
 make -j4
 make check
-sudo make install
-sudo ldconfig # refresh shared library cache.
+make install

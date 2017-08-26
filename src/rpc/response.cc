@@ -27,16 +27,11 @@ void RpcResponse::encodeDerive(common::Buffer *b) {
 }
 
 uint32_t RpcErrorResponse::getDerivePayloadLength() {
-    return sizeof(CodeType) + sizeof(uint16_t) + m_sContent.length();
+    return sizeof(CodeType);
 }
 
 void RpcErrorResponse::encodeDerive(common::Buffer *b) {
     ByteOrderUtils::WriteUInt16(b->GetPos(), (CodeType)m_code);
-    b->MoveHeadBack(sizeof(CodeType));
-    auto contentLen = m_sContent.length();
-    if (contentLen > 0) {
-        memcpy(b->GetPos(), m_sContent.c_str(), contentLen);
-    }
 }
 } // namespace rpc
 } // namespace ccraft

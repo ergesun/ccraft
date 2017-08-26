@@ -8,11 +8,11 @@
 namespace ccraft {
 namespace rpc {
 std::shared_ptr<google::protobuf::Message>
-TypicalRpcHandler::Handle(std::shared_ptr<google::protobuf::Message> req) {
+TypicalRpcHandler::Handle(SP_PB_MSG req) {
     return m_handle(req);
 }
 
-std::shared_ptr<google::protobuf::Message> TypicalRpcHandler::CreateRequest() {
+SP_PB_MSG TypicalRpcHandler::CreateRequest() {
     return m_requstCreator();
 }
 } // namespace rpc

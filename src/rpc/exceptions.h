@@ -79,6 +79,52 @@ public:
         return m_sWhat.c_str();
     }
 };
+
+class RpcServerInternalException : public RpcException {
+public:
+    RpcServerInternalException() {
+        m_sWhat = "Rpc peer server internal error! Maybe oom.";
+    }
+
+    const char *what() const noexcept override {
+        return m_sWhat.c_str();
+    }
+};
+
+class RpcClientSendTimeoutException : public RpcException {
+public:
+    RpcClientSendTimeoutException() {
+        m_sWhat = "Rpc client send timeout!";
+    }
+
+    const char *what() const noexcept override {
+        return m_sWhat.c_str();
+    }
+};
+
+class RpcBrokenPipeException : public RpcException {
+public:
+    RpcBrokenPipeException() {
+        m_sWhat = "Rpc pipe is broken!";
+    }
+
+    const char *what() const noexcept override {
+        return m_sWhat.c_str();
+    }
+};
+
+class RpcMessageCorruptException : public RpcException {
+public:
+    RpcMessageCorruptException(uint16_t handlerId) {
+        std::stringstream ss;
+        ss << "Cannot parse sent message error for handler id " << handlerId << ".";
+        m_sWhat = ss.str();
+    }
+
+    const char *what() const noexcept override {
+        return m_sWhat.c_str();
+    }
+};
 }
 }
 

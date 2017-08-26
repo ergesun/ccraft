@@ -9,6 +9,8 @@
 #include <memory>
 #include <cassert>
 
+#include "common-def.h"
+
 namespace google {
 namespace protobuf {
 class Message;
@@ -33,8 +35,8 @@ public:
      * @param b 对端的消息内容buffer。
      * @param sm 本端的响应消息体。
      */
-    virtual std::shared_ptr<google::protobuf::Message> Handle(std::shared_ptr<google::protobuf::Message> req) = 0;
-    virtual std::shared_ptr<google::protobuf::Message> CreateRequest() = 0;
+    virtual SP_PB_MSG Handle(SP_PB_MSG req) = 0;
+    virtual SP_PB_MSG CreateRequest() = 0;
 };
 
 /**
@@ -42,7 +44,6 @@ public:
  */
 class TypicalRpcHandler : public IRpcHandler {
 public:
-    typedef std::shared_ptr<google::protobuf::Message> SP_PB_MSG;
     typedef std::function<SP_PB_MSG(SP_PB_MSG)> RpcHandle;
     typedef std::function<SP_PB_MSG(void)> RequestCreator;
 
@@ -52,8 +53,8 @@ public:
         assert((nullptr != handle) && (nullptr != requestCreator));
     }
 
-    std::shared_ptr<google::protobuf::Message> Handle(std::shared_ptr<google::protobuf::Message> req) override;
-    std::shared_ptr<google::protobuf::Message> CreateRequest() override;
+    SP_PB_MSG Handle(SP_PB_MSG req) override;
+    SP_PB_MSG CreateRequest() override;
 
 private:
     RpcHandle             m_handle;

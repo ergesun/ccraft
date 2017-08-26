@@ -8,14 +8,27 @@
 
 #include "../net/snd-message.h"
 
+namespace google {
+namespace protobuf {
+class Message;
+}
+}
+
 namespace ccraft {
 namespace rpc {
+typedef std::shared_ptr<google::protobuf::Message> SP_PB_MSG;
+
 enum class RpcCode {
+    // server side
     OK                   = 0,
     ErrorNoHandler       = 1,
     ErrorMsg             = 2,
     ErrorInternal        = 3,
+
+    // client side
     ErrorNoRegisteredRpc = 4,
+
+    // common
     ErrorUnknown         = 5
 };
 } // namespace rpc
