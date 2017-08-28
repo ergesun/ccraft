@@ -15,24 +15,25 @@
 
 using namespace std;
 
-
-
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     ccraft::common::initialize();
     std::shared_ptr<ccraft::IService> pRpcServer(new ccraft::test::TestRpcServer());
 
-    pRpcServer->Start();
+    EXPECT_EQ(pRpcServer->Start(), true);
 
     auto res = RUN_ALL_TESTS();
-    pRpcServer->Stop();
+    getchar();
+    EXPECT_EQ(pRpcServer->Stop(), true);
+
+    return res;
 }
 
 TEST(RpcTest, ClientServerTest) {
-    ccraft::common::cctime_t timeout(0, 1000000 * 200);
+    ccraft::common::cctime_t timeout(10, 1000000 * 200);
     std::shared_ptr<ccraft::test::TestRpcClientSync> pRpcClient(new ccraft::test::TestRpcClientSync(2, timeout, 42335));
 
-    pRpcClient->Start();
+    EXPECT_EQ(pRpcClient->Start(), true);
     ccraft::net::net_peer_info_t peer = {
         .nat = {
             .addr = "localhost",
@@ -47,7 +48,11 @@ TEST(RpcTest, ClientServerTest) {
     request->set_prevlogindex(22);
     request->set_prevlogterm(1233);
 
-    pRpcClient->AppendRfLog(ccraft::rpc::SP_PB_MSG(request), std::move(peer));
+    std::shared_ptr<ccraft::rpc::AppendOpLogResponse> sspResp;
+    EXPECT_NO_THROW(sspResp = pRpcClient->AppendRfLog(ccraft::rpc::SP_PB_MSG(request), std::move(peer)));
+    EXPECT_EQ(sspResp->term(), 1111);
+    EXPECT_EQ(sspResp->success(), true);
+    std::cout << "server resp: term = " << sspResp->term() << ", ok = " << sspResp->success() << std::endl;
 
-    pRpcClient->Stop();
+    EXPECT_EQ(pRpcClient->Stop(), true);
 }

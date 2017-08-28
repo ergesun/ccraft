@@ -37,13 +37,13 @@ link_directories(${EXTERN_COMPILE_THIRDPARTY_ROOT}/lib)
 #add_definitions(-DGTEST_LANG_CXX11=1 -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)
 #add_subdirectory(${SRC_ROOT}/common)
 #add_subdirectory(${SRC_ROOT}/net)
-##add_subdirectory(${SRC_ROOT}/rpc)
-##add_subdirectory(${SRC_ROOT}/codegen)
+#add_subdirectory(${SRC_ROOT}/rpc)
+#add_subdirectory(${SRC_ROOT}/codegen)
 #
 #set(BUILD_OUTPUT_ROOT_DIR ${PROJECT_SOURCE_DIR}/build/ut/debug)
 #set(LIBRARY_OUTPUT_PATH ${BUILD_OUTPUT_ROOT_DIR}/lib)
 #set(EXECUTABLE_OUTPUT_PATH ${BUILD_OUTPUT_ROOT_DIR})
-#add_subdirectory(${UT_ROOT}/net)
+#add_subdirectory(${UT_ROOT}/rpc)
 ##----------------------------------------------------------------------------------------------
 
 if(${PROJECT_TYPE} MATCHES "UT")

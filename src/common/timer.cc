@@ -72,7 +72,10 @@ Timer::EventId Timer::SubscribeEventAfter(cctime_t duration, Event &ev) {
 }
 
 bool Timer::UnsubscribeEvent(EventId eventId) {
-    assert(eventId.how);
+    if (0 == eventId.when || nullptr == eventId.how) {
+        return false;
+    }
+
     SpinLock l(&m_thread_safe_sl);
     auto ev = m_mapEventsEntry.find(eventId);
     if (m_mapEventsEntry.end() != ev) {

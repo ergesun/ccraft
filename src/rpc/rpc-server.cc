@@ -76,8 +76,9 @@ bool RpcServer::Stop() {
 
     m_bStopped = true;
     hw_rw_memory_barrier();
-    if (m_pSocketService->Stop()) {
-        throw std::runtime_error("cannot stop RpcServer's SocketService");
+    if (!m_pSocketService->Stop()) {
+        LOGEFUN << "cannot stop RpcServer's SocketService";
+        return false;
     }
 
     DELETE_PTR(m_pWorkThreadPool);
@@ -147,7 +148,7 @@ void RpcServer::proc_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
         case net::NotifyMessageType::Worker: {
             auto *wnm = dynamic_cast<net::WorkerNotifyMessage*>(sspNM.get());
             if (wnm) {
-                LOGEFUN << "rc = " << (int)wnm->GetCode() << ", message = " << wnm->What();
+                LOGWFUN << "rc = " << (int)wnm->GetCode() << ", message = " << wnm->What();
             }
             break;
         }

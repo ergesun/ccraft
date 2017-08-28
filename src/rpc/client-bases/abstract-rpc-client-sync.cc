@@ -36,6 +36,7 @@ ARpcClientSync::ARpcClientSync(uint16_t socketServiceThreadsCnt, common::cctime_
 }
 
 ARpcClientSync::~ARpcClientSync() {
+    Stop();
     DELETE_PTR(m_pSocketService);
     DELETE_PTR(m_pMemPool);
 }
@@ -57,6 +58,12 @@ bool ARpcClientSync::Stop() {
 
     m_bStopped = true;
     hw_rw_memory_barrier();
+    common::SpinLock l(&m_slRpcCtxs);
+    for (auto &peerRpc : m_hmapPeerRpcs) {
+        for (auto rc : peerRpc.second) {
+            common::g_pTimer->UnsubscribeEvent(rc->timer_ev);
+        }
+    }
 
     return m_pSocketService->Stop();
 }
@@ -143,6 +150,7 @@ std::shared_ptr<net::NotifyMessage> ARpcClientSync::recvMessage(RpcCtx* rc) {
             throw RpcClientInternalException();
         }
 
+        rc->timer_ev = eventId;
         while (!rc->complete) {
             rc->cv->wait(ll);
         }
@@ -201,7 +209,7 @@ void ARpcClientSync::recv_net_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
                     }
 
                     rc = m_hmapRpcCtxs[id];
-                    //common::g_pTimer->UnsubscribeEvent(rc->timer_ev);
+                    common::g_pTimer->UnsubscribeEvent(rc->timer_ev);
                     m_hmapRpcCtxs.erase(id);
                     m_hmapPeerRpcs[rc->peer].erase(rc);
                     if (m_hmapPeerRpcs[rc->peer].empty()) {
@@ -228,21 +236,22 @@ void ARpcClientSync::recv_net_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
                 auto peer = wnm->GetPeer();
                 {
                     common::SpinLock l(&m_slRpcCtxs);
-                    if (m_hmapPeerRpcs.end() != m_hmapPeerRpcs.find(peer))
-                    for (auto rc : m_hmapPeerRpcs[peer]) {
-                        m_hmapRpcCtxs.erase(rc->msgId);
-                        common::g_pTimer->UnsubscribeEvent(rc->timer_ev);
-                        {
-                            std::unique_lock<std::mutex> ll(*(rc->mtx));
-                            rc->complete = true;
-                            rc->state = RpcCtx::State::BrokenPipe;
-                            rc->ssp_nm = std::move(sspNM);
+                    if (m_hmapPeerRpcs.end() != m_hmapPeerRpcs.find(peer)) {
+                        for (auto rc : m_hmapPeerRpcs[peer]) {
+                            m_hmapRpcCtxs.erase(rc->msgId);
+                            common::g_pTimer->UnsubscribeEvent(rc->timer_ev);
+                            {
+                                std::unique_lock<std::mutex> ll(*(rc->mtx));
+                                rc->complete = true;
+                                rc->state = RpcCtx::State::BrokenPipe;
+                                rc->ssp_nm = std::move(sspNM);
+                            }
+                            rc->cv->notify_one();
                         }
-                        rc->cv->notify_one();
-                    }
 
-                    m_hmapPeerRpcs[peer].clear();
-                    m_hmapPeerRpcs.erase(peer);
+                        m_hmapPeerRpcs[peer].clear();
+                        m_hmapPeerRpcs.erase(peer);
+                    }
                 }
             }
             break;

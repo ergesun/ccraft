@@ -4,6 +4,7 @@
  */
 
 #include <iostream>
+#include <gtest/gtest.h>
 
 #include "../../../common/server-gflags-config.h"
 #include "../../../rpc/rpc-handler.h"
@@ -41,9 +42,13 @@ void TestRpcServer::register_rpc_handlers() {
 
 rpc::SP_PB_MSG TestRpcServer::append_rflog(rpc::SP_PB_MSG sspMsg) {
     auto appendOpLogRequest = dynamic_cast<rpc::AppendOpLogRequest*>(sspMsg.get());
-    std::cout << "term: " << appendOpLogRequest->term() << ", leader id: " << appendOpLogRequest->leaderid()
-              << ", prev log idx: " << appendOpLogRequest->prevlogindex()
-              << ", prev log term: " << appendOpLogRequest->prevlogterm() << std::endl;
+    EXPECT_EQ(1234, appendOpLogRequest->term());
+    EXPECT_STREQ("test leader", appendOpLogRequest->leaderid().c_str());
+    EXPECT_EQ(22, appendOpLogRequest->prevlogindex());
+    EXPECT_EQ(1233, appendOpLogRequest->prevlogterm());
+    std::cout << "client req: term = " << appendOpLogRequest->term() << ", leader id = " << appendOpLogRequest->leaderid()
+              << ", prev log idx = " << appendOpLogRequest->prevlogindex()
+              << ", prev log term = " << appendOpLogRequest->prevlogterm() << std::endl;
     auto response = new rpc::AppendOpLogResponse();
     response->set_term(1111);
     response->set_success(true);
