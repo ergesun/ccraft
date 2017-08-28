@@ -3,8 +3,8 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_RF_NODE_RPC_SYNC_CLIENT_H
-#define CCRAFT_RF_NODE_RPC_SYNC_CLIENT_H
+#ifndef CCRAFT_TEST_RPC_CLIENT_H
+#define CCRAFT_TEST_RPC_CLIENT_H
 
 #include "../../../rpc/client-bases/abstract-rpc-client-sync.h"
 #include "../../../rpc/common-def.h"
@@ -14,10 +14,10 @@
 #define RpcAppendRfLog "AppendRfLog"
 
 namespace ccraft {
-namespace server {
-class RfNodeRpcClientSync : public rpc::ARpcClientSync {
+namespace test {
+class TestRpcClientSync : public rpc::ARpcClientSync {
 public:
-    RfNodeRpcClientSync(uint16_t socketServiceThreadsCnt, common::cctime_t timeout, uint16_t logicPort) :
+    TestRpcClientSync(uint16_t socketServiceThreadsCnt, common::cctime_t timeout, uint16_t logicPort) :
         rpc::ARpcClientSync(socketServiceThreadsCnt, timeout, logicPort) {}
 
     bool Start() override;
@@ -26,7 +26,7 @@ public:
 private:
     bool register_rpc_handlers();
 };
-} // namespace server
+} // namespace test
 } // namespace ccraft
 
-#endif //CCRAFT_RF_NODE_RPC_SYNC_CLIENT_H
+#endif //CCRAFT_TEST_RPC_CLIENT_H

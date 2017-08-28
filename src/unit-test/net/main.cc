@@ -18,8 +18,6 @@
 
 void recv_msg(std::shared_ptr<ccraft::net::NotifyMessage> sspNM);
 
-ccraft::common::MemPool g_memPool;
-
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     ccraft::common::initialize();
@@ -43,40 +41,40 @@ TEST(NetTest, ServerTest) {
     std::shared_ptr<ccraft::net::net_addr_t> ssp_npt(nullptr);
     std::shared_ptr<ccraft::net::INetStackWorkerManager> sspMgr1 =
         std::shared_ptr<ccraft::net::INetStackWorkerManager>(new ccraft::net::UniqueWorkerManager());
-    auto netService1 = ccraft::net::SocketServiceFactory::CreateService(ccraft::net::SocketProtocal::Tcp, ssp_npt, 2210, &g_memPool,
+    auto netService1 = ccraft::net::SocketServiceFactory::CreateService(ccraft::net::SocketProtocal::Tcp, ssp_npt, 2210, ccraft::common::g_pMemPool,
                                                                        std::bind(recv_msg, std::placeholders::_1),
                                                                        sspMgr1);
     EXPECT_EQ(netService1->Start(2, ccraft::net::NonBlockingEventModel::Posix), true);
-    auto *tsm11 = new ccraft::test::TestSndMessage(&g_memPool, ccraft::net::net_peer_info_t(peerInfo), "1-1 ---client request: hello server!");
+    auto *tsm11 = new ccraft::test::TestSndMessage(ccraft::common::g_pMemPool, ccraft::net::net_peer_info_t(peerInfo), "1-1 ---client request: hello server!");
     EXPECT_EQ(netService1->SendMessage(tsm11), true);
 
     std::shared_ptr<ccraft::net::INetStackWorkerManager> sspMgr2 =
         std::shared_ptr<ccraft::net::INetStackWorkerManager>(new ccraft::net::UniqueWorkerManager());
-    auto netService2 = ccraft::net::SocketServiceFactory::CreateService(ccraft::net::SocketProtocal::Tcp, ssp_npt, 2210, &g_memPool,
+    auto netService2 = ccraft::net::SocketServiceFactory::CreateService(ccraft::net::SocketProtocal::Tcp, ssp_npt, 2210, ccraft::common::g_pMemPool,
                                                                         std::bind(recv_msg, std::placeholders::_1),
                                                                         sspMgr2);
     EXPECT_EQ(netService2->Start(2, ccraft::net::NonBlockingEventModel::Posix), true);
-    auto *tsm2 = new ccraft::test::TestSndMessage(&g_memPool, ccraft::net::net_peer_info_t(peerInfo), "2 ---client request: hello server!");
+    auto *tsm2 = new ccraft::test::TestSndMessage(ccraft::common::g_pMemPool, ccraft::net::net_peer_info_t(peerInfo), "2 ---client request: hello server!");
     EXPECT_EQ(netService2->SendMessage(tsm2), false);
     DELETE_PTR(tsm2);
-    auto *tsm12 = new ccraft::test::TestSndMessage(&g_memPool, ccraft::net::net_peer_info_t(peerInfo), "1-2 ---client request: hello server!");
+    auto *tsm12 = new ccraft::test::TestSndMessage(ccraft::common::g_pMemPool, ccraft::net::net_peer_info_t(peerInfo), "1-2 ---client request: hello server!");
     EXPECT_EQ(netService1->SendMessage(tsm12), true);
 
     std::shared_ptr<ccraft::net::INetStackWorkerManager> sspMgr3 =
         std::shared_ptr<ccraft::net::INetStackWorkerManager>(new ccraft::net::UniqueWorkerManager());
-    auto netService3 = ccraft::net::SocketServiceFactory::CreateService(ccraft::net::SocketProtocal::Tcp, ssp_npt, 2211, &g_memPool,
+    auto netService3 = ccraft::net::SocketServiceFactory::CreateService(ccraft::net::SocketProtocal::Tcp, ssp_npt, 2211, ccraft::common::g_pMemPool,
                                                                         std::bind(recv_msg, std::placeholders::_1),
                                                                         sspMgr3);
 
     EXPECT_EQ(netService3->Start(2, ccraft::net::NonBlockingEventModel::Posix), true);
 
-    auto *tsm3 = new ccraft::test::TestSndMessage(&g_memPool, ccraft::net::net_peer_info_t(peerInfo), "3 ---client request: hello server!");
+    auto *tsm3 = new ccraft::test::TestSndMessage(ccraft::common::g_pMemPool, ccraft::net::net_peer_info_t(peerInfo), "3 ---client request: hello server!");
     EXPECT_EQ(netService1->SendMessage(tsm3), true);
 
     for (int i = 0; i < 100; ++i) {
         std::stringstream ss;
         ss << "1-" << i + 3 << " ---client request: hello server!";
-        auto *tsm13 = new ccraft::test::TestSndMessage(&g_memPool, ccraft::net::net_peer_info_t(peerInfo), ss.str());
+        auto *tsm13 = new ccraft::test::TestSndMessage(ccraft::common::g_pMemPool, ccraft::net::net_peer_info_t(peerInfo), ss.str());
         EXPECT_EQ(netService1->SendMessage(tsm13), true);
         usleep(1000 * 50);
     }

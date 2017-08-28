@@ -201,7 +201,7 @@ void ARpcClientSync::recv_net_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
                     }
 
                     rc = m_hmapRpcCtxs[id];
-                    common::g_pTimer->UnsubscribeEvent(rc->timer_ev);
+                    //common::g_pTimer->UnsubscribeEvent(rc->timer_ev);
                     m_hmapRpcCtxs.erase(id);
                     m_hmapPeerRpcs[rc->peer].erase(rc);
                     if (m_hmapPeerRpcs[rc->peer].empty()) {

@@ -17,7 +17,7 @@ class Buffer;
 namespace rpc {
 class ProtoBufUtils {
 public:
-    static bool Parse(const common::Buffer *from, google::protobuf::Message *to);
+    static bool Deserialize(const common::Buffer *from, google::protobuf::Message *to);
     static void Serialize(const google::protobuf::Message *from, common::Buffer *to, common::MemPool *mp);
     static void Serialize(const google::protobuf::Message *from, common::Buffer *to);
 };

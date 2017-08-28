@@ -3,8 +3,8 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_COMMON_DEF_H
-#define CCRAFT_COMMON_DEF_H
+#ifndef CCRAFT_RPC_COMMON_DEF_H
+#define CCRAFT_RPC_COMMON_DEF_H
 
 #include "../net/snd-message.h"
 
@@ -34,4 +34,4 @@ enum class RpcCode {
 } // namespace rpc
 } // namespace ccraft
 
-#endif //CCRAFT_COMMON_DEF_H
+#endif //CCRAFT_RPC_COMMON_DEF_H

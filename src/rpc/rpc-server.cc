@@ -22,7 +22,14 @@ namespace rpc {
 RpcServer::RpcServer(uint16_t workThreadsCnt, uint16_t netIOThreadsCnt, uint16_t port)
             : m_iWorkThreadsCnt(workThreadsCnt), m_iNetIOThreadsCnt(netIOThreadsCnt), m_iport(port) {
     if (0 == workThreadsCnt) {
-        m_iWorkThreadsCnt = (uint16_t)(common::PHYSICAL_CPUS_CNT);
+        m_iWorkThreadsCnt = (uint16_t)(common::LOGIC_CPUS_CNT * 2);
+    }
+
+    if (0 == netIOThreadsCnt) {
+        m_iNetIOThreadsCnt = (uint16_t)(common::LOGIC_CPUS_CNT / 2);
+        if (m_iNetIOThreadsCnt == 0) {
+            m_iNetIOThreadsCnt = 1;
+        }
     }
 
     m_pRpcMemPool = new common::MemPool();
@@ -41,6 +48,9 @@ RpcServer::RpcServer(uint16_t workThreadsCnt, uint16_t netIOThreadsCnt, uint16_t
 RpcServer::~RpcServer() {
     DELETE_PTR(m_pRpcMemPool);
     DELETE_PTR(m_pSocketService);
+    for (auto p : m_hmHandlers) {
+        DELETE_PTR(p.second);
+    }
 }
 
 bool RpcServer::Start() {
@@ -116,7 +126,7 @@ void RpcServer::proc_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
                     m_pSocketService->SendMessage(new RpcErrorResponse(RpcCode::ErrorInternal));
                     return;
                 }
-                if (!ProtoBufUtils::Parse(reqBuf, request.get())) {
+                if (!ProtoBufUtils::Deserialize(reqBuf, request.get())) {
                     LOGEFUN << "cannot parse request for handler id " << handlerId;
                     m_pSocketService->SendMessage(new RpcErrorResponse(RpcCode::ErrorMsg));
                     return;

@@ -49,8 +49,8 @@ public:
 
 public:
     TypicalRpcHandler(RpcHandle handle, RequestCreator requestCreator) :
-        m_handle(std::move(handle)), m_requstCreator(std::move(requestCreator)) {
-        assert((nullptr != handle) && (nullptr != requestCreator));
+        m_handle(std::move(handle)), m_requestCreator(std::move(requestCreator)) {
+        assert((nullptr != m_handle) && (nullptr != m_requestCreator));
     }
 
     SP_PB_MSG Handle(SP_PB_MSG req) override;
@@ -58,7 +58,7 @@ public:
 
 private:
     RpcHandle             m_handle;
-    RequestCreator        m_requstCreator;
+    RequestCreator        m_requestCreator;
 };
 }
 }

@@ -28,13 +28,10 @@ DECLARE_int32(net_server_handshake_threads_cnt);
 
 
 /**
- * rpc server common
+ * internal rpc server
  */
+DECLARE_int32(internal_rpc_server_threads_cnt);
 DECLARE_int32(internal_rpc_io_threads_cnt);
-
-/**
- * internal communication rpc
- */
 DECLARE_int32(internal_rpc_logic_port);
 
 

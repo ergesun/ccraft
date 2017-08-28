@@ -69,33 +69,33 @@ do
         BUILD_FLAG="${BUILD_FLAG} -DDEFINE_MACRO=ON"
         BUILD_LOG_INFO="DebugLog: on"
         param_state=""
-    elif [ "$p" == "-gen" ]; then
+    elif [ "$p" = "-gen" ]; then
         GEN_IDLS="true"
-    elif [ "$p" == "-ut" ]; then
+    elif [ "$p" = "-ut" ]; then
         BUILD_FLAG="${BUILD_FLAG} -DPROJECT_TYPE=UT"
         BUILD_PROJECT_TYPE="ProjectType: ccraft unit-test"
         has_ut="1"
         param_state="ut"
-    elif [ "$p" == "-tl" ]; then
+    elif [ "$p" = "-tl" ]; then
         BUILD_FLAG="${BUILD_FLAG} -DPROJECT_TYPE=TOOLS"
         BUILD_PROJECT_TYPE="ProjectType: tools"
         has_tl="1"
         param_state="tl"
-    elif [ "$p" == "-m" ]; then
+    elif [ "$p" = "-m" ]; then
         has_make_args="1"
         param_state="make_args"
-    elif [ "$p" == "-h" ]; then
+    elif [ "$p" = "-h" ]; then
         param_state=""
         print_usage
         exit 0
     else
-        if [ "$param_state" == "ut" ]; then
+        if [ "$param_state" = "ut" ]; then
             UT_MODULE=$p
             BUILD_PROJECT_TYPE="${BUILD_PROJECT_TYPE} - ${UT_MODULE}"
-        elif [ "$param_state" == "tl" ]; then
+        elif [ "$param_state" = "tl" ]; then
             TL_MODULE=$p
             BUILD_PROJECT_TYPE="${BUILD_PROJECT_TYPE} - ${TL_MODULE}"
-        elif [ "$param_state" == "make_args" ]; then
+        elif [ "$param_state" = "make_args" ]; then
             MAKE_ARGS=$p
         else
             echo_red "Not support opt \"$p\""

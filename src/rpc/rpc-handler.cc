@@ -13,7 +13,7 @@ TypicalRpcHandler::Handle(SP_PB_MSG req) {
 }
 
 SP_PB_MSG TypicalRpcHandler::CreateRequest() {
-    return m_requstCreator();
+    return m_requestCreator();
 }
 } // namespace rpc
 } // namespace ccraft
