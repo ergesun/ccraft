@@ -1,6 +1,7 @@
-//
-// Created by sunchao31 on 17-9-2.
-//
+/**
+ * This work copyright Chao Sun(qq:296449610) and licensed under
+ * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
+ */
 
 #ifndef CCRAFT_INODE_INTERNAL_COMMUNICATOR_H
 #define CCRAFT_INODE_INTERNAL_COMMUNICATOR_H

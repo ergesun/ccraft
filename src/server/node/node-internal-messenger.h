@@ -71,6 +71,7 @@ private:
     void dispatch_msg(std::shared_ptr<net::NotifyMessage> sspNM);
 
 private:
+    uint16_t                                                    m_iIOThreadsCnt  = 0;
     uint16_t                                                    m_iPort          = 0;
     bool                                                        m_bStopped       = true;
     /**

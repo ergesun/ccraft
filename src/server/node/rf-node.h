@@ -10,6 +10,8 @@
 #include "../../rpc/common-def.h"
 #include "inode-internal-rpc-handler.h"
 
+#include "common-def.h"
+
 namespace ccraft {
     namespace server {
         class NodeInternalMessenger;
@@ -23,6 +25,7 @@ namespace ccraft {
             rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
 
         private:
+            NodeRoleType                   m_roleType = NodeRoleType::Follower;
             NodeInternalMessenger         *m_pNodeInternalMessenger = nullptr;
         };
     } // namespace server

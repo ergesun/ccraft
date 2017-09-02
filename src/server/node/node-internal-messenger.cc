@@ -28,6 +28,7 @@ NodeInternalMessenger::NodeInternalMessenger(CreateNodeInternalMessengerParam &c
         m_pMemPool = new common::MemPool();
     }
 
+    m_iIOThreadsCnt = createParam.netIOThreadsCnt;
     m_iPort = createParam.port;
     auto nat = new net::net_addr_t("0.0.0.0", createParam.port);
     std::shared_ptr<net::net_addr_t> sspNat(nat);
@@ -47,6 +48,10 @@ NodeInternalMessenger::~NodeInternalMessenger() {
     if (m_bOwnMemPool) {
         DELETE_PTR(m_pMemPool);
     }
+
+    DELETE_PTR(m_pClient);
+    DELETE_PTR(m_pServer);
+    DELETE_PTR(m_pSocketService);
 }
 
 bool NodeInternalMessenger::Start() {
@@ -56,6 +61,7 @@ bool NodeInternalMessenger::Start() {
 
     m_bStopped = false;
     hw_rw_memory_barrier();
+    m_pSocketService->Start(m_iIOThreadsCnt, net::NonBlockingEventModel::Posix);
     m_pDispatchTp = new common::ThreadPool<std::shared_ptr<net::NotifyMessage>>(m_iDispatchTpCnt);
     m_pClient->Start();
     m_pServer->Start();
@@ -70,6 +76,9 @@ bool NodeInternalMessenger::Stop() {
 
     m_bStopped = true;
     hw_rw_memory_barrier();
+    m_pClient->Stop();
+    m_pServer->Stop();
+    m_pSocketService->Stop();
     DELETE_PTR(m_pDispatchTp);
     return true;
 }
@@ -120,6 +129,10 @@ void NodeInternalMessenger::dispatch_msg(std::shared_ptr<net::NotifyMessage> ssp
 }
 
 void NodeInternalMessenger::recv_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
+    if (UNLIKELY(m_bStopped)) {
+        return;
+    }
+
     m_pDispatchTp->AddTask(std::bind(&NodeInternalMessenger::dispatch_msg, this, std::placeholders::_1), sspNM);
 }
 } // namespace server

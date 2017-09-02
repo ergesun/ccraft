@@ -22,7 +22,7 @@ bool RfNodeInternalRpcClientSync::Start() {
 std::shared_ptr<rpc::AppendOpLogResponse>
 RfNodeInternalRpcClientSync::AppendRfLog(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
     auto tmpPeer = peer;
-    auto ctx = sendMessage(RpcAppendRfLog, req, std::move(peer));
+    auto ctx = sendMessage(RpcAppendRfLog, std::move(req), std::move(peer));
     if (UNLIKELY(!ctx)) {
         LOGFFUN << "send msg to " << tmpPeer.nat.addr << ":" << tmpPeer.nat.port << " failed!";
     }
