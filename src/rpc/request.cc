@@ -10,18 +10,21 @@
 #include "protobuf-utils.h"
 
 #include "request.h"
+#include "common-def.h"
 
 namespace ccraft {
 namespace rpc {
 uint32_t RpcRequest::getDerivePayloadLength() {
     if (m_sspMsg.get()) {
-        return sizeof(uint16_t) + m_sspMsg->ByteSize();
+        return 1 + sizeof(uint16_t) + m_sspMsg->ByteSize();
     } else {
-        return sizeof(uint16_t);
+        return 1 + sizeof(uint16_t);
     }
 }
 
 void RpcRequest::encodeDerive(common::Buffer *b) {
+    *(b->GetPos()) = (uchar)((uint8_t)(MessageType::Request));
+    b->MoveHeadBack(1);
     ByteOrderUtils::WriteUInt16(b->GetPos(), (uint16_t)m_iHandlerId);
     b->MoveHeadBack(sizeof(uint16_t));
     if (m_sspMsg.get()) {

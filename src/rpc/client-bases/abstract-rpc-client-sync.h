@@ -17,6 +17,9 @@
 #include "../../common/spin-lock.h"
 #include "../../common/resource-pool.h"
 #include "../../net/common-def.h"
+#include "../../iservice.h"
+#include "../imessage-handler.h"
+#include "../../common/thread-pool.h"
 
 namespace google {
 namespace protobuf {
@@ -35,19 +38,27 @@ class NotifyMessage;
 namespace rpc {
 /**
  * [Message format]
- *    client -> server :  |net common header(Message::HeaderSize() bytes)|[handler id(2bytes)|protobuf msg(n bytes)]|
- *    server -> client :  |net common header(Message::HeaderSize() bytes)|[rpc code(2bytes)|protobuf msg(n bytes or 0 bytes if no return value)]|
+ *    client -> server :  |net common header(Message::HeaderSize() bytes)|msg type|[handler id(2bytes)|protobuf msg(n bytes)]|
+ *    server -> client :  |net common header(Message::HeaderSize() bytes)|msg type|[rpc code(2bytes)|protobuf msg(n bytes or 0 bytes if no return value)]|
  */
 /**
  * Rpc client base class.
  */
-class ARpcClientSync {
+class ARpcClientSync : public IService, public IMessageHandler {
 public:
-    ARpcClientSync(uint16_t socketServiceThreadsCnt, common::cctime_t timeout, uint16_t logicPort);
+    /**
+     *
+     * @param workThreadsCnt
+     * @param timeout
+     * @param memPool 如果为空，则内部自己构造。
+     */
+    ARpcClientSync(net::ISocketService *ss, common::cctime_t timeout, uint16_t workThreadsCnt, common::MemPool *memPool = nullptr);
     virtual ~ARpcClientSync();
 
     virtual bool Start();
     virtual bool Stop();
+
+    void HandleMessage(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
 protected:
     class RpcCtx {
@@ -97,20 +108,23 @@ protected:
     std::shared_ptr<net::NotifyMessage> recvMessage(RpcCtx* rc);
 
 private:
-    void recv_net_msg(std::shared_ptr<net::NotifyMessage> sspNM);
+    void proc_recv_msg(std::shared_ptr<net::NotifyMessage> sspNM);
 
 private:
-    bool                                                           m_bStopped       = true;
-    net::ISocketService                                           *m_pSocketService = nullptr;
-    bool                                                           m_bRegistered    = false;
+    bool                                                           m_bStopped          = true;
+    // 关联关系，无需本类释放。
+    net::ISocketService                                           *m_pSocketService    = nullptr;
+    bool                                                           m_bRegistered       = false;
     std::unordered_map<std::string, uint16_t>                      m_hmapRpcs;
     std::unordered_map<uint64_t, RpcCtx*>                          m_hmapRpcCtxs;
     std::unordered_map<net::net_peer_info_t, std::set<RpcCtx*>>    m_hmapPeerRpcs;
     common::spin_lock_t                                            m_slRpcCtxs = UNLOCKED;
-    uint16_t                                                       m_iSSThreadsCnt;
     common::cctime_t                                               m_timeout;
+    bool                                                           m_bOwnPool = false;
     common::MemPool                                               *m_pMemPool;
     common::ResourcePool<RpcCtx>                                   m_rpcCtxPool = common::ResourcePool<RpcCtx>(200);
+    uint16_t                                                       m_iWorkThreadsCnt       = 0;
+    common::ThreadPool<std::shared_ptr<net::NotifyMessage>>       *m_pWorkThreadPool = nullptr;
 }; // class ARpcClientSync
 } // namespace rpc
 } // namespace ccraft

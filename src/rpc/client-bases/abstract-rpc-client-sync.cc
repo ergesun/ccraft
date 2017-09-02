@@ -20,25 +20,24 @@
 
 namespace ccraft {
 namespace rpc {
-ARpcClientSync::ARpcClientSync(uint16_t socketServiceThreadsCnt, common::cctime_t timeout, uint16_t logicPort) :
-    m_iSSThreadsCnt(socketServiceThreadsCnt), m_timeout(timeout) {
-    if (0 == m_iSSThreadsCnt) {
-        m_iSSThreadsCnt = (uint16_t)(common::PHYSICAL_CPUS_CNT);
+ARpcClientSync::ARpcClientSync(net::ISocketService *ss, common::cctime_t timeout, uint16_t workThreadsCnt, common::MemPool *memPool) :
+    m_pSocketService(ss), m_timeout(timeout), m_pMemPool(memPool) {
+    CHECK(ss);
+    if (0 == workThreadsCnt) {
+        m_iWorkThreadsCnt = (uint16_t)(common::LOGIC_CPUS_CNT * 2);
     }
 
-    m_pMemPool = new common::MemPool();
-    std::shared_ptr<net::net_addr_t> sspNat;
-    std::shared_ptr<net::INetStackWorkerManager> sspMgr = std::shared_ptr<net::INetStackWorkerManager>(new net::UniqueWorkerManager());
-    m_pSocketService = net::SocketServiceFactory::CreateService(net::SocketProtocal::Tcp,
-                                                                sspNat, logicPort, m_pMemPool,
-                                                                std::bind(&ARpcClientSync::recv_net_msg, this, std::placeholders::_1),
-                                                                sspMgr);
+    if (!memPool) {
+        m_bOwnPool = true;
+        m_pMemPool = new common::MemPool();
+    }
 }
 
 ARpcClientSync::~ARpcClientSync() {
     Stop();
-    DELETE_PTR(m_pSocketService);
-    DELETE_PTR(m_pMemPool);
+    if (m_bOwnPool) {
+        DELETE_PTR(m_pMemPool);
+    }
 }
 
 bool ARpcClientSync::Start() {
@@ -47,8 +46,10 @@ bool ARpcClientSync::Start() {
     }
 
     m_bStopped = false;
-    // TODO(sunchao): 等加了其他model，此处及类似的地方设置成可配置的。
-    return m_pSocketService->Start(m_iSSThreadsCnt, net::NonBlockingEventModel::Posix);
+    hw_rw_memory_barrier();
+    m_pWorkThreadPool = new common::ThreadPool<std::shared_ptr<net::NotifyMessage>>(m_iWorkThreadsCnt);
+
+    return true;
 }
 
 bool ARpcClientSync::Stop() {
@@ -57,15 +58,19 @@ bool ARpcClientSync::Stop() {
     }
 
     m_bStopped = true;
-    hw_rw_memory_barrier();
-    common::SpinLock l(&m_slRpcCtxs);
+    DELETE_PTR(m_pWorkThreadPool);
+    common::SpinLock l(&m_slRpcCtxs); // 有屏障作用。
     for (auto &peerRpc : m_hmapPeerRpcs) {
         for (auto rc : peerRpc.second) {
             common::g_pTimer->UnsubscribeEvent(rc->timer_ev);
         }
     }
 
-    return m_pSocketService->Stop();
+    return true;
+}
+
+void ARpcClientSync::HandleMessage(std::shared_ptr<net::NotifyMessage> sspNM) {
+    m_pWorkThreadPool->AddTask(std::bind(&ARpcClientSync::proc_recv_msg, this, std::placeholders::_1), sspNM);
 }
 
 bool ARpcClientSync::registerRpc(std::string &&rpcName, uint16_t id) {
@@ -91,6 +96,7 @@ ARpcClientSync::RpcCtx* ARpcClientSync::sendMessage(std::string &&rpcName, SP_PB
     net::net_peer_info_t rcPeer = peer;
     auto handlerId = m_hmapRpcs[rpcName];
     auto rr = new RpcRequest(m_pMemPool, std::move(peer), handlerId, std::move(msg));
+    auto id = rr->GetId();
     if (UNLIKELY(!m_pSocketService->SendMessage(rr))) {
         DELETE_PTR(rr);
         return nullptr;
@@ -98,7 +104,7 @@ ARpcClientSync::RpcCtx* ARpcClientSync::sendMessage(std::string &&rpcName, SP_PB
 
     auto rc = m_rpcCtxPool.Get();
     rc->peer = std::move(rcPeer);
-    rc->msgId = rr->GetId();
+    rc->msgId = id;
     rc->handlerId = handlerId;
 
     return rc;
@@ -193,7 +199,7 @@ std::shared_ptr<net::NotifyMessage> ARpcClientSync::recvMessage(RpcCtx* rc) {
     return std::move(sspNM);
 }
 
-void ARpcClientSync::recv_net_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
+void ARpcClientSync::proc_recv_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
     switch (sspNM->GetType()) {
         case net::NotifyMessageType::Message: {
             auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());

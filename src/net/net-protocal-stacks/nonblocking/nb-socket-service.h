@@ -33,7 +33,7 @@ public:
      * @param nlt 如果为空，则是为仅仅一个服务于client的服务，否则为server信息，会开启server的服务。
      * @param sspMgr  worker的管理策略。
      * @param memPool 内存池。
-     * @param sspMgr
+     * @param sspMgr 所有权归本类所有，用户不可以保留。
      */
     NBSocketService(SocketProtocal sp, std::shared_ptr<net_addr_t> sspNat, uint16_t logicPort,
                     std::shared_ptr<INetStackWorkerManager> sspMgr,
@@ -75,7 +75,7 @@ private:
     common::MemPool                                   *m_pMemPool = nullptr;
     AEventManager                                     *m_pEventManager = nullptr;
     NotifyMessageCallbackHandler                       m_msgCallback;
-    bool                                               m_bStopped;
+    bool                                               m_bStopped = true;
 
 
 }; // class NBSocketService

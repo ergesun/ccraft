@@ -7,20 +7,20 @@
 #include "../../../net/rcv-message.h"
 #include "../../../rpc/protobuf-utils.h"
 #include "../../../common/buffer.h"
-#include "../common-def.h"
+#include "common-def.h"
 
 #include "rf-node-rpc-sync-client.h"
 
 namespace ccraft {
 namespace server {
-bool RfNodeRpcClientSync::Start() {
+bool RfNodeInternalRpcClientSync::Start() {
     register_rpc_handlers();
 
     return rpc::ARpcClientSync::Start();
 }
 
 std::shared_ptr<rpc::AppendOpLogResponse>
-RfNodeRpcClientSync::AppendRfLog(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
+RfNodeInternalRpcClientSync::AppendRfLog(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
     auto tmpPeer = peer;
     auto ctx = sendMessage(RpcAppendRfLog, req, std::move(peer));
     if (UNLIKELY(!ctx)) {
@@ -38,7 +38,7 @@ RfNodeRpcClientSync::AppendRfLog(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer
     return std::shared_ptr<rpc::AppendOpLogResponse>(appendLogResp);
 }
 
-bool RfNodeRpcClientSync::register_rpc_handlers() {
+bool RfNodeInternalRpcClientSync::register_rpc_handlers() {
     if (!registerRpc(RpcAppendRfLog, APPEND_RFLOG_RPC_ID)) {
         return false;
     }

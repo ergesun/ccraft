@@ -17,8 +17,8 @@ namespace ccraft {
 namespace test {
 class TestRpcClientSync : public rpc::ARpcClientSync {
 public:
-    TestRpcClientSync(uint16_t socketServiceThreadsCnt, common::cctime_t timeout, uint16_t logicPort) :
-        rpc::ARpcClientSync(socketServiceThreadsCnt, timeout, logicPort) {}
+    TestRpcClientSync(net::ISocketService *ss, common::cctime_t timeout, uint16_t workThreadsCnt, common::MemPool *memPool = nullptr) :
+        rpc::ARpcClientSync(ss, timeout, workThreadsCnt, memPool) {}
 
     bool Start() override;
     std::shared_ptr<rpc::AppendOpLogResponse> AppendRfLog(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);

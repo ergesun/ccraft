@@ -26,6 +26,10 @@ DEFINE_int32(net_server_handshake_threads_cnt, 16, "网络框架服务端处理�
 /**
  * rpc server common
  */
+DEFINE_int32(internal_rpc_client_threads_cnt, 0, "设置用于rpc client处理任务的线程池线程个数。默认0为cpu逻辑核数的2倍。");
+DEFINE_int32(internal_rpc_client_wait_timeout_secs, 10, "设置用rpc client等待请求的最大时长的秒数部分。");
+DEFINE_int64(internal_rpc_client_wait_timeout_nsecs, 0, "设置用于rpc client等待请求的最大时长的纳秒数部分，与秒数共同组成等待时长。");
 DEFINE_int32(internal_rpc_server_threads_cnt, 0, "设置用于rpc server处理任务的线程池线程个数。默认0为cpu逻辑核数的2倍。");
+DEFINE_int32(internal_rpc_messenger_threads_cnt, 0, "设置用于internal rpc处理的信使的消息分发的线程数目。默认0为cpu逻辑核数的2倍。");
 DEFINE_int32(internal_rpc_io_threads_cnt, 0, "设置用于node间通信的rpc服务的网络io处理线程个数。默认0为cpu逻辑核数的一半。");
 DEFINE_int32(internal_rpc_logic_port, 22210, "设置用于node件通信的rpc服务的逻辑端口号。不要超过65535");

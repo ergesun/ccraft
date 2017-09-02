@@ -16,7 +16,7 @@ namespace net {
 NBSocketService::NBSocketService(SocketProtocal sp, std::shared_ptr<net_addr_t> sspNat, uint16_t logicPort,
                                  std::shared_ptr<INetStackWorkerManager> sspMgr,
                                  common::MemPool *memPool, NotifyMessageCallbackHandler msgCallbackHandler) :
-    ASocketService(sp, sspNat), m_iLogicPort(logicPort), m_pMemPool(memPool), m_bStopped(false) {
+    ASocketService(sp, sspNat), m_iLogicPort(logicPort), m_pMemPool(memPool) {
     assert(memPool);
     m_msgCallback = msgCallbackHandler;
     if (sspMgr.get()) {
@@ -27,16 +27,16 @@ NBSocketService::NBSocketService(SocketProtocal sp, std::shared_ptr<net_addr_t> 
 }
 
 NBSocketService::~NBSocketService() {
-    hw_rw_memory_barrier();
-    if (!m_bStopped) {
-        Stop();
-    }
-
+    Stop();
     DELETE_PTR(m_pEventManager);
 }
 
 bool NBSocketService::Start(uint16_t ioThreadsCnt, NonBlockingEventModel m) {
+    if (!m_bStopped) {
+        return true;
+    }
     m_bStopped = false;
+    hw_rw_memory_barrier();
     m_pEventManager = new PosixEventManager(m_sp, m_nlt, m_pMemPool, MAX_EVENTS, ioThreadsCnt,
                                             std::bind(&NBSocketService::on_stack_connect, this, _1),
                                             std::bind(&NBSocketService::on_logic_connect, this, _1),
@@ -46,12 +46,19 @@ bool NBSocketService::Start(uint16_t ioThreadsCnt, NonBlockingEventModel m) {
 }
 
 bool NBSocketService::Stop() {
+    if (m_bStopped) {
+        return true;
+    }
     m_bStopped = true;
+    hw_rw_memory_barrier();
     m_pNetStackWorkerManager.reset();
     return m_pEventManager->Stop();
 }
 
 bool NBSocketService::SendMessage(SndMessage *m) {
+    if (UNLIKELY(m_bStopped)) {
+        return false;
+    }
     if (SocketProtocal::Tcp != m->GetPeerInfo().sp) {
         std::stringstream ss;
         ss << "Not support now!" << __FILE__ << ":" << __LINE__;
@@ -70,7 +77,7 @@ bool NBSocketService::SendMessage(SndMessage *m) {
     if (handler) {
         rc = handler->GetStackMsgWorker()->SendMessage(m);
     } else {
-        LOGEFUN << "There is no worker for peer " << peer.nat.addr.c_str() << ":" << peer.nat.port;
+        LOGWFUN << "There is no worker for peer " << peer.nat.addr.c_str() << ":" << peer.nat.port;
     }
 
     return rc;
@@ -117,14 +124,23 @@ bool NBSocketService::connect(net_peer_info_t &npt) {
 }
 
 void NBSocketService::on_stack_connect(AFileEventHandler *handler) {
+    if (UNLIKELY(m_bStopped)) {
+        return;
+    }
     m_pEventManager->AddEvent(handler, EVENT_NONE, EVENT_READ|EVENT_WRITE);
 }
 
 bool NBSocketService::on_logic_connect(AFileEventHandler *handler) {
+    if (UNLIKELY(m_bStopped)) {
+        return false;
+    }
     return m_pNetStackWorkerManager->PutWorkerEventHandler(handler);
 }
 
 void NBSocketService::on_finish(AFileEventHandler *handler) {
+    if (UNLIKELY(m_bStopped)) {
+        return;
+    }
     auto lnpt = handler->GetSocketDescriptor()->GetLogicPeerInfo();
     auto rnpt = handler->GetSocketDescriptor()->GetRealPeerInfo();
     m_pNetStackWorkerManager->RemoveWorkerEventHandler(lnpt, rnpt);

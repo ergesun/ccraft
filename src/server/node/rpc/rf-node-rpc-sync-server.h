@@ -3,18 +3,20 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_TEST_RPC_SERVER_H
-#define CCRAFT_TEST_RPC_SERVER_H
+#ifndef CCRAFT_SERVER_RF_NODE_H
+#define CCRAFT_SERVER_RF_NODE_H
 
 #include "../../../rpc/rpc-server.h"
 #include "../../../rpc/common-def.h"
 
 namespace ccraft {
-namespace test {
-class TestRpcServer : public IService, public rpc::IMessageHandler {
+namespace server {
+class INodeInternalRpcHandler;
+class RfNodeInternalRpcServerSync : public IService, public rpc::IMessageHandler {
 public:
-    TestRpcServer(uint16_t workThreadsCnt, net::ISocketService *ss, common::MemPool *memPool = nullptr);
-    ~TestRpcServer() override;
+    RfNodeInternalRpcServerSync(INodeInternalRpcHandler *handler, uint16_t workThreadsCnt,
+                                net::ISocketService *ss, common::MemPool *memPool = nullptr);
+    ~RfNodeInternalRpcServerSync() override;
 
     bool Start() override;
     bool Stop() override;
@@ -31,9 +33,10 @@ private:
     rpc::SP_PB_MSG create_append_rflog_request();
 
 private:
-    rpc::RpcServer        *m_pRpcServer = nullptr;
+    rpc::RpcServer           *m_pRpcServer = nullptr;
+    INodeInternalRpcHandler  *m_pHandler   = nullptr;
 };
-} // namespace test
+} // namespace server
 } // namespace ccraft
 
-#endif //CCRAFT_TEST_RPC_SERVER_H
+#endif //CCRAFT_SERVER_RF_NODE_H

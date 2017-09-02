@@ -12,13 +12,15 @@ namespace ccraft {
 namespace rpc {
 uint32_t RpcResponse::getDerivePayloadLength() {
     if (m_pMsg.get()) {
-        return sizeof(CodeType) + m_pMsg->ByteSize();
+        return 1 + sizeof(CodeType) + m_pMsg->ByteSize();
     } else {
-        return sizeof(CodeType);
+        return 1 + sizeof(CodeType);
     }
 }
 
 void RpcResponse::encodeDerive(common::Buffer *b) {
+    *(b->GetPos()) = (uchar)((uint8_t)(MessageType::Response));
+    b->MoveHeadBack(1);
     ByteOrderUtils::WriteUInt16(b->GetPos(), (CodeType)m_code);
     b->MoveHeadBack(sizeof(CodeType));
     if (m_pMsg.get()) {
@@ -27,10 +29,12 @@ void RpcResponse::encodeDerive(common::Buffer *b) {
 }
 
 uint32_t RpcErrorResponse::getDerivePayloadLength() {
-    return sizeof(CodeType);
+    return 1 + sizeof(CodeType);
 }
 
 void RpcErrorResponse::encodeDerive(common::Buffer *b) {
+    *(b->GetPos()) = (uchar)((uint8_t)(MessageType::Response));
+    b->MoveHeadBack(1);
     ByteOrderUtils::WriteUInt16(b->GetPos(), (CodeType)m_code);
 }
 } // namespace rpc

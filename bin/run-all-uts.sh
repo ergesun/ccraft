@@ -3,7 +3,7 @@
 function print_usage {
     echo_red "Usage: build COMMAND."
     echo_yellow "where COMMAND is one of:"
-    echo_yellow "  -d           \t run release unit tests(default: release unit test cases)."
+    echo_yellow "  -d           \t run debug unit tests(default: release unit test cases)."
     echo_yellow "  -h           \t show help."
 }
 

@@ -14,33 +14,37 @@
 
 namespace ccraft {
 namespace test {
-TestRpcServer::TestRpcServer() {
-    m_pInternalRpcServer = new rpc::RpcServer(4, 2, 42335);
+TestRpcServer::TestRpcServer(uint16_t workThreadsCnt, net::ISocketService *ss, common::MemPool *memPool) {
+    m_pRpcServer = new rpc::RpcServer(workThreadsCnt, ss, memPool);
 }
 
 TestRpcServer::~TestRpcServer() {
-    DELETE_PTR(m_pInternalRpcServer);
+    DELETE_PTR(m_pRpcServer);
 }
 
 bool TestRpcServer::Start() {
     register_rpc_handlers();
 
-    return m_pInternalRpcServer->Start();
+    return m_pRpcServer->Start();
 }
 
 bool TestRpcServer::Stop() {
-    return m_pInternalRpcServer->Stop();
+    return m_pRpcServer->Stop();
+}
+
+void TestRpcServer::HandleMessage(std::shared_ptr<net::NotifyMessage> sspNM) {
+    m_pRpcServer->HandleMessage(sspNM);
 }
 
 void TestRpcServer::register_rpc_handlers() {
     // internal communication
-    auto appendLogHandler = new rpc::TypicalRpcHandler(std::bind(&TestRpcServer::append_rflog, this, std::placeholders::_1),
+    auto appendLogHandler = new rpc::TypicalRpcHandler(std::bind(&TestRpcServer::on_append_rflog, this, std::placeholders::_1),
                                                        std::bind(&TestRpcServer::create_append_rflog_request, this));
-    m_pInternalRpcServer->RegisterRpc(1, appendLogHandler);
-    m_pInternalRpcServer->FinishRegisterRpc();
+    m_pRpcServer->RegisterRpc(1, appendLogHandler);
+    m_pRpcServer->FinishRegisterRpc();
 }
 
-rpc::SP_PB_MSG TestRpcServer::append_rflog(rpc::SP_PB_MSG sspMsg) {
+rpc::SP_PB_MSG TestRpcServer::on_append_rflog(rpc::SP_PB_MSG sspMsg) {
     auto appendOpLogRequest = dynamic_cast<rpc::AppendOpLogRequest*>(sspMsg.get());
     EXPECT_EQ(1234, appendOpLogRequest->term());
     EXPECT_STREQ("test leader", appendOpLogRequest->leaderid().c_str());

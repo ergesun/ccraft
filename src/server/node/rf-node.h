@@ -3,35 +3,29 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_SERVER_RF_NODE_H
-#define CCRAFT_SERVER_RF_NODE_H
+#ifndef CCRAFT_RF_NODE_H
+#define CCRAFT_RF_NODE_H
 
-#include "../../rpc/rpc-server.h"
+#include "../../iservice.h"
 #include "../../rpc/common-def.h"
+#include "inode-internal-rpc-handler.h"
 
 namespace ccraft {
     namespace server {
-        class RfNode : public IService {
+        class NodeInternalMessenger;
+        class RfNode : public IService, public INodeInternalRpcHandler {
         public:
             RfNode();
-            ~RfNode() override;
-
+            ~RfNode();
             bool Start() override;
             bool Stop() override;
 
-        private:
-            void register_rpc_handlers();
-            rpc::SP_PB_MSG append_rflog(rpc::SP_PB_MSG sspMsg);
-            /**
-             * for rpc lib to deserialize client request.
-             * @return
-             */
-            rpc::SP_PB_MSG create_append_rflog_request();
+            rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
 
         private:
-            rpc::RpcServer        *m_pInternalRpcServer = nullptr;
+            NodeInternalMessenger         *m_pNodeInternalMessenger = nullptr;
         };
     } // namespace server
 } // namespace ccraft
 
-#endif //CCRAFT_SERVER_RF_NODE_H
+#endif //CCRAFT_RF_NODE_H
