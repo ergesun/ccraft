@@ -23,6 +23,7 @@ namespace ccraft {
             bool Stop() override;
 
             rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
+            rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
 
         private:
             NodeRoleType                   m_roleType = NodeRoleType::Follower;

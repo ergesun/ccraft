@@ -19,6 +19,7 @@
 #include "../../net/net-protocal-stacks/inet-stack-worker-manager.h"
 #include "../../net/socket-service-factory.h"
 #include "../../net/net-protocal-stacks/msg-worker-managers/unique-worker-manager.h"
+#include "../../codegen/append-log.pb.h"
 
 using namespace std;
 
@@ -77,13 +78,13 @@ TEST(RpcTest, ClientServerTest) {
         .sp = ccraft::net::SocketProtocal::Tcp
     };
 
-    auto request = new ccraft::rpc::AppendOpLogRequest();
+    auto request = new ccraft::rpc::AppendRfLogRequest();
     request->set_term(1234);
-    request->set_leaderid("test leader");
+    request->set_leaderid(1);
     request->set_prevlogindex(22);
     request->set_prevlogterm(1233);
 
-    std::shared_ptr<ccraft::rpc::AppendOpLogResponse> sspResp;
+    std::shared_ptr<ccraft::rpc::AppendRfLogResponse> sspResp;
     EXPECT_NO_THROW(sspResp = g_pClient->AppendRfLog(ccraft::rpc::SP_PB_MSG(request), std::move(peer)));
     EXPECT_EQ(sspResp->term(), 1111);
     EXPECT_EQ(sspResp->success(), true);

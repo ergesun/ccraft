@@ -45,15 +45,15 @@ void TestRpcServer::register_rpc_handlers() {
 }
 
 rpc::SP_PB_MSG TestRpcServer::on_append_rflog(rpc::SP_PB_MSG sspMsg) {
-    auto appendOpLogRequest = dynamic_cast<rpc::AppendOpLogRequest*>(sspMsg.get());
+    auto appendOpLogRequest = dynamic_cast<rpc::AppendRfLogRequest*>(sspMsg.get());
     EXPECT_EQ(1234, appendOpLogRequest->term());
-    EXPECT_STREQ("test leader", appendOpLogRequest->leaderid().c_str());
+    EXPECT_EQ(1, appendOpLogRequest->leaderid());
     EXPECT_EQ(22, appendOpLogRequest->prevlogindex());
     EXPECT_EQ(1233, appendOpLogRequest->prevlogterm());
     std::cout << "client req: term = " << appendOpLogRequest->term() << ", leader id = " << appendOpLogRequest->leaderid()
               << ", prev log idx = " << appendOpLogRequest->prevlogindex()
               << ", prev log term = " << appendOpLogRequest->prevlogterm() << std::endl;
-    auto response = new rpc::AppendOpLogResponse();
+    auto response = new rpc::AppendRfLogResponse();
     response->set_term(1111);
     response->set_success(true);
 
@@ -61,7 +61,7 @@ rpc::SP_PB_MSG TestRpcServer::on_append_rflog(rpc::SP_PB_MSG sspMsg) {
 }
 
 rpc::SP_PB_MSG TestRpcServer::create_append_rflog_request() {
-    return rpc::SP_PB_MSG(new rpc::AppendOpLogRequest());
+    return rpc::SP_PB_MSG(new rpc::AppendRfLogRequest());
 }
 }
 }

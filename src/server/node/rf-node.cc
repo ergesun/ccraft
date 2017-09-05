@@ -3,6 +3,7 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
+#include "../../codegen/requst-vote.pb.h"
 #include "../../codegen/append-log.pb.h"
 #include "../../common/server-gflags-config.h"
 
@@ -45,7 +46,15 @@ namespace ccraft {
         }
 
         rpc::SP_PB_MSG RfNode::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
-            auto response = new rpc::AppendOpLogResponse();
+            auto response = new rpc::AppendRfLogResponse();
+            response->set_term(1111);
+            response->set_success(true);
+
+            return rpc::SP_PB_MSG(response);
+        }
+
+        rpc::SP_PB_MSG RfNode::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
+            auto response = new rpc::RequestVoteResponse();
             response->set_term(1111);
             response->set_success(true);
 

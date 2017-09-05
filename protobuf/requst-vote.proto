@@ -1,0 +1,16 @@
+syntax="proto3";
+//option cc_generic_services = true;
+
+package ccraft.rpc;
+
+message RequestVoteRequest {
+    uint32                term         = 1;
+    uint32                leaderId     = 2;
+    uint64                lastLogIndex = 3;
+    uint32                lastLogTerm  = 4;
+}
+
+message RequestVoteResponse {
+    uint32 term = 1;
+    bool   success = 2;
+}

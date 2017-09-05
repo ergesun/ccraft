@@ -7,6 +7,7 @@
 #include "../../../net/rcv-message.h"
 #include "../../../rpc/protobuf-utils.h"
 #include "../../../common/buffer.h"
+#include "../../../codegen/append-log.pb.h"
 
 #include "test-rpc-client.h"
 
@@ -18,7 +19,7 @@ bool TestRpcClientSync::Start() {
     return rpc::ARpcClientSync::Start();
 }
 
-std::shared_ptr<rpc::AppendOpLogResponse>
+std::shared_ptr<rpc::AppendRfLogResponse>
 TestRpcClientSync::AppendRfLog(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
     auto tmpPeer = peer;
     auto ctx = sendMessage(RpcAppendRfLog, req, std::move(peer));
@@ -29,12 +30,12 @@ TestRpcClientSync::AppendRfLog(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) 
     auto sspNM = recvMessage(ctx);
     auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());
     auto rm = mnm->GetContent();
-    auto appendLogResp = new rpc::AppendOpLogResponse();
+    auto appendLogResp = new rpc::AppendRfLogResponse();
     auto buf = rm->GetDataBuffer();
     buf->MoveHeadBack(sizeof(uint16_t)); // server code
     rpc::ProtoBufUtils::Deserialize(buf, appendLogResp);
 
-    return std::shared_ptr<rpc::AppendOpLogResponse>(appendLogResp);
+    return std::shared_ptr<rpc::AppendRfLogResponse>(appendLogResp);
 }
 
 bool TestRpcClientSync::register_rpc_handlers() {

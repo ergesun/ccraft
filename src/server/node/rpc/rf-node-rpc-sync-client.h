@@ -9,11 +9,18 @@
 #include "../../../rpc/client-bases/abstract-rpc-client-sync.h"
 #include "../../../rpc/common-def.h"
 
-#include "../../../codegen/append-log.pb.h"
-
 #define RpcAppendRfLog "AppendRfLog"
+#define RpcRequestVote "RequestVote"
+
+#define DefineRfNodeRpcWithPeer(RpcName)                                                                \
+    std::shared_ptr<rpc::RpcName##Response> RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer)
 
 namespace ccraft {
+namespace rpc {
+    class AppendRfLogResponse;
+    class RequestVoteResponse;
+}
+
 namespace server {
 class RfNodeInternalRpcClientSync : public rpc::ARpcClientSync {
 public:
@@ -22,7 +29,11 @@ public:
         rpc::ARpcClientSync(ss, timeout, workThreadsCnt, memPool) {}
 
     bool Start() override;
-    std::shared_ptr<rpc::AppendOpLogResponse> AppendRfLog(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+
+    // Define Rpc start
+    DefineRfNodeRpcWithPeer(AppendRfLog);
+    DefineRfNodeRpcWithPeer(RequestVote);
+    // Define Rpc end
 
 private:
     bool register_rpc_handlers();

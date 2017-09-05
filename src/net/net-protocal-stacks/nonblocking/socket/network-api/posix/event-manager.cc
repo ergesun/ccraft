@@ -22,15 +22,17 @@ PosixEventManager::PosixEventManager(SocketProtocal sp, std::shared_ptr<net_addr
 }
 
 PosixEventManager::~PosixEventManager() {
-    if (!m_bStopped) {
-        Stop();
-    }
-
+    Stop();
     DELETE_PTR(m_pServerEventHandler);
 }
 
 bool PosixEventManager::Start(NonBlockingEventModel m) {
+    if (!m_bStopped) {
+        return true;
+    }
+
     m_bStopped = false;
+    hw_rw_memory_barrier();
     if (SocketProtocal::Tcp == m_sp) {
         if (m_sspNat.get()) {
             auto ew = new EventWorker(m_iMaxEvents, m);
@@ -58,7 +60,11 @@ bool PosixEventManager::Start(NonBlockingEventModel m) {
 }
 
 bool PosixEventManager::Stop() {
+    if (m_bStopped) {
+        return true;
+    }
     m_bStopped = true;
+    hw_rw_memory_barrier();
     if (m_sspNat.get()) {
         // 释放listen的worker及其相关资源
         auto listenEW = m_pListenWorkerEventLoopCtx.second;
@@ -101,10 +107,13 @@ void PosixEventManager::AddEvent(AFileEventHandler *socketEventHandler, int cur_
 
 void PosixEventManager::worker_loop(EventWorker *ew) {
     auto events = ew->GetEventsContainer();
-    while (!m_bStopped) {
+    while (LIKELY(!m_bStopped)) {
         auto nevents = ew->GetInternalEvent(events, nullptr);
-        auto pendingDeleteEventHandlers = ew->GetExternalEpDelEvents();
+        if (UNLIKELY(m_bStopped)) {
+            break;
+        }
 
+        auto pendingDeleteEventHandlers = ew->GetExternalEpDelEvents();
         for (auto de : pendingDeleteEventHandlers) {
             ew->DeleteHandler(de);
         }

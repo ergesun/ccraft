@@ -3,7 +3,7 @@ syntax="proto3";
 
 package ccraft.rpc;
 
-message OpLogEntry {
+message RfLogEntry {
     uint32 term         = 1;
     uint64 index        = 2;
     uint32 type         = 3;
@@ -11,16 +11,16 @@ message OpLogEntry {
     bytes  value        = 5;
 }
 
-message AppendOpLogRequest {
+message AppendRfLogRequest {
     uint32                term         = 1;
-    string                leaderId     = 2;
+    uint32                leaderId     = 2;
     uint64                prevLogIndex = 3;
     uint32                prevLogTerm  = 4;
-    repeated OpLogEntry   entries      = 5;
+    repeated RfLogEntry   entries      = 5;
     uint64                leaderCommit = 6;
 }
 
-message AppendOpLogResponse {
-    uint32 term = 1;
+message AppendRfLogResponse {
+    uint32 term    = 1;
     bool   success = 2;
 }

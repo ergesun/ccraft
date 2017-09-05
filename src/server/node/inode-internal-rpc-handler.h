@@ -14,6 +14,7 @@ class INodeInternalRpcHandler {
 public:
     virtual ~INodeInternalRpcHandler() = default;
     virtual rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) = 0;
+    virtual rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) = 0;
 }; // class IMessageHandler
 } // namespace rpc
 } // namespace ccraft

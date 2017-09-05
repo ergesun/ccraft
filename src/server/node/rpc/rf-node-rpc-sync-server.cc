@@ -5,10 +5,12 @@
 
 #include "../../../common/server-gflags-config.h"
 #include "../../../rpc/rpc-handler.h"
-#include "common-def.h"
 #include "../../../codegen/append-log.pb.h"
+#include "../../../codegen/requst-vote.pb.h"
 
 #include "../inode-internal-rpc-handler.h"
+#include "common-def.h"
+
 #include "rf-node-rpc-sync-server.h"
 
 namespace ccraft {
@@ -40,9 +42,13 @@ void RfNodeInternalRpcServerSync::HandleMessage(std::shared_ptr<net::NotifyMessa
 
 void RfNodeInternalRpcServerSync::register_rpc_handlers() {
     // internal communication
-    auto appendLogHandler = new rpc::TypicalRpcHandler(std::bind(&RfNodeInternalRpcServerSync::on_append_rflog, this, std::placeholders::_1),
+    auto appendRfLogHandler = new rpc::TypicalRpcHandler(std::bind(&RfNodeInternalRpcServerSync::on_append_rflog, this, std::placeholders::_1),
                                               std::bind(&RfNodeInternalRpcServerSync::create_append_rflog_request, this));
-    m_pRpcServer->RegisterRpc(APPEND_RFLOG_RPC_ID, appendLogHandler);
+    m_pRpcServer->RegisterRpc(APPEND_RFLOG_RPC_ID, appendRfLogHandler);
+    auto requestVoteHandler = new rpc::TypicalRpcHandler(std::bind(&RfNodeInternalRpcServerSync::on_request_vote, this, std::placeholders::_1),
+                                              std::bind(&RfNodeInternalRpcServerSync::create_request_vote_request, this));
+    m_pRpcServer->RegisterRpc(REQUEST_VOTE_RPC_ID, requestVoteHandler);
+
     m_pRpcServer->FinishRegisterRpc();
 }
 
@@ -51,7 +57,15 @@ rpc::SP_PB_MSG RfNodeInternalRpcServerSync::on_append_rflog(rpc::SP_PB_MSG sspMs
 }
 
 rpc::SP_PB_MSG RfNodeInternalRpcServerSync::create_append_rflog_request() {
-    return rpc::SP_PB_MSG(new rpc::AppendOpLogRequest());
+    return rpc::SP_PB_MSG(new rpc::AppendRfLogRequest());
+}
+
+rpc::SP_PB_MSG RfNodeInternalRpcServerSync::on_request_vote(rpc::SP_PB_MSG sspMsg) {
+    return m_pHandler->OnRequestVote(sspMsg);
+}
+
+rpc::SP_PB_MSG RfNodeInternalRpcServerSync::create_request_vote_request() {
+    return rpc::SP_PB_MSG(new rpc::RequestVoteRequest());
 }
 } // namespace server
 } // namespace ccraft

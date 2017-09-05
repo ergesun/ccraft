@@ -83,13 +83,22 @@ bool NodeInternalMessenger::Stop() {
     return true;
 }
 
-std::shared_ptr<rpc::AppendOpLogResponse> NodeInternalMessenger::AppendRfLogSync(rpc::SP_PB_MSG req,
+std::shared_ptr<rpc::AppendRfLogResponse> NodeInternalMessenger::AppendRfLogSync(rpc::SP_PB_MSG req,
                                                                                  net::net_peer_info_t &&peer) {
     return m_pClient->AppendRfLog(req, std::move(peer));
 }
 
 rpc::SP_PB_MSG NodeInternalMessenger::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
     return m_pRfNode->OnAppendRfLog(sspMsg);
+}
+
+std::shared_ptr<rpc::RequestVoteResponse> NodeInternalMessenger::RequestVoteSync(rpc::SP_PB_MSG req,
+                                                                                 net::net_peer_info_t &&peer) {
+    return m_pClient->RequestVote(req, std::move(peer));
+}
+
+rpc::SP_PB_MSG NodeInternalMessenger::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
+    return m_pRfNode->OnRequestVote(sspMsg);
 }
 
 void NodeInternalMessenger::dispatch_msg(std::shared_ptr<net::NotifyMessage> sspNM) {

@@ -9,11 +9,12 @@
 #include "../../../rpc/client-bases/abstract-rpc-client-sync.h"
 #include "../../../rpc/common-def.h"
 
-#include "../../../codegen/append-log.pb.h"
-
 #define RpcAppendRfLog "AppendRfLog"
 
 namespace ccraft {
+namespace rpc {
+class AppendRfLogResponse;
+}
 namespace test {
 class TestRpcClientSync : public rpc::ARpcClientSync {
 public:
@@ -21,7 +22,7 @@ public:
         rpc::ARpcClientSync(ss, timeout, workThreadsCnt, memPool) {}
 
     bool Start() override;
-    std::shared_ptr<rpc::AppendOpLogResponse> AppendRfLog(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    std::shared_ptr<rpc::AppendRfLogResponse> AppendRfLog(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
 
 private:
     bool register_rpc_handlers();
