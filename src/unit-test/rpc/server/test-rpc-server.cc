@@ -11,6 +11,7 @@
 #include "../../../codegen/append-log.pb.h"
 
 #include "test-rpc-server.h"
+#include "../../../codegen/requst-vote.pb.h"
 
 namespace ccraft {
 namespace test {
@@ -41,6 +42,9 @@ void TestRpcServer::register_rpc_handlers() {
     auto appendLogHandler = new rpc::TypicalRpcHandler(std::bind(&TestRpcServer::on_append_rflog, this, std::placeholders::_1),
                                                        std::bind(&TestRpcServer::create_append_rflog_request, this));
     m_pRpcServer->RegisterRpc(1, appendLogHandler);
+    auto requestVoteHandler = new rpc::TypicalRpcHandler(std::bind(&TestRpcServer::on_request_vote, this, std::placeholders::_1),
+                                                       std::bind(&TestRpcServer::create_request_vote_request, this));
+    m_pRpcServer->RegisterRpc(2, requestVoteHandler);
     m_pRpcServer->FinishRegisterRpc();
 }
 
@@ -50,7 +54,8 @@ rpc::SP_PB_MSG TestRpcServer::on_append_rflog(rpc::SP_PB_MSG sspMsg) {
     EXPECT_EQ(1, appendOpLogRequest->leaderid());
     EXPECT_EQ(22, appendOpLogRequest->prevlogindex());
     EXPECT_EQ(1233, appendOpLogRequest->prevlogterm());
-    std::cout << "client req: term = " << appendOpLogRequest->term() << ", leader id = " << appendOpLogRequest->leaderid()
+    std::cout << "client req: term = " << appendOpLogRequest->term()
+              << ", leader id = " << appendOpLogRequest->leaderid()
               << ", prev log idx = " << appendOpLogRequest->prevlogindex()
               << ", prev log term = " << appendOpLogRequest->prevlogterm() << std::endl;
     auto response = new rpc::AppendRfLogResponse();
@@ -62,6 +67,27 @@ rpc::SP_PB_MSG TestRpcServer::on_append_rflog(rpc::SP_PB_MSG sspMsg) {
 
 rpc::SP_PB_MSG TestRpcServer::create_append_rflog_request() {
     return rpc::SP_PB_MSG(new rpc::AppendRfLogRequest());
+}
+
+rpc::SP_PB_MSG TestRpcServer::on_request_vote(rpc::SP_PB_MSG sspMsg) {
+    auto requestVoteRequest = dynamic_cast<rpc::RequestVoteRequest*>(sspMsg.get());
+    EXPECT_EQ(1234, requestVoteRequest->term());
+    EXPECT_EQ(1, requestVoteRequest->leaderid());
+    EXPECT_EQ(22, requestVoteRequest->lastlogindex());
+    EXPECT_EQ(1233, requestVoteRequest->lastlogterm());
+    std::cout << "client req: term = " << requestVoteRequest->term()
+              << ", leader id = " << requestVoteRequest->leaderid()
+              << ", prev log idx = " << requestVoteRequest->lastlogindex()
+              << ", prev log term = " << requestVoteRequest->lastlogterm() << std::endl;
+    auto response = new rpc::RequestVoteResponse();
+    response->set_term(1111);
+    response->set_success(true);
+
+    return rpc::SP_PB_MSG(response);
+}
+
+rpc::SP_PB_MSG TestRpcServer::create_request_vote_request() {
+    return rpc::SP_PB_MSG(new rpc::RequestVoteRequest());
 }
 }
 }

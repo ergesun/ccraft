@@ -20,6 +20,7 @@
 #include "../../net/socket-service-factory.h"
 #include "../../net/net-protocal-stacks/msg-worker-managers/unique-worker-manager.h"
 #include "../../codegen/append-log.pb.h"
+#include "../../codegen/requst-vote.pb.h"
 
 using namespace std;
 
@@ -78,17 +79,29 @@ TEST(RpcTest, ClientServerTest) {
         .sp = ccraft::net::SocketProtocal::Tcp
     };
 
-    auto request = new ccraft::rpc::AppendRfLogRequest();
-    request->set_term(1234);
-    request->set_leaderid(1);
-    request->set_prevlogindex(22);
-    request->set_prevlogterm(1233);
+    auto appendRfLogRequest = new ccraft::rpc::AppendRfLogRequest();
+    appendRfLogRequest->set_term(1234);
+    appendRfLogRequest->set_leaderid(1);
+    appendRfLogRequest->set_prevlogindex(22);
+    appendRfLogRequest->set_prevlogterm(1233);
 
-    std::shared_ptr<ccraft::rpc::AppendRfLogResponse> sspResp;
-    EXPECT_NO_THROW(sspResp = g_pClient->AppendRfLog(ccraft::rpc::SP_PB_MSG(request), std::move(peer)));
-    EXPECT_EQ(sspResp->term(), 1111);
-    EXPECT_EQ(sspResp->success(), true);
-    std::cout << "server resp: term = " << sspResp->term() << ", ok = " << sspResp->success() << std::endl;
+    std::shared_ptr<ccraft::rpc::AppendRfLogResponse> appendRfLogSspResp;
+    EXPECT_NO_THROW(appendRfLogSspResp = g_pClient->AppendRfLog(ccraft::rpc::SP_PB_MSG(appendRfLogRequest), std::move(peer)));
+    EXPECT_EQ(appendRfLogSspResp->term(), 1111);
+    EXPECT_EQ(appendRfLogSspResp->success(), true);
+    std::cout << "server resp: term = " << appendRfLogSspResp->term() << ", ok = " << appendRfLogSspResp->success() << std::endl;
+
+    auto reqVoteRequest = new ccraft::rpc::RequestVoteRequest();
+    reqVoteRequest->set_term(1234);
+    reqVoteRequest->set_leaderid(1);
+    reqVoteRequest->set_lastlogindex(22);
+    reqVoteRequest->set_lastlogterm(1233);
+
+    std::shared_ptr<ccraft::rpc::RequestVoteResponse> reqVoteSspResp;
+    EXPECT_NO_THROW(reqVoteSspResp = g_pClient->RequestVote(ccraft::rpc::SP_PB_MSG(reqVoteRequest), std::move(peer)));
+    EXPECT_EQ(reqVoteSspResp->term(), 1111);
+    EXPECT_EQ(reqVoteSspResp->success(), true);
+    std::cout << "server resp: term = " << reqVoteSspResp->term() << ", ok = " << reqVoteSspResp->success() << std::endl;
 
     EXPECT_EQ(g_pClient->Stop(), true);
 }

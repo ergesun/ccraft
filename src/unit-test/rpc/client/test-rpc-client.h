@@ -10,10 +10,15 @@
 #include "../../../rpc/common-def.h"
 
 #define RpcAppendRfLog "AppendRfLog"
+#define RpcRequestVote "RequestVote"
+
+#define DefineTestRpcClientSyncWithPeer(RpcName)                                                                \
+    std::shared_ptr<rpc::RpcName##Response> RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer)
 
 namespace ccraft {
 namespace rpc {
 class AppendRfLogResponse;
+class RequestVoteResponse;
 }
 namespace test {
 class TestRpcClientSync : public rpc::ARpcClientSync {
@@ -22,7 +27,8 @@ public:
         rpc::ARpcClientSync(ss, timeout, workThreadsCnt, memPool) {}
 
     bool Start() override;
-    std::shared_ptr<rpc::AppendRfLogResponse> AppendRfLog(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    DefineTestRpcClientSyncWithPeer(AppendRfLog);
+    DefineTestRpcClientSyncWithPeer(RequestVote);
 
 private:
     bool register_rpc_handlers();

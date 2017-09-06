@@ -17,8 +17,8 @@
 
 namespace ccraft {
 namespace rpc {
-    class AppendRfLogResponse;
-    class RequestVoteResponse;
+class AppendRfLogResponse;
+class RequestVoteResponse;
 }
 
 namespace server {

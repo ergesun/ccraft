@@ -29,6 +29,12 @@ private:
      * @return
      */
     rpc::SP_PB_MSG create_append_rflog_request();
+    rpc::SP_PB_MSG on_request_vote(rpc::SP_PB_MSG sspMsg);
+    /**
+     * for rpc lib to deserialize client request.
+     * @return
+     */
+    rpc::SP_PB_MSG create_request_vote_request();
 
 private:
     rpc::RpcServer        *m_pRpcServer = nullptr;

@@ -8,8 +8,27 @@
 #include "../../../rpc/protobuf-utils.h"
 #include "../../../common/buffer.h"
 #include "../../../codegen/append-log.pb.h"
+#include "../../../codegen/requst-vote.pb.h"
 
 #include "test-rpc-client.h"
+
+#define ImplTestRpcClientSyncWithPeer(RpcName)                                                          \
+std::shared_ptr<rpc::RpcName##Response>                                                                 \
+    TestRpcClientSync::RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {                       \
+        auto tmpPeer = peer;                                                                            \
+        auto ctx = sendMessage(#RpcName, std::move(req), std::move(peer));                              \
+        if (UNLIKELY(!ctx)) {                                                                           \
+            LOGFFUN << "send msg to " << tmpPeer.nat.addr << ":" << tmpPeer.nat.port << " failed!";     \
+        }                                                                                               \
+        auto sspNM = recvMessage(ctx);                                                                  \
+        auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());                              \
+        auto rm = mnm->GetContent();                                                                    \
+        auto RpcName##Resp__Impl_DEF_TMP = new rpc::RpcName##Response();                                \
+        auto buf = rm->GetDataBuffer();                                                                 \
+        buf->MoveHeadBack(sizeof(uint16_t));                                                            \
+        rpc::ProtoBufUtils::Deserialize(buf, RpcName##Resp__Impl_DEF_TMP);                              \
+        return std::shared_ptr<rpc::RpcName##Response>(RpcName##Resp__Impl_DEF_TMP);                    \
+    }
 
 namespace ccraft {
 namespace test {
@@ -19,27 +38,15 @@ bool TestRpcClientSync::Start() {
     return rpc::ARpcClientSync::Start();
 }
 
-std::shared_ptr<rpc::AppendRfLogResponse>
-TestRpcClientSync::AppendRfLog(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
-    auto tmpPeer = peer;
-    auto ctx = sendMessage(RpcAppendRfLog, req, std::move(peer));
-    if (UNLIKELY(!ctx)) {
-        LOGFFUN << "send msg to " << tmpPeer.nat.addr << ":" << tmpPeer.nat.port << " failed!";
-    }
-
-    auto sspNM = recvMessage(ctx);
-    auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());
-    auto rm = mnm->GetContent();
-    auto appendLogResp = new rpc::AppendRfLogResponse();
-    auto buf = rm->GetDataBuffer();
-    buf->MoveHeadBack(sizeof(uint16_t)); // server code
-    rpc::ProtoBufUtils::Deserialize(buf, appendLogResp);
-
-    return std::shared_ptr<rpc::AppendRfLogResponse>(appendLogResp);
-}
+ImplTestRpcClientSyncWithPeer(AppendRfLog)
+ImplTestRpcClientSyncWithPeer(RequestVote)
 
 bool TestRpcClientSync::register_rpc_handlers() {
     if (!registerRpc(RpcAppendRfLog, 1)) {
+        return false;
+    }
+
+    if (!registerRpc(RpcRequestVote, 2)) {
         return false;
     }
 
