@@ -19,8 +19,7 @@
 #include "../../net/net-protocal-stacks/inet-stack-worker-manager.h"
 #include "../../net/socket-service-factory.h"
 #include "../../net/net-protocal-stacks/msg-worker-managers/unique-worker-manager.h"
-#include "../../codegen/append-log.pb.h"
-#include "../../codegen/requst-vote.pb.h"
+#include "../../codegen/node-raft.pb.h"
 
 using namespace std;
 
@@ -79,25 +78,25 @@ TEST(RpcTest, ClientServerTest) {
         .sp = ccraft::net::SocketProtocal::Tcp
     };
 
-    auto appendRfLogRequest = new ccraft::rpc::AppendRfLogRequest();
+    auto appendRfLogRequest = new ccraft::protocal::serverraft::AppendRfLogRequest();
     appendRfLogRequest->set_term(1234);
     appendRfLogRequest->set_leaderid(1);
     appendRfLogRequest->set_prevlogindex(22);
     appendRfLogRequest->set_prevlogterm(1233);
 
-    std::shared_ptr<ccraft::rpc::AppendRfLogResponse> appendRfLogSspResp;
+    std::shared_ptr<ccraft::protocal::serverraft::AppendRfLogResponse> appendRfLogSspResp;
     EXPECT_NO_THROW(appendRfLogSspResp = g_pClient->AppendRfLog(ccraft::rpc::SP_PB_MSG(appendRfLogRequest), std::move(peer)));
     EXPECT_EQ(appendRfLogSspResp->term(), 1111);
     EXPECT_EQ(appendRfLogSspResp->success(), true);
     std::cout << "server resp: term = " << appendRfLogSspResp->term() << ", ok = " << appendRfLogSspResp->success() << std::endl;
 
-    auto reqVoteRequest = new ccraft::rpc::RequestVoteRequest();
+    auto reqVoteRequest = new ccraft::protocal::serverraft::RequestVoteRequest();
     reqVoteRequest->set_term(1234);
     reqVoteRequest->set_leaderid(1);
     reqVoteRequest->set_lastlogindex(22);
     reqVoteRequest->set_lastlogterm(1233);
 
-    std::shared_ptr<ccraft::rpc::RequestVoteResponse> reqVoteSspResp;
+    std::shared_ptr<ccraft::protocal::serverraft::RequestVoteResponse> reqVoteSspResp;
     EXPECT_NO_THROW(reqVoteSspResp = g_pClient->RequestVote(ccraft::rpc::SP_PB_MSG(reqVoteRequest), std::move(peer)));
     EXPECT_EQ(reqVoteSspResp->term(), 1111);
     EXPECT_EQ(reqVoteSspResp->success(), true);

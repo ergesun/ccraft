@@ -5,8 +5,7 @@
 
 #include "../../../common/server-gflags-config.h"
 #include "../../../rpc/rpc-handler.h"
-#include "../../../codegen/append-log.pb.h"
-#include "../../../codegen/requst-vote.pb.h"
+#include "../../../codegen/node-raft.pb.h"
 
 #include "../inode-internal-rpc-handler.h"
 #include "common-def.h"
@@ -57,7 +56,7 @@ rpc::SP_PB_MSG RfNodeInternalRpcServerSync::on_append_rflog(rpc::SP_PB_MSG sspMs
 }
 
 rpc::SP_PB_MSG RfNodeInternalRpcServerSync::create_append_rflog_request() {
-    return rpc::SP_PB_MSG(new rpc::AppendRfLogRequest());
+    return rpc::SP_PB_MSG(new protocal::serverraft::AppendRfLogRequest());
 }
 
 rpc::SP_PB_MSG RfNodeInternalRpcServerSync::on_request_vote(rpc::SP_PB_MSG sspMsg) {
@@ -65,7 +64,7 @@ rpc::SP_PB_MSG RfNodeInternalRpcServerSync::on_request_vote(rpc::SP_PB_MSG sspMs
 }
 
 rpc::SP_PB_MSG RfNodeInternalRpcServerSync::create_request_vote_request() {
-    return rpc::SP_PB_MSG(new rpc::RequestVoteRequest());
+    return rpc::SP_PB_MSG(new protocal::serverraft::RequestVoteRequest());
 }
 } // namespace server
 } // namespace ccraft

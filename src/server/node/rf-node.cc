@@ -3,8 +3,7 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#include "../../codegen/requst-vote.pb.h"
-#include "../../codegen/append-log.pb.h"
+#include "../../codegen/node-raft.pb.h"
 #include "../../common/server-gflags-config.h"
 
 #include "node-internal-messenger.h"
@@ -46,7 +45,7 @@ namespace ccraft {
         }
 
         rpc::SP_PB_MSG RfNode::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
-            auto response = new rpc::AppendRfLogResponse();
+            auto response = new protocal::serverraft::AppendRfLogResponse();
             response->set_term(1111);
             response->set_success(true);
 
@@ -54,7 +53,7 @@ namespace ccraft {
         }
 
         rpc::SP_PB_MSG RfNode::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
-            auto response = new rpc::RequestVoteResponse();
+            auto response = new protocal::serverraft::RequestVoteResponse();
             response->set_term(1111);
             response->set_success(true);
 

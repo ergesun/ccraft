@@ -22,6 +22,13 @@ class ISocketService;
 class NotifyMessage;
 }
 
+namespace protocal {
+namespace serverraft {
+class AppendRfLogResponse;
+class RequestVoteResponse;
+}
+}
+
 namespace server {
 class RfNode;
 class RfNodeInternalRpcClientSync;
@@ -63,10 +70,10 @@ public:
     bool Start() override;
     bool Stop() override;
 
-    std::shared_ptr<rpc::AppendRfLogResponse> AppendRfLogSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    std::shared_ptr<protocal::serverraft::AppendRfLogResponse> AppendRfLogSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
 
-    std::shared_ptr<rpc::RequestVoteResponse> RequestVoteSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    std::shared_ptr<protocal::serverraft::RequestVoteResponse> RequestVoteSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
 
 private:

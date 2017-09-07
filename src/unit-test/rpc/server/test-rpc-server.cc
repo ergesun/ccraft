@@ -8,10 +8,9 @@
 
 #include "../../../common/server-gflags-config.h"
 #include "../../../rpc/rpc-handler.h"
-#include "../../../codegen/append-log.pb.h"
+#include "../../../codegen/node-raft.pb.h"
 
 #include "test-rpc-server.h"
-#include "../../../codegen/requst-vote.pb.h"
 
 namespace ccraft {
 namespace test {
@@ -49,7 +48,7 @@ void TestRpcServer::register_rpc_handlers() {
 }
 
 rpc::SP_PB_MSG TestRpcServer::on_append_rflog(rpc::SP_PB_MSG sspMsg) {
-    auto appendOpLogRequest = dynamic_cast<rpc::AppendRfLogRequest*>(sspMsg.get());
+    auto appendOpLogRequest = dynamic_cast<protocal::serverraft::AppendRfLogRequest*>(sspMsg.get());
     EXPECT_EQ(1234, appendOpLogRequest->term());
     EXPECT_EQ(1, appendOpLogRequest->leaderid());
     EXPECT_EQ(22, appendOpLogRequest->prevlogindex());
@@ -58,7 +57,7 @@ rpc::SP_PB_MSG TestRpcServer::on_append_rflog(rpc::SP_PB_MSG sspMsg) {
               << ", leader id = " << appendOpLogRequest->leaderid()
               << ", prev log idx = " << appendOpLogRequest->prevlogindex()
               << ", prev log term = " << appendOpLogRequest->prevlogterm() << std::endl;
-    auto response = new rpc::AppendRfLogResponse();
+    auto response = new protocal::serverraft::AppendRfLogResponse();
     response->set_term(1111);
     response->set_success(true);
 
@@ -66,11 +65,11 @@ rpc::SP_PB_MSG TestRpcServer::on_append_rflog(rpc::SP_PB_MSG sspMsg) {
 }
 
 rpc::SP_PB_MSG TestRpcServer::create_append_rflog_request() {
-    return rpc::SP_PB_MSG(new rpc::AppendRfLogRequest());
+    return rpc::SP_PB_MSG(new protocal::serverraft::AppendRfLogRequest());
 }
 
 rpc::SP_PB_MSG TestRpcServer::on_request_vote(rpc::SP_PB_MSG sspMsg) {
-    auto requestVoteRequest = dynamic_cast<rpc::RequestVoteRequest*>(sspMsg.get());
+    auto requestVoteRequest = dynamic_cast<protocal::serverraft::RequestVoteRequest*>(sspMsg.get());
     EXPECT_EQ(1234, requestVoteRequest->term());
     EXPECT_EQ(1, requestVoteRequest->leaderid());
     EXPECT_EQ(22, requestVoteRequest->lastlogindex());
@@ -79,7 +78,7 @@ rpc::SP_PB_MSG TestRpcServer::on_request_vote(rpc::SP_PB_MSG sspMsg) {
               << ", leader id = " << requestVoteRequest->leaderid()
               << ", prev log idx = " << requestVoteRequest->lastlogindex()
               << ", prev log term = " << requestVoteRequest->lastlogterm() << std::endl;
-    auto response = new rpc::RequestVoteResponse();
+    auto response = new protocal::serverraft::RequestVoteResponse();
     response->set_term(1111);
     response->set_success(true);
 
@@ -87,7 +86,7 @@ rpc::SP_PB_MSG TestRpcServer::on_request_vote(rpc::SP_PB_MSG sspMsg) {
 }
 
 rpc::SP_PB_MSG TestRpcServer::create_request_vote_request() {
-    return rpc::SP_PB_MSG(new rpc::RequestVoteRequest());
+    return rpc::SP_PB_MSG(new protocal::serverraft::RequestVoteRequest());
 }
 }
 }
