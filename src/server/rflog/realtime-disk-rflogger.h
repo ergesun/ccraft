@@ -7,6 +7,7 @@
 #define CCRAFT_SERVER_RFLOG_RFLOGGER_H
 
 #include "irflogger.h"
+#include "../../common/segmented-vector.h"
 
 namespace ccraft {
     namespace rflog {
@@ -19,7 +20,7 @@ namespace ccraft {
             bool AppendEntries(RepeatedPtrField<RfLogEntry> *entries) override;
 
         private:
-
+            common::SegmentedVector<RfLogEntry*>  m_vEntries;
         };
     } // namespace rflog
 } // namespace ccraft
