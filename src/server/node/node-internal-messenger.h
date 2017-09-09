@@ -30,19 +30,19 @@ class RequestVoteResponse;
 }
 
 namespace server {
-class RfNode;
+class RfNodeService;
 class RfNodeInternalRpcClientSync;
 class RfNodeInternalRpcServerSync;
 
 struct CreateNodeInternalMessengerParam {
-    CreateNodeInternalMessengerParam(RfNode *prfNode, uint16_t cliRpcWorkThreadsCnt, common::cctime_t cliWaitRespTimeout,
+    CreateNodeInternalMessengerParam(RfNodeService *prfNode, uint16_t cliRpcWorkThreadsCnt, common::cctime_t cliWaitRespTimeout,
                                     uint16_t srvRpcWorkThreadsCnt, uint16_t mngerWorkThreadsCnt, uint16_t inetIOThreadsCnt,
                                     uint16_t iport, common::MemPool *pMp = nullptr) :
         rfNode(prfNode), clientRpcWorkThreadsCnt(cliRpcWorkThreadsCnt), clientWaitResponseTimeout(cliWaitRespTimeout),
         serverRpcWorkThreadsCnt(srvRpcWorkThreadsCnt), mngerDispatchWorkThreadsCnt(mngerWorkThreadsCnt), netIOThreadsCnt(inetIOThreadsCnt),
         port(iport), memPool(pMp) {}
 
-    RfNode             *rfNode;
+    RfNodeService             *rfNode;
     uint16_t            clientRpcWorkThreadsCnt;
     common::cctime_t    clientWaitResponseTimeout;
     uint16_t            serverRpcWorkThreadsCnt;
@@ -87,7 +87,7 @@ private:
     /**
      * 关联关系，无需本类释放。
      */
-    RfNode                                                     *m_pRfNode         = nullptr;
+    RfNodeService                                                     *m_pRfNode         = nullptr;
     net::ISocketService                                        *m_pSocketService  = nullptr;
     RfNodeInternalRpcClientSync                                *m_pClient         = nullptr;
     RfNodeInternalRpcServerSync                                *m_pServer         = nullptr;

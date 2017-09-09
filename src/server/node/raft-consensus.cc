@@ -3,15 +3,8 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_SERVER_RFLOG_RFLOGGER_H
-#define CCRAFT_SERVER_RFLOG_RFLOGGER_H
-
-#include "irflogger.h"
-
 namespace ccraft {
-    namespace rflog {
+    namespace server {
 
-    } // namespace rflog
+    } // namespace server
 } // namespace ccraft
-
-#endif //CCRAFT_SERVER_RFLOG_RFLOGGER_H

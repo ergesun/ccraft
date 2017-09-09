@@ -3,10 +3,15 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#include "rflogger.h"
+#ifndef CCRAFT_SRV_NODE_RAFT_CONSENSUS_H
+#define CCRAFT_SRV_NODE_RAFT_CONSENSUS_H
 
 namespace ccraft {
-    namespace rflog {
+    namespace server {
+        class RaftConsensus {
 
-    } // namespace rflog
+        };
+    } // namespace server
 } // namespace ccraft
+
+#endif //CCRAFT_SRV_NODE_RAFT_CONSENSUS_H

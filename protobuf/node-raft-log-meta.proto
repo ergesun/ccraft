@@ -2,3 +2,8 @@ syntax="proto3";
 //option cc_generic_services = true;
 
 package ccraft.protocal.raftmeta;
+
+message Metadata {
+    uint32 currentTerm = 1;
+    uint32 votedFor    = 2;
+}

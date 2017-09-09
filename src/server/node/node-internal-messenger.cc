@@ -13,7 +13,7 @@
 
 #include "./rpc/rf-node-rpc-sync-client.h"
 #include "./rpc/rf-node-rpc-sync-server.h"
-#include "rf-node.h"
+#include "rf-node-service.h"
 
 #include "node-internal-messenger.h"
 

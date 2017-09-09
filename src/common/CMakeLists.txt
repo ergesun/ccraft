@@ -6,4 +6,5 @@ add_library(common SHARED ${SRCS}
                             cctime.h
                             errors.h
                             resource-pool.h
+                            segmented-vector.h
                             )

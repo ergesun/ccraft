@@ -5,7 +5,7 @@ package ccraft.protocal.serverraft;
 
 message RfLogEntry {
     uint32 term         = 1;
-    uint64 index        = 2;
+    uint32 index        = 2;
     uint32 type         = 3;
     bytes  data         = 4;
 }
@@ -13,10 +13,10 @@ message RfLogEntry {
 message AppendRfLogRequest {
     uint32                term         = 1;
     uint32                leaderId     = 2;
-    uint64                prevLogIndex = 3;
+    uint32                prevLogIndex = 3;
     uint32                prevLogTerm  = 4;
     repeated RfLogEntry   entries      = 5;
-    uint64                leaderCommit = 6;
+    uint32                leaderCommit = 6;
 }
 
 message AppendRfLogResponse {
@@ -27,7 +27,7 @@ message AppendRfLogResponse {
 message RequestVoteRequest {
     uint32                term         = 1;
     uint32                leaderId     = 2;
-    uint64                lastLogIndex = 3;
+    uint32                lastLogIndex = 3;
     uint32                lastLogTerm  = 4;
 }
 

@@ -8,11 +8,11 @@
 
 #include "node-internal-messenger.h"
 
-#include "rf-node.h"
+#include "rf-node-service.h"
 
 namespace ccraft {
     namespace server {
-        RfNode::RfNode() {
+        RfNodeService::RfNodeService() {
             common::cctime_t clientWaitTimeOut = {
                 .sec = FLAGS_internal_rpc_client_wait_timeout_secs,
                 .nsec = FLAGS_internal_rpc_client_wait_timeout_nsecs
@@ -32,19 +32,20 @@ namespace ccraft {
             m_pNodeInternalMessenger = new NodeInternalMessenger(cnimp);
         }
 
-        RfNode::~RfNode() {
+        RfNodeService::~RfNodeService() {
             DELETE_PTR(m_pNodeInternalMessenger);
         }
 
-        bool RfNode::Start() {
+        bool RfNodeService::Start() {
             return m_pNodeInternalMessenger->Start();
         }
 
-        bool RfNode::Stop() {
+        bool RfNodeService::Stop() {
             return m_pNodeInternalMessenger->Stop();
         }
 
-        rpc::SP_PB_MSG RfNode::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
+        rpc::SP_PB_MSG RfNodeService::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
+            auto appendRfLogRequest = dynamic_cast<protocal::serverraft::AppendRfLogRequest*>(sspMsg.get());
             auto response = new protocal::serverraft::AppendRfLogResponse();
             response->set_term(1111);
             response->set_success(true);
@@ -52,7 +53,7 @@ namespace ccraft {
             return rpc::SP_PB_MSG(response);
         }
 
-        rpc::SP_PB_MSG RfNode::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
+        rpc::SP_PB_MSG RfNodeService::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
             auto response = new protocal::serverraft::RequestVoteResponse();
             response->set_term(1111);
             response->set_success(true);
