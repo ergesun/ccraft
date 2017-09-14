@@ -10,7 +10,7 @@
 
 namespace ccraft {
 namespace common {
-ssize_t IOUtils::WriteFully(int fd, const char *buf, size_t size) {
+ssize_t IOUtils::WriteFully(int fd, const void *buf, size_t size) {
     if (-1 == fd || !buf) {
         return -1;
     }
@@ -33,7 +33,7 @@ ssize_t IOUtils::WriteFully(int fd, const char *buf, size_t size) {
     return size;
 }
 
-ssize_t IOUtils::ReadFully(int fd, char **buf, size_t size) {
+ssize_t IOUtils::ReadFully(int fd, void **buf, size_t size) {
     if (-1 == fd || 0 == size) {
         return 0;
     }
@@ -59,7 +59,7 @@ ssize_t IOUtils::ReadFully(int fd, char **buf, size_t size) {
     return size;
 }
 
-ssize_t IOUtils::ReadFully_V2(int fd, char **buf, size_t size) {
+ssize_t IOUtils::ReadFully_V2(int fd, void **buf, size_t size) {
     if (-1 == fd || 0 == size) {
         return 0;
     }

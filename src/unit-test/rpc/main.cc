@@ -83,6 +83,12 @@ TEST(RpcTest, ClientServerTest) {
     appendRfLogRequest->set_leaderid(1);
     appendRfLogRequest->set_prevlogindex(22);
     appendRfLogRequest->set_prevlogterm(1233);
+    appendRfLogRequest->add_entries();
+    auto entry = appendRfLogRequest->mutable_entries(0);
+    entry->set_term(1233);
+    entry->set_index(25);
+    entry->set_type(1);
+    entry->set_data("test entry data!");
 
     std::shared_ptr<ccraft::protocal::serverraft::AppendRfLogResponse> appendRfLogSspResp;
     EXPECT_NO_THROW(appendRfLogSspResp = g_pClient->AppendRfLog(ccraft::rpc::SP_PB_MSG(appendRfLogRequest), std::move(peer)));

@@ -50,6 +50,15 @@ public:
      * @return
      */
     static common::Buffer* GetNewBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize);
+
+    /**
+     * 判断入参是否为2的N次幂。
+     * @param x
+     * @return
+     */
+    static bool IsPowerOfTwo(int x) {
+        return (x > 0) && ((x & (x - 1)) == 0);
+    }
 }; // class CommonUtils
 }  // namespace common
 }  // namespace ccraft

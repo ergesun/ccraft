@@ -19,7 +19,7 @@ public:
      * @param size
      * @return -1失败，否则为size
      */
-    static ssize_t WriteFully(int fd, const char *buf, size_t size);
+    static ssize_t WriteFully(int fd, const void *buf, size_t size);
 
     /**
      * 从fd中读取size大小的buf。
@@ -29,7 +29,7 @@ public:
      * @param size 想读取的大小
      * @return -1出错，否则为实际读取到的大小。
      */
-    static ssize_t ReadFully(int fd, char **buf, size_t size);
+    static ssize_t ReadFully(int fd, void **buf, size_t size);
 
     /**
      * 从fd中读取size大小的buf。
@@ -39,7 +39,7 @@ public:
      * @param size 想读取的大小
      * @return -1出错，否则为实际读取到的大小。
      */
-    static ssize_t ReadFully_V2(int fd, char **buf, size_t size);
+    static ssize_t ReadFully_V2(int fd, void **buf, size_t size);
 };
 }
 }

@@ -20,6 +20,7 @@ namespace ccraft {
             virtual RfLogEntry* GetLastEntry() = 0;
             virtual RfLogEntry* GetEntry(uint32_t index) = 0;
             virtual bool AppendEntries(RepeatedPtrField<RfLogEntry>* entries) = 0;
+            virtual bool AppendEntry(RfLogEntry* entry) = 0;
         };
     } // namespace rflog
 } // namespace ccraft

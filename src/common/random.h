@@ -38,14 +38,14 @@ public:
         init_default_seed();
     }
 
-    Random(uint32_t seed) : m_iSeed(seed) {
+    explicit Random(uint32_t seed) {
         srand(seed);
         m_r.start = m_r.end = Range::INVALID_RANGE;
     }
-    Random(Range r) : m_r(r) {
+    explicit Random(Range r) : m_r(r) {
         init_default_seed();
     }
-    Random(uint32_t seed, Range r) : m_iSeed(seed), m_r(r) {
+    Random(uint32_t seed, Range r) : m_r(r) {
         srand(seed);
     }
 
@@ -63,7 +63,6 @@ private:
     }
 
 private:
-    uint32_t m_iSeed;
     Range m_r;
 };
 }

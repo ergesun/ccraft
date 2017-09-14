@@ -7,7 +7,10 @@
 #define CCRAFT_FILE_UTILS_H
 
 #include <unistd.h>
+#include <sys/stat.h>
+
 #include <string>
+#include <fcntl.h>
 
 using std::string;
 
@@ -64,6 +67,51 @@ public:
      * @return
      */
     static string ReadAllString(const string &file_path);
+
+    static inline void GetStat(const string &path, struct stat *st) {
+        stat(path.c_str(), st);
+    }
+
+    /**
+     * 判断是否为文件夹
+     * @param path
+     * @return 是为true，否则false
+     */
+    static inline bool IsDir(const string &path) {
+        struct stat st;
+        return stat(path.c_str(), &st) >= 0 && S_ISDIR(st.st_mode);
+    }
+
+    /**
+     * 判断是否为文件
+     * @param path
+     * @return 是为true，否则false
+     */
+    static inline bool IsFile(const string &path) {
+        struct stat st;
+        return stat(path.c_str(), &st) >= 0 && S_ISREG(st.st_mode);
+    }
+
+    /**
+     * 检查文件是否存在
+     * @param path
+     * @return 存在为true，否则为false
+     */
+    static inline bool Exist(const string &path) {
+        return access(path.c_str(), F_OK) != -1;
+    }
+
+    /**
+     * 打开文件。参数参考man 2 open。
+     * @param path
+     * @param mode read、write
+     * @param create 创建与否，与truncate组合与否
+     * @param access 文件的访问权限
+     * @return 成功返回fd，失败返回-1
+     */
+    static inline int Open(const string &path, int mode, int create, int access) {
+        return open(path.c_str(), mode|create, access);
+    }
 };
 }
 }

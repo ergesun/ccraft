@@ -48,15 +48,24 @@ void TestRpcServer::register_rpc_handlers() {
 }
 
 rpc::SP_PB_MSG TestRpcServer::on_append_rflog(rpc::SP_PB_MSG sspMsg) {
-    auto appendOpLogRequest = dynamic_cast<protocal::serverraft::AppendRfLogRequest*>(sspMsg.get());
-    EXPECT_EQ(1234, appendOpLogRequest->term());
-    EXPECT_EQ(1, appendOpLogRequest->leaderid());
-    EXPECT_EQ(22, appendOpLogRequest->prevlogindex());
-    EXPECT_EQ(1233, appendOpLogRequest->prevlogterm());
-    std::cout << "client req: term = " << appendOpLogRequest->term()
-              << ", leader id = " << appendOpLogRequest->leaderid()
-              << ", prev log idx = " << appendOpLogRequest->prevlogindex()
-              << ", prev log term = " << appendOpLogRequest->prevlogterm() << std::endl;
+    auto appendRfLogRequest = dynamic_cast<protocal::serverraft::AppendRfLogRequest*>(sspMsg.get());
+    EXPECT_EQ(1234, appendRfLogRequest->term());
+    EXPECT_EQ(1, appendRfLogRequest->leaderid());
+    EXPECT_EQ(22, appendRfLogRequest->prevlogindex());
+    EXPECT_EQ(1233, appendRfLogRequest->prevlogterm());
+    std::cout << "client req: term = " << appendRfLogRequest->term()
+              << ", leader id = " << appendRfLogRequest->leaderid()
+              << ", prev log idx = " << appendRfLogRequest->prevlogindex()
+              << ", prev log term = " << appendRfLogRequest->prevlogterm() << std::endl;
+    auto entry = appendRfLogRequest->mutable_entries(0);
+    EXPECT_EQ(1233, entry->term());
+    EXPECT_EQ(25, entry->index());
+    EXPECT_EQ(1, entry->type());
+
+    EXPECT_STREQ("test entry data!", entry->data().data());
+    std::string entryData = std::move(*(entry->release_data()));
+    std::cout << "entry 0 data = " << entryData.c_str() << std::endl;
+
     auto response = new protocal::serverraft::AppendRfLogResponse();
     response->set_term(1111);
     response->set_success(true);

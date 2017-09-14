@@ -137,11 +137,15 @@ ssize_t FileUtils::GetFileSize(int fd) {
         return -1;
     }
 
-    auto cur_pos = lseek(fd, 0, SEEK_CUR);
-    auto size = lseek(fd, 0, SEEK_END);
-    lseek(fd, cur_pos, SEEK_SET);
+    struct stat s;
+    bzero(&s, sizeof(struct stat));
+    if (-1 == fstat(fd, &s)) {
+        int err = errno;
+        LOGEFUN << "stat fd " << fd << " err with errmsg = " << strerror(err);
+        return -1;
+    }
 
-    return size;
+    return s.st_size;
 }
 
 string FileUtils::ReadAllString(const string &file_path) {
