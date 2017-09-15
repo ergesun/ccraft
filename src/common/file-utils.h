@@ -52,7 +52,7 @@ public:
      * @param path
      * @return 成功返回自然数(>=0)，失败-1。
      */
-    static ssize_t GetFileSize(const char *path);
+    static off_t GetFileSize(const char *path);
 
     /**
      * 获取文件的大小(bytes)

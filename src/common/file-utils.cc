@@ -132,7 +132,7 @@ ssize_t FileUtils::GetFileSize(const char *path) {
     return s.st_size;
 }
 
-ssize_t FileUtils::GetFileSize(int fd) {
+off_t FileUtils::GetFileSize(int fd) {
     if (0 >= fd) {
         return -1;
     }

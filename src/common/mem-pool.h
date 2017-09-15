@@ -89,7 +89,6 @@ public:
     class MemObject {
     public:
         MemObject(const MemObject&) = default;
-        ~MemObject() = default;
 
         char* Pointer() const;
         uint32_t Size() const;
@@ -98,6 +97,7 @@ public:
     private:
         friend class MemPool;
         MemObject() = default;
+        ~MemObject() = default;
         /**
          *
          * @param type

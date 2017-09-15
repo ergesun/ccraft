@@ -7,9 +7,9 @@
 #define CCRAFT_SERVER_RFLOG_RFLOGGER_H
 
 #include <string>
+#include <vector>
 
 #include "irflogger.h"
-#include "../../common/segmented-vector.h"
 
 //         RFLOG_MAGIC_NO        r f l g
 #define    RFLOG_MAGIC_NO      0x72666c67
@@ -26,22 +26,25 @@ namespace ccraft {
          */
         class RtDiskRfLogger : public IRfLogger {
         public:
-            explicit RtDiskRfLogger(std::string &&logFilePath);
+            explicit RtDiskRfLogger(std::string &&logFilePath, bool autoSync = false);
             ~RtDiskRfLogger() override;
 
             RfLogEntry *GetLastEntry() override;
             RfLogEntry *GetEntry(uint32_t index) override;
-            bool AppendEntries(RepeatedPtrField<RfLogEntry> *entries) override;
-            bool AppendEntry(RfLogEntry *entry) override;
+            void AppendEntries(RepeatedPtrField<RfLogEntry> *entries) override;
+            void AppendEntry(RfLogEntry *entry) override;
+            void Sync() override;
 
         private:
             void initialize();
 
         private:
             std::string                           m_sLogFilePath;
+            bool                                  m_bAutoSync = false;
             int                                   m_iFd = -1;
-            common::SegmentedVector<RfLogEntry*>  m_vEntries;
-
+            std::vector<RfLogEntry*>              m_vEntries;
+            uint32_t                              m_iCurIdxToSync = 0;
+            uint32_t                              m_iFileSize = 0;
         };
     } // namespace rflog
 } // namespace ccraft

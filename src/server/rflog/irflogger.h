@@ -19,8 +19,9 @@ namespace ccraft {
             virtual ~IRfLogger() = default;
             virtual RfLogEntry* GetLastEntry() = 0;
             virtual RfLogEntry* GetEntry(uint32_t index) = 0;
-            virtual bool AppendEntries(RepeatedPtrField<RfLogEntry>* entries) = 0;
-            virtual bool AppendEntry(RfLogEntry* entry) = 0;
+            virtual void AppendEntries(RepeatedPtrField<RfLogEntry>* entries) = 0;
+            virtual void AppendEntry(RfLogEntry* entry) = 0;
+            virtual void Sync() = 0;
         };
     } // namespace rflog
 } // namespace ccraft
