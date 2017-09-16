@@ -18,6 +18,7 @@
 namespace ccraft {
     namespace rflog {
         /**
+         * Not thread-safe!
          * log format on disk file(file header + log segments)：
          *                             |<-log file header(magic no)->|
          *                             |<-log content len(u32)->|<-log content->|<-log segment start pos(u32)->|

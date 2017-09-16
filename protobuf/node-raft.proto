@@ -3,11 +3,48 @@ syntax="proto3";
 
 package ccraft.protocal.serverraft;
 
+/**
+ * A server in a configuration.
+ */
+message RfServerId {
+    /**
+     * The ID of the server.
+     */
+    uint32 serverId = 1;
+    /**
+     * The network address:port of the server.
+     * Eg: localhost:9921、192.168.0.55:9921 and so on.
+     */
+    string address = 2;
+}
+
+/**
+ * The type of payload stored in a log entry.
+ */
+enum RfLogEntryType {
+    /**
+     * No use.
+     */
+    NONE = 0;
+    /**
+     * Stores a 'Configuration', to be used internally by the consensus module.
+     */
+    CONFIGURATION = 1;
+    /**
+     * Stores a command to be processed by the state machine.
+     */
+    DATA = 2;
+    /**
+     * No op.
+     */
+    NOOP = 3;
+};
+
 message RfLogEntry {
-    uint32 term         = 1;
-    uint32 index        = 2;
-    uint32 type         = 3;
-    bytes  data         = 4;
+    uint32         term         = 1;
+    uint32         index        = 2;
+    RfLogEntryType type         = 3;
+    bytes          data         = 4;
 }
 
 message AppendRfLogRequest {

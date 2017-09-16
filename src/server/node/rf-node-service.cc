@@ -25,7 +25,7 @@ namespace ccraft {
                 .serverRpcWorkThreadsCnt = (uint16_t)FLAGS_internal_rpc_server_threads_cnt,
                 .mngerDispatchWorkThreadsCnt = (uint16_t)FLAGS_internal_rpc_messenger_threads_cnt,
                 .netIOThreadsCnt = (uint16_t)FLAGS_internal_rpc_io_threads_cnt,
-                .port = (uint16_t)FLAGS_internal_rpc_logic_port,
+                .port = (uint16_t)0,
                 .memPool = nullptr
             };
 

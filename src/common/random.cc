@@ -16,5 +16,10 @@ int32_t Random::GetNew() {
         return rand();
     }
 }
+
+int32_t Random::GetNewWithSRand() {
+    init_ts_seed();
+    return rand();
+}
 }
 }

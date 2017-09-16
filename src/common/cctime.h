@@ -3,8 +3,8 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_CCTIME_H
-#define CCRAFT_CCTIME_H
+#ifndef CCRAFT_COMMON_CCTIME_H
+#define CCRAFT_COMMON_CCTIME_H
 
 namespace ccraft {
 namespace common {
@@ -80,4 +80,4 @@ inline bool operator!=(const cctime_t &a, const cctime_t &b) {
 }
 }
 
-#endif //CCRAFT_CCTIME_H
+#endif //CCRAFT_COMMON_CCTIME_H

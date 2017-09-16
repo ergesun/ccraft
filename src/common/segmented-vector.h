@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <cassert>
 #include "common-def.h"
 #include "nocopyable.h"
 #include "common-utils.h"

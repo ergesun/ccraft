@@ -1,7 +1,6 @@
 # 定义服务实例的端口
-# thrift server
-9905
+## rf servers
 
-# http server
-8088
+# id hostname for_internal_port for_client_port
+0 localhost 5466 6466
 

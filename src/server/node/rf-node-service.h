@@ -16,27 +16,27 @@
 #include "common-def.h"
 
 namespace ccraft {
-    namespace server {
-        class NodeInternalMessenger;
-        class RfNodeService : public IService, public INodeInternalRpcHandler {
-        public:
-            RfNodeService();
-            ~RfNodeService() override;
+namespace server {
+class NodeInternalMessenger;
+class RfNodeService : public IService, public INodeInternalRpcHandler {
+public:
+    RfNodeService();
+    ~RfNodeService() override;
 
-            bool Start() override;
-            bool Stop() override;
+    bool Start() override;
+    bool Stop() override;
 
-            rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
-            rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
+    rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
+    rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
 
-        private:
-            NodeInternalMessenger                                       *m_pNodeInternalMessenger = nullptr;
-            NodeRoleType                                                 m_roleType               = NodeRoleType::Follower;
-            uint32_t                                                     m_iCurrentTerm           = 0;
-            uint32_t                                                     m_iVoteFor               = 0;
-            std::unordered_map<uint32_t, net::net_peer_info_t>           m_hmServicesConf;
-        };
-    } // namespace server
+private:
+    NodeInternalMessenger                                       *m_pNodeInternalMessenger = nullptr;
+    NodeRoleType                                                 m_roleType               = NodeRoleType::Follower;
+    uint32_t                                                     m_iCurrentTerm           = 0;
+    uint32_t                                                     m_iVoteFor               = 0;
+    std::unordered_map<uint32_t, net::net_peer_info_t>           m_hmServicesConf;
+};
+} // namespace server
 } // namespace ccraft
 
 #endif //CCRAFT_RF_NODE_H

@@ -13,6 +13,21 @@
 
 using namespace ccraft::common;
 
+//const std::string UnitTestProjectName = "biz_conf_parser_test";
+//const std::string TestConfFileName = "eg--acc-biz.json";
+//
+//std::string g_sConFilePath;
+//
+//int main(int argc, char **argv) {
+//    testing::InitGoogleTest(&argc, argv);
+//    std::string exePath = argv[0];
+//    auto projectStartPos = exePath.find(UnitTestProjectName);
+//    auto projectRootPath = exePath.substr(0, projectStartPos);
+//    g_sConFilePath = projectRootPath + "../../../conf/" + TestConfFileName;
+//
+//    return RUN_ALL_TESTS();
+//}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     ccraft::common::initialize();
@@ -46,4 +61,12 @@ TEST(CommonTest, SpinLockTest) {
     sl.Unlock();
     SpinLock sl3(&l, false);
     EXPECT_EQ(sl3.TryLock(), true);
+}
+
+TEST(CommonTest, CommonUtilsTest) {
+    std::string localIp = "127.0.0.1";
+    std::string host = "localhost";
+    std::string ip;
+    ccraft::common::CommonUtils::GetAddrInfo(host, ip);
+    EXPECT_STREQ(localIp.c_str(), ip.c_str());
 }

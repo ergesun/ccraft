@@ -35,7 +35,7 @@ public:
 
 public:
     Random() {
-        init_default_seed();
+        init_ts_seed();
     }
 
     explicit Random(uint32_t seed) {
@@ -43,16 +43,17 @@ public:
         m_r.start = m_r.end = Range::INVALID_RANGE;
     }
     explicit Random(Range r) : m_r(r) {
-        init_default_seed();
+        init_ts_seed();
     }
     Random(uint32_t seed, Range r) : m_r(r) {
         srand(seed);
     }
 
     int32_t GetNew();
+    static int32_t GetNewWithSRand();
 
 private:
-    inline void init_default_seed() {
+    static inline void init_ts_seed() {
         timeval tv;
         gettimeofday(&tv, nullptr);
         srand(static_cast<uint32_t >(tv.tv_sec * 1000 + tv.tv_usec / 1000));

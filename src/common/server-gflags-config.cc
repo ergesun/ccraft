@@ -32,4 +32,8 @@ DEFINE_int64(internal_rpc_client_wait_timeout_nsecs, 0, "设置用于rpc client�
 DEFINE_int32(internal_rpc_server_threads_cnt, 0, "设置用于rpc server处理任务的线程池线程个数。默认0为cpu逻辑核数的2倍。");
 DEFINE_int32(internal_rpc_messenger_threads_cnt, 0, "设置用于internal rpc处理的信使的消息分发的线程数目。默认0为cpu逻辑核数的2倍。");
 DEFINE_int32(internal_rpc_io_threads_cnt, 0, "设置用于node间通信的rpc服务的网络io处理线程个数。默认0为cpu逻辑核数的一半。");
-DEFINE_int32(internal_rpc_logic_port, 22210, "设置用于node件通信的rpc服务的逻辑端口号。不要超过65535");
+
+/**
+ * rf node
+ */
+DEFINE_int32(server_id, 0, "设置server id，从0开始。");

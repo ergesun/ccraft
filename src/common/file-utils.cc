@@ -149,14 +149,14 @@ off_t FileUtils::GetFileSize(int fd) {
 }
 
 string FileUtils::ReadAllString(const string &file_path) {
-    ifstream in_fs(file_path);
+    ifstream fs(file_path);
 
-    if (!in_fs) {
+    if (!fs) {
         return "";
     }
 
     stringstream ss;
-    ss << in_fs.rdbuf();
+    ss << fs.rdbuf();
     return ss.str();
 }
 }
