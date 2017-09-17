@@ -5,7 +5,7 @@
 
 #include "../../../net/notify-message.h"
 #include "../../../net/rcv-message.h"
-#include "../../../rpc/protobuf-utils.h"
+#include "../../../common/protobuf-utils.h"
 #include "../../../common/buffer.h"
 #include "../../../codegen/node-raft.pb.h"
 
@@ -27,7 +27,7 @@ std::shared_ptr<protocal::RpcName##Response>                                    
         auto RpcName##Resp__Impl_DEF_TMP = new protocal::RpcName##Response();                           \
         auto buf = rm->GetDataBuffer();                                                                 \
         buf->MoveHeadBack(sizeof(uint16_t));                                                            \
-        rpc::ProtoBufUtils::Deserialize(buf, RpcName##Resp__Impl_DEF_TMP);                              \
+        common::ProtoBufUtils::Deserialize(buf, RpcName##Resp__Impl_DEF_TMP);                           \
         return std::shared_ptr<protocal::RpcName##Response>(RpcName##Resp__Impl_DEF_TMP);               \
     }
 

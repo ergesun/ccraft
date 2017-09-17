@@ -18,7 +18,7 @@ ElectorManager::~ElectorManager() {
     DELETE_PTR(m_nodeConf);
 }
 
-bool ElectorManager::Initialzie(uint32_t myId, std::string &&serversConfPath) {
+bool ElectorManager::Initialize(uint32_t myId, std::string &&serversConfPath) {
     if (0 == myId) {
         LOGFFUN << "server id must be larger than 0.";
     }

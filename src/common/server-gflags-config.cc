@@ -39,3 +39,5 @@ DEFINE_int32(internal_rpc_io_threads_cnt, 0, "设置用于node间通信的rpc服
 DEFINE_int32(server_id, 0, "设置server id，从0开始。");
 DEFINE_string(data_dir, "/tmp/ccraft", "数据存放目录");
 DEFINE_string(rflogger_type, "realtime-disk", "rflogger类型");
+DEFINE_int32(raft_election_interval, 30, "raft leader超时的时间间隔");
+DEFINE_string(servers_conf_path, "/tmp/ccraft/conf/servers", "集群server地址信息。");

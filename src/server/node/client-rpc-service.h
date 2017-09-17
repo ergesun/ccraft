@@ -6,7 +6,7 @@
 #ifndef CCRAFT_SRV_NODE_CLIENT_RPC_SERVICE_H
 #define CCRAFT_SRV_NODE_CLIENT_RPC_SERVICE_H
 
-#include "../../iservice.h"
+#include "iservice.h"
 
 namespace ccraft {
 namespace server {

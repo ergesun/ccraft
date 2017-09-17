@@ -11,7 +11,7 @@
 #include "../../common/io-utils.h"
 #include "../../common/codec-utils.h"
 #include "../../common/buffer.h"
-#include "../../rpc/protobuf-utils.h"
+#include "../../common/protobuf-utils.h"
 #include "../../codegen/node-raft.pb.h"
 
 #include "realtime-disk-rflogger.h"
@@ -106,7 +106,7 @@ void RtDiskRfLogger::Sync() {
         b.SetPos(b.GetPos() + (offset += 4));
 
         // content
-        rpc::ProtoBufUtils::Serialize(m_vEntries[idx], &b);
+        common::ProtoBufUtils::Serialize(m_vEntries[idx], &b);
         b.SetPos(b.GetPos() + (offset += entrySize));
 
         // offset
@@ -182,7 +182,7 @@ void RtDiskRfLogger::initialize() {
             auto endPtr = buf + len - 1;
             b.Refresh(startPtr, endPtr, startPtr, endPtr, nullptr);
             auto rflogEntry = new RfLogEntry();
-            if (UNLIKELY(!rpc::ProtoBufUtils::Deserialize(&b, rflogEntry))) {
+            if (UNLIKELY(!common::ProtoBufUtils::Deserialize(&b, rflogEntry))) {
                 LOGFFUN << "deserialize rflog at offset " << offset << " failed!";
             }
 

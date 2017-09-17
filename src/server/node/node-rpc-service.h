@@ -8,7 +8,7 @@
 
 #include <unordered_map>
 
-#include "../../iservice.h"
+#include "iservice.h"
 #include "../../net/common-def.h"
 #include "../../rpc/common-def.h"
 #include "inode-internal-rpc-handler.h"

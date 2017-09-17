@@ -3,7 +3,7 @@ aux_source_directory(./node            ND_SRCS)
 aux_source_directory(./node/rpc        ND_RPC_SRCS)
 aux_source_directory(./rflog           RFLOG_SRCS)
 
-add_executable(ccraftd ${SOURCE_FILES} ${ND_SRCS} ${ND_RPC_SRCS} ${RFLOG_SRCS} ./rflog/irflogger.h)
+add_executable(ccraftd ${SOURCE_FILES} ${ND_SRCS} ${ND_RPC_SRCS} ${RFLOG_SRCS} ./rflog/irflogger.h node/service-manager.h node/service-manager.cc)
 
 set(LINK_LIBS
         protobufgen

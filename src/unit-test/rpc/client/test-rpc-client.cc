@@ -5,14 +5,14 @@
 
 #include "../../../net/notify-message.h"
 #include "../../../net/rcv-message.h"
-#include "../../../rpc/protobuf-utils.h"
+#include "../../../common/protobuf-utils.h"
 #include "../../../common/buffer.h"
 #include "../../../codegen/node-raft.pb.h"
 
 #include "test-rpc-client.h"
 
 #define ImplTestRpcClientSyncWithPeer(RpcName)                                                          \
-std::shared_ptr<protocal::RpcName##Response>                                                \
+std::shared_ptr<protocal::RpcName##Response>                                                            \
     TestRpcClientSync::RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {                       \
         auto tmpPeer = peer;                                                                            \
         auto ctx = sendMessage(#RpcName, std::move(req), std::move(peer));                              \
@@ -22,11 +22,11 @@ std::shared_ptr<protocal::RpcName##Response>                                    
         auto sspNM = recvMessage(ctx);                                                                  \
         auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());                              \
         auto rm = mnm->GetContent();                                                                    \
-        auto RpcName##Resp__Impl_DEF_TMP = new protocal::RpcName##Response();               \
+        auto RpcName##Resp__Impl_DEF_TMP = new protocal::RpcName##Response();                           \
         auto buf = rm->GetDataBuffer();                                                                 \
         buf->MoveHeadBack(sizeof(uint16_t));                                                            \
-        rpc::ProtoBufUtils::Deserialize(buf, RpcName##Resp__Impl_DEF_TMP);                              \
-        return std::shared_ptr<protocal::RpcName##Response>(RpcName##Resp__Impl_DEF_TMP);   \
+        common::ProtoBufUtils::Deserialize(buf, RpcName##Resp__Impl_DEF_TMP);                           \
+        return std::shared_ptr<protocal::RpcName##Response>(RpcName##Resp__Impl_DEF_TMP);               \
     }
 
 namespace ccraft {

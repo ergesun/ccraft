@@ -19,7 +19,7 @@ public:
     ElectorManager();
     ~ElectorManager();
 
-    bool Initialzie(uint32_t myId, std::string &&serversConfPath);
+    bool Initialize(uint32_t myId, std::string &&serversConfPath);
     const common::RfServer& GetSelfServerConf() const;
 
 private:

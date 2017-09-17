@@ -12,9 +12,6 @@ namespace ccraft {
 namespace common {
 class MemPool;
 class Buffer;
-}
-
-namespace rpc {
 class ProtoBufUtils {
 public:
     static bool Deserialize(const common::Buffer *from, google::protobuf::Message *to);

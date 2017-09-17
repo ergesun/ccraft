@@ -17,6 +17,25 @@ RfStateMachine::~RfStateMachine() {
 
 }
 
+bool RfStateMachine::Start() {
+    if (!m_bStopped) {
+        return true;
+    }
+
+    m_bStopped = false;
+    return true;
+}
+
+bool RfStateMachine::Stop() {
+    if (m_bStopped) {
+        return true;
+    }
+
+    m_bStopped = true;
+    
+    return true;
+}
+
 void RfStateMachine::Apply(std::vector<protocal::StateMachineCommand*> commands) {
     for (auto command : commands) {
         m_mapKVs[command->key()] = command->value();

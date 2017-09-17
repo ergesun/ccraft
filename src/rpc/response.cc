@@ -6,7 +6,7 @@
 #include <google/protobuf/message.h>
 
 #include "response.h"
-#include "protobuf-utils.h"
+#include "../common/protobuf-utils.h"
 
 namespace ccraft {
 namespace rpc {
@@ -24,7 +24,7 @@ void RpcResponse::encodeDerive(common::Buffer *b) {
     ByteOrderUtils::WriteUInt16(b->GetPos(), (CodeType)m_code);
     b->MoveHeadBack(sizeof(CodeType));
     if (m_pMsg.get()) {
-        ProtoBufUtils::Serialize(m_pMsg.get(), b);
+        common::ProtoBufUtils::Serialize(m_pMsg.get(), b);
     }
 }
 

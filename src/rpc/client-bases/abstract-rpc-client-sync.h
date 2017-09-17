@@ -17,7 +17,7 @@
 #include "../../common/spin-lock.h"
 #include "../../common/resource-pool.h"
 #include "../../net/common-def.h"
-#include "../../iservice.h"
+#include "../../server/node/iservice.h"
 #include "../imessage-handler.h"
 #include "../../common/thread-pool.h"
 

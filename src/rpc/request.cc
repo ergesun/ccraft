@@ -7,7 +7,7 @@
 
 #include "../common/buffer.h"
 #include "../common/codec-utils.h"
-#include "protobuf-utils.h"
+#include "../common/protobuf-utils.h"
 
 #include "request.h"
 #include "common-def.h"
@@ -28,7 +28,7 @@ void RpcRequest::encodeDerive(common::Buffer *b) {
     ByteOrderUtils::WriteUInt16(b->GetPos(), (uint16_t)m_iHandlerId);
     b->MoveHeadBack(sizeof(uint16_t));
     if (m_sspMsg.get()) {
-        ProtoBufUtils::Serialize(m_sspMsg.get(), b);
+        common::ProtoBufUtils::Serialize(m_sspMsg.get(), b);
     }
 }
 } // namespace rpc

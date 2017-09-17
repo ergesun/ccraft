@@ -9,7 +9,7 @@
 #include "../net/net-protocal-stacks/msg-worker-managers/unique-worker-manager.h"
 #include "../net/rcv-message.h"
 #include "../common/buffer.h"
-#include "protobuf-utils.h"
+#include "../common/protobuf-utils.h"
 #include "../common/codec-utils.h"
 
 #include "response.h"
@@ -111,7 +111,7 @@ void RpcServer::proc_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
                     m_pSocketService->SendMessage(new RpcErrorResponse(RpcCode::ErrorInternal));
                     return;
                 }
-                if (!ProtoBufUtils::Deserialize(reqBuf, request.get())) {
+                if (!common::ProtoBufUtils::Deserialize(reqBuf, request.get())) {
                     LOGEFUN << "cannot parse request for handler id " << handlerId;
                     m_pSocketService->SendMessage(new RpcErrorResponse(RpcCode::ErrorMsg));
                     return;

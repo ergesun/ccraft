@@ -43,5 +43,7 @@ DECLARE_int32(internal_rpc_io_threads_cnt);
 DECLARE_int32(server_id);
 DECLARE_string(data_dir);
 DECLARE_string(rflogger_type);
+DECLARE_int32(raft_election_interval);
+DECLARE_string(servers_conf_path);
 
 #endif //CCRAFT_GFLAGS_CONFIG_H

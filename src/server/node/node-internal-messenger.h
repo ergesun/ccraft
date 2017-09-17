@@ -6,7 +6,7 @@
 #ifndef CCRAFT_NODE_INTERNAL_MESSENGER_H
 #define CCRAFT_NODE_INTERNAL_MESSENGER_H
 
-#include "../../iservice.h"
+#include "iservice.h"
 #include "../../common/cctime.h"
 #include "../../common/blocking-queue.h"
 #include "../../common/thread-pool.h"

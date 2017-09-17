@@ -16,16 +16,13 @@
 #include "../common/file-utils.h"
 #include "../common/server-gflags-config.h"
 #include "../common/global-vars.h"
+#include "node/service-manager.h"
 
 using std::string;
 using std::stringstream;
 using std::map;
 
 using ccraft::common::FileUtils;
-
-bool                            m_bAllStopped = false;
-std::mutex                      m_mtxRpc;
-std::condition_variable         m_cvRpc;
 
 void init_gflags_glog(int *argc, char ***argv) {
     gflags::ParseCommandLineFlags(argc, argv, true);
@@ -70,19 +67,12 @@ void signal_handler(int sig) {
 
     switch (sig) {
         case SIGHUP: {
-            //std::string bizConfPath = FLAGS_acc_biz_conf_path.c_str();
-            //m_pAccInst->Reload(bizConfPath);
             break;
         }
         case SIGINT:
         case SIGTERM: {
             // TODO(sunchao): 抽象一个ServiceManager和一个IService接口?
-            std::unique_lock<std::mutex> l(m_mtxRpc);
-            //m_pRpcInst->Stop();
-            //m_pHttpServerInst->Stop();
-
-            m_bAllStopped = true;
-            m_cvRpc.notify_one();
+            ccraft::server::ServiceManager::ServiceBootstrap::Run();
             break;
         }
         default: {
@@ -103,13 +93,6 @@ void register_signal() {
     sigaction(SIGALRM, &newSigaction, nullptr); /* catch alarm signal */
 }
 
-void wait_all_stopped() {
-    std::unique_lock<std::mutex> l(m_mtxRpc);
-    while (!m_bAllStopped) {
-        m_cvRpc.wait(l);
-    }
-}
-
 int
 main(int argc, char *argv[])
 try {
@@ -123,30 +106,12 @@ try {
      */
     umask(0);
     init_gflags_glog(&argc, &argv);
-    register_signal();
     ccraft::common::initialize();
-    // create acc
-    //m_pAccInst = new ACC();
-
-    //std::string bizConfPath = FLAGS_acc_biz_conf_path.c_str();
-    ////m_pAccInst->Init(bizConfPath);
-//
-    //// start rpc service
-    //m_pRpcInst = new RpcService(m_pAccInst, FLAGS_thriftserver_port,
-    //                            (size_t)(FLAGS_thriftserver_resident_threads_cnt),
-    //                            (size_t)(FLAGS_thriftserver_pending_threads_cnt));
-    //LOGIFUN << "start thrift server port = " << FLAGS_thriftserver_port;
-    //m_pRpcInst->Start();
-
-    //m_pHttpServerInst = new HttpServerService(m_pAccInst);
-    //m_pHttpServerInst->Start();
-    LOGIFUN << "access control service is running!";
-    wait_all_stopped();
+    ccraft::server::ServiceManager::ServiceBootstrap::Run();
+    register_signal();
+    ccraft::server::ServiceManager::ServiceDestroyer::WaitAllServicesStopped();
 
     ccraft::common::uninitialize();
-    //DELETE_PTR(m_pRpcInst);
-    //DELETE_PTR(m_pAccInst);
-    //DELETE_PTR(m_pHttpServerInst);
 
     uninit_gflags_glog();
 

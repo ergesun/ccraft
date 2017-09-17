@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "../iservice.h"
+#include "../server/node/iservice.h"
 
 #include "../net/notify-message.h"
 #include "../common/blocking-queue.h"
