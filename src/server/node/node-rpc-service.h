@@ -30,7 +30,7 @@ public:
     rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
 
 private:
-    NodeInternalMessenger                                       *m_pNodeInternalMessenger = nullptr;
+    NodeInternalMessenger          *m_pNodeInternalMessenger = nullptr;
 };
 } // namespace server
 } // namespace ccraft

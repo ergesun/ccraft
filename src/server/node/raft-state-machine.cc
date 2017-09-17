@@ -8,23 +8,23 @@
 #include "raft-state-machine.h"
 
 namespace ccraft {
-    namespace server {
-        RfStateMachine::RfStateMachine() {
+namespace server {
+RfStateMachine::RfStateMachine() {
 
-        }
+}
 
-        RfStateMachine::~RfStateMachine() {
+RfStateMachine::~RfStateMachine() {
 
-        }
+}
 
-        void RfStateMachine::Apply(std::vector<protocal::StateMachineCommand*> commands) {
-            for (auto command : commands) {
-                m_mapKVs[command->key()] = command->value();
-            }
-        }
+void RfStateMachine::Apply(std::vector<protocal::StateMachineCommand*> commands) {
+    for (auto command : commands) {
+        m_mapKVs[command->key()] = command->value();
+    }
+}
 
-        std::string RfStateMachine::GetValue(const std::string &key) {
-            return this->m_mapKVs[key];
-        }
-    } // namespace server
+std::string RfStateMachine::GetValue(const std::string &key) {
+    return this->m_mapKVs[key];
+}
+} // namespace server
 } // namespace ccraft

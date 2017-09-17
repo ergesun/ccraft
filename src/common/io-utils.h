@@ -8,6 +8,30 @@
 
 #include <cstdio>
 
+#define WriteFileFullyWithFatalLOG(fd, buf, size, filePath)                                         \
+        if (-1 == common::IOUtils::WriteFully((fd), (buf), (size))) {                               \
+            auto err = errno;                                                                       \
+            LOGFFUN << "write file " << (filePath) << " failed with errmsg " << strerror(err);      \
+        }
+
+#define ReadFileFullyWithFatalLOG(fd, buf, size, filePath)                                          \
+        if (-1 == common::IOUtils::ReadFully_V2((fd), (buf), (size))) {                             \
+            auto err = errno;                                                                       \
+            LOGFFUN << "read file " << (filePath) << " failed with errmsg " << strerror(err);       \
+        }
+
+#define LSeekFileWithFatalLOG(fd, len, where, filePath)                                             \
+        if (-1 == lseek((fd), (len), (where))) {                                                    \
+            auto err = errno;                                                                       \
+            LOGFFUN << "lseek file " << (filePath) << " failed with errmsg " << strerror(err);      \
+        }
+
+#define FDataSyncFileWithFatalLOG(fd, filePath)                                                     \
+        if (-1 == fdatasync((fd))) {                                                                \
+            auto err = errno;                                                                       \
+            LOGFFUN << "fdatasync file " << (filePath) << " failed with errmsg " << strerror(err);  \
+        }
+
 namespace ccraft {
 namespace common {
 class IOUtils {
