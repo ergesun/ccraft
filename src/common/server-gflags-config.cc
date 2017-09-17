@@ -8,7 +8,7 @@
 /**
  * glog配置
  */
-DEFINE_string(glog_dir, "/tmp/logs/test.lg", "glog的保存路径");
+DEFINE_string(glog_dir, "/tmp/ccraft/logs", "glog的保存路径");
 DEFINE_bool(glog_prefix, true, "设置日志前缀是否应该添加到每行输出");
 DEFINE_int32(max_glog_size, 100, "设置最大日志文件大小（以MB为单位）");
 DEFINE_int32(glogbufsecs, 0, "设置可以缓冲日志的最大秒数，0指实时输出");
@@ -37,3 +37,5 @@ DEFINE_int32(internal_rpc_io_threads_cnt, 0, "设置用于node间通信的rpc服
  * rf node
  */
 DEFINE_int32(server_id, 0, "设置server id，从0开始。");
+DEFINE_string(data_dir, "/tmp/ccraft", "数据存放目录");
+DEFINE_string(rflogger_type, "realtime-disk", "rflogger类型");

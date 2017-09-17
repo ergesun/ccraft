@@ -9,16 +9,16 @@
 #include "../../iservice.h"
 
 namespace ccraft {
-    namespace server {
-        class ClientRpcService : public IService {
-        public:
-            ClientRpcService() = default;
-            ~ClientRpcService() override = default;
+namespace server {
+class ClientRpcService : public IService {
+public:
+    ClientRpcService() = default;
+    ~ClientRpcService() override = default;
 
-            bool Start() override;
-            bool Stop() override;
-        };
-    } // namespace server
+    bool Start() override;
+    bool Stop() override;
+};
+} // namespace server
 } // namespace ccraft
 
 #endif //CCRAFT_SRV_NODE_CLIENT_RPC_SERVICE_H

@@ -18,10 +18,10 @@
 namespace ccraft {
 namespace server {
 class NodeInternalMessenger;
-class RfNodeService : public IService, public INodeInternalRpcHandler {
+class NodeRpcService : public IService, public INodeInternalRpcHandler {
 public:
-    RfNodeService();
-    ~RfNodeService() override;
+    NodeRpcService();
+    ~NodeRpcService() override;
 
     bool Start() override;
     bool Stop() override;
@@ -31,10 +31,6 @@ public:
 
 private:
     NodeInternalMessenger                                       *m_pNodeInternalMessenger = nullptr;
-    NodeRoleType                                                 m_roleType               = NodeRoleType::Follower;
-    uint32_t                                                     m_iCurrentTerm           = 0;
-    uint32_t                                                     m_iVoteFor               = 0;
-    std::unordered_map<uint32_t, net::net_peer_info_t>           m_hmServicesConf;
 };
 } // namespace server
 } // namespace ccraft

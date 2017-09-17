@@ -7,7 +7,7 @@ echo "
 #####################################################################################
 # glog的保存路径
 # TODO(sunchao): 确认log path
---glog_dir=/export/logs/access-control-center
+--glog_dir=/tmp/ccraft/logs
 
 # 设置日志前缀是否应该添加到每行输出
 --glog_prefix=true

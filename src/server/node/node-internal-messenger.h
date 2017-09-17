@@ -23,26 +23,24 @@ class NotifyMessage;
 }
 
 namespace protocal {
-namespace serverraft {
 class AppendRfLogResponse;
 class RequestVoteResponse;
 }
-}
 
 namespace server {
-class RfNodeService;
+class NodeRpcService;
 class RfNodeInternalRpcClientSync;
 class RfNodeInternalRpcServerSync;
 
 struct CreateNodeInternalMessengerParam {
-    CreateNodeInternalMessengerParam(RfNodeService *prfNode, uint16_t cliRpcWorkThreadsCnt, common::cctime_t cliWaitRespTimeout,
+    CreateNodeInternalMessengerParam(NodeRpcService *prfNode, uint16_t cliRpcWorkThreadsCnt, common::cctime_t cliWaitRespTimeout,
                                     uint16_t srvRpcWorkThreadsCnt, uint16_t mngerWorkThreadsCnt, uint16_t inetIOThreadsCnt,
                                     uint16_t iport, common::MemPool *pMp = nullptr) :
         rfNode(prfNode), clientRpcWorkThreadsCnt(cliRpcWorkThreadsCnt), clientWaitResponseTimeout(cliWaitRespTimeout),
         serverRpcWorkThreadsCnt(srvRpcWorkThreadsCnt), mngerDispatchWorkThreadsCnt(mngerWorkThreadsCnt), netIOThreadsCnt(inetIOThreadsCnt),
         port(iport), memPool(pMp) {}
 
-    RfNodeService             *rfNode;
+    NodeRpcService             *rfNode;
     uint16_t            clientRpcWorkThreadsCnt;
     common::cctime_t    clientWaitResponseTimeout;
     uint16_t            serverRpcWorkThreadsCnt;
@@ -70,10 +68,10 @@ public:
     bool Start() override;
     bool Stop() override;
 
-    std::shared_ptr<protocal::serverraft::AppendRfLogResponse> AppendRfLogSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    std::shared_ptr<protocal::AppendRfLogResponse> AppendRfLogSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
 
-    std::shared_ptr<protocal::serverraft::RequestVoteResponse> RequestVoteSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    std::shared_ptr<protocal::RequestVoteResponse> RequestVoteSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
 
 private:
@@ -87,7 +85,7 @@ private:
     /**
      * 关联关系，无需本类释放。
      */
-    RfNodeService                                                     *m_pRfNode         = nullptr;
+    NodeRpcService                                                     *m_pRfNode         = nullptr;
     net::ISocketService                                        *m_pSocketService  = nullptr;
     RfNodeInternalRpcClientSync                                *m_pClient         = nullptr;
     RfNodeInternalRpcServerSync                                *m_pServer         = nullptr;

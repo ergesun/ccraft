@@ -3,6 +3,8 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
+#include "../../codegen/client-server.pb.h"
+
 #include "raft-state-machine.h"
 
 namespace ccraft {
@@ -22,7 +24,7 @@ namespace ccraft {
         }
 
         std::string RfStateMachine::GetValue(const std::string &key) {
-            return m_mapKVs[key];
+            return this->m_mapKVs[key];
         }
     } // namespace server
 } // namespace ccraft

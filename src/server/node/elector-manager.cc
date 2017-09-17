@@ -19,6 +19,10 @@ ElectorManager::~ElectorManager() {
 }
 
 bool ElectorManager::Initialzie(uint32_t myId, std::string &&serversConfPath) {
+    if (0 == myId) {
+        LOGFFUN << "server id must be larger than 0.";
+    }
+
     m_iMyId = myId;
 
     return m_nodeConf->Initialize(serversConfPath);

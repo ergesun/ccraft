@@ -56,7 +56,7 @@ rpc::SP_PB_MSG RfNodeInternalRpcServerSync::on_append_rflog(rpc::SP_PB_MSG sspMs
 }
 
 rpc::SP_PB_MSG RfNodeInternalRpcServerSync::create_append_rflog_request() {
-    return rpc::SP_PB_MSG(new protocal::serverraft::AppendRfLogRequest());
+    return rpc::SP_PB_MSG(new protocal::AppendRfLogRequest());
 }
 
 rpc::SP_PB_MSG RfNodeInternalRpcServerSync::on_request_vote(rpc::SP_PB_MSG sspMsg) {
@@ -64,7 +64,7 @@ rpc::SP_PB_MSG RfNodeInternalRpcServerSync::on_request_vote(rpc::SP_PB_MSG sspMs
 }
 
 rpc::SP_PB_MSG RfNodeInternalRpcServerSync::create_request_vote_request() {
-    return rpc::SP_PB_MSG(new protocal::serverraft::RequestVoteRequest());
+    return rpc::SP_PB_MSG(new protocal::RequestVoteRequest());
 }
 } // namespace server
 } // namespace ccraft

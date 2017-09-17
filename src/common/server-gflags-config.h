@@ -38,8 +38,10 @@ DECLARE_int32(internal_rpc_messenger_threads_cnt);
 DECLARE_int32(internal_rpc_io_threads_cnt);
 
 /**
- * rf node
+ * rf server
  */
 DECLARE_int32(server_id);
+DECLARE_string(data_dir);
+DECLARE_string(rflogger_type);
 
 #endif //CCRAFT_GFLAGS_CONFIG_H

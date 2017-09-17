@@ -12,6 +12,7 @@
 #include "../../common/codec-utils.h"
 #include "../../common/buffer.h"
 #include "../../rpc/protobuf-utils.h"
+#include "../../codegen/node-raft.pb.h"
 
 #include "realtime-disk-rflogger.h"
 
@@ -71,7 +72,19 @@ namespace ccraft {
 
         void RtDiskRfLogger::AppendEntries(RepeatedPtrField<RfLogEntry> *entries) {
             for (auto iter = entries->begin(); iter < entries->end(); ++iter) {
-                AppendEntry(&(*iter));
+                auto entry = new RfLogEntry();
+                entry->set_term(iter->term());
+                entry->set_index(iter->index());
+                entry->set_type(iter->type());
+                auto data = iter->release_data();
+                entry->set_data(std::move(*data));
+                DELETE_PTR(data);
+
+                m_vEntries.push_back(entry);
+            }
+
+            if (m_bAutoSync) {
+                Sync();
             }
         }
 
@@ -85,6 +98,10 @@ namespace ccraft {
             DELETE_PTR(data);
 
             m_vEntries.push_back(entry);
+
+            if (m_bAutoSync) {
+                Sync();
+            }
         }
 
         void RtDiskRfLogger::Sync() {

@@ -1,7 +1,7 @@
 syntax="proto3";
 //option cc_generic_services = true;
 
-package ccraft.protocal.serverraft;
+package ccraft.protocal;
 
 /**
  * A server in a configuration.

@@ -9,24 +9,24 @@
 #include <string>
 
 namespace ccraft {
-    namespace common {
-        class RfServer;
-        class RfNodeConfiguration;
-    }
-    namespace server {
-        class ElectorManager {
-        public:
-            ElectorManager();
-            ~ElectorManager();
+namespace common {
+class RfServer;
+class RfNodeConfiguration;
+}
+namespace server {
+class ElectorManager {
+public:
+    ElectorManager();
+    ~ElectorManager();
 
-            bool Initialzie(uint32_t myId, std::string &&serversConfPath);
-            const common::RfServer& GetSelfServerConf() const;
+    bool Initialzie(uint32_t myId, std::string &&serversConfPath);
+    const common::RfServer& GetSelfServerConf() const;
 
-        private:
-            common::RfNodeConfiguration               *m_nodeConf = nullptr;
-            uint32_t                                   m_iMyId = 0;
-        };
-    } // namespace server
+private:
+    common::RfNodeConfiguration               *m_nodeConf = nullptr;
+    uint32_t                                   m_iMyId = 0;
+};
+} // namespace server
 } // namespace ccraft
 
 #endif //CCRAFT_SERVER_ELECTOR_MANAGER_H

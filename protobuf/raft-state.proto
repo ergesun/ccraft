@@ -1,9 +1,9 @@
 syntax="proto3";
 //option cc_generic_services = true;
 
-package ccraft.protocal.raftmeta;
+package ccraft.protocal;
 
-message Metadata {
+message RaftState {
     uint32 currentTerm = 1;
     uint32 votedFor    = 2;
 }
