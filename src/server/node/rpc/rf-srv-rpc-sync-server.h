@@ -12,11 +12,11 @@
 namespace ccraft {
 namespace server {
 class INodeInternalRpcHandler;
-class RfNodeInternalRpcServerSync : public IService, public rpc::IMessageHandler {
+class RfSrvInternalRpcServerSync : public IService, public rpc::IMessageHandler {
 public:
-    RfNodeInternalRpcServerSync(INodeInternalRpcHandler *handler, uint16_t workThreadsCnt,
+    RfSrvInternalRpcServerSync(INodeInternalRpcHandler *handler, uint16_t workThreadsCnt,
                                 net::ISocketService *ss, common::MemPool *memPool = nullptr);
-    ~RfNodeInternalRpcServerSync() override;
+    ~RfSrvInternalRpcServerSync() override;
 
     bool Start() override;
     bool Stop() override;

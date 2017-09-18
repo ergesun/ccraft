@@ -11,15 +11,15 @@
 #include "../../net/rcv-message.h"
 #include "../../rpc/common-def.h"
 
-#include "./rpc/rf-node-rpc-sync-client.h"
-#include "./rpc/rf-node-rpc-sync-server.h"
-#include "node-rpc-service.h"
+#include "rpc/rf-srv-rpc-sync-client.h"
+#include "rpc/rf-srv-rpc-sync-server.h"
+#include "server-rpc-service.h"
 
-#include "node-internal-messenger.h"
+#include "server-internal-messenger.h"
 
 namespace ccraft {
 namespace server {
-NodeInternalMessenger::NodeInternalMessenger(CreateNodeInternalMessengerParam &createParam) :
+ServerInternalMessenger::ServerInternalMessenger(CreateServerInternalMessengerParam &createParam) :
         m_pRfNode(createParam.rfNode), m_iDispatchTpCnt(createParam.mngerDispatchWorkThreadsCnt) {
     CHECK(createParam.rfNode);
     if (!createParam.memPool) {
@@ -36,14 +36,14 @@ NodeInternalMessenger::NodeInternalMessenger(CreateNodeInternalMessengerParam &c
                                                                 sspNat,
                                                                 createParam.port,
                                                                 m_pMemPool,
-                                                                std::bind(&NodeInternalMessenger::recv_msg, this, std::placeholders::_1),
+                                                                std::bind(&ServerInternalMessenger::recv_msg, this, std::placeholders::_1),
                                                                 std::shared_ptr<net::INetStackWorkerManager>(new net::UniqueWorkerManager()));
-    m_pClient = new RfNodeInternalRpcClientSync(m_pSocketService, createParam.clientWaitResponseTimeout,
+    m_pClient = new RfSrvInternalRpcClientSync(m_pSocketService, createParam.clientWaitResponseTimeout,
                                                 createParam.clientRpcWorkThreadsCnt, m_pMemPool);
-    m_pServer = new RfNodeInternalRpcServerSync(this, createParam.serverRpcWorkThreadsCnt, m_pSocketService, m_pMemPool);
+    m_pServer = new RfSrvInternalRpcServerSync(this, createParam.serverRpcWorkThreadsCnt, m_pSocketService, m_pMemPool);
 }
 
-NodeInternalMessenger::~NodeInternalMessenger() {
+ServerInternalMessenger::~ServerInternalMessenger() {
     Stop();
     if (m_bOwnMemPool) {
         DELETE_PTR(m_pMemPool);
@@ -54,7 +54,7 @@ NodeInternalMessenger::~NodeInternalMessenger() {
     DELETE_PTR(m_pSocketService);
 }
 
-bool NodeInternalMessenger::Start() {
+bool ServerInternalMessenger::Start() {
     if (!m_bStopped) {
         return true;
     }
@@ -69,7 +69,7 @@ bool NodeInternalMessenger::Start() {
     return true;
 }
 
-bool NodeInternalMessenger::Stop() {
+bool ServerInternalMessenger::Stop() {
     if (m_bStopped) {
         return true;
     }
@@ -83,25 +83,25 @@ bool NodeInternalMessenger::Stop() {
     return true;
 }
 
-std::shared_ptr<protocal::AppendRfLogResponse> NodeInternalMessenger::AppendRfLogSync(rpc::SP_PB_MSG req,
+std::shared_ptr<protocal::AppendRfLogResponse> ServerInternalMessenger::AppendRfLogSync(rpc::SP_PB_MSG req,
                                                                                  net::net_peer_info_t &&peer) {
     return m_pClient->AppendRfLog(req, std::move(peer));
 }
 
-rpc::SP_PB_MSG NodeInternalMessenger::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
+rpc::SP_PB_MSG ServerInternalMessenger::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
     return m_pRfNode->OnAppendRfLog(sspMsg);
 }
 
-std::shared_ptr<protocal::RequestVoteResponse> NodeInternalMessenger::RequestVoteSync(rpc::SP_PB_MSG req,
+std::shared_ptr<protocal::RequestVoteResponse> ServerInternalMessenger::RequestVoteSync(rpc::SP_PB_MSG req,
                                                                                  net::net_peer_info_t &&peer) {
     return m_pClient->RequestVote(req, std::move(peer));
 }
 
-rpc::SP_PB_MSG NodeInternalMessenger::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
+rpc::SP_PB_MSG ServerInternalMessenger::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
     return m_pRfNode->OnRequestVote(sspMsg);
 }
 
-void NodeInternalMessenger::dispatch_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
+void ServerInternalMessenger::dispatch_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
     if (UNLIKELY(m_bStopped)) {
         return;
     }
@@ -137,12 +137,12 @@ void NodeInternalMessenger::dispatch_msg(std::shared_ptr<net::NotifyMessage> ssp
     }
 }
 
-void NodeInternalMessenger::recv_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
+void ServerInternalMessenger::recv_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
     if (UNLIKELY(m_bStopped)) {
         return;
     }
 
-    m_pDispatchTp->AddTask(std::bind(&NodeInternalMessenger::dispatch_msg, this, std::placeholders::_1), sspNM);
+    m_pDispatchTp->AddTask(std::bind(&ServerInternalMessenger::dispatch_msg, this, std::placeholders::_1), sspNM);
 }
 } // namespace server
 } // namespace ccraft

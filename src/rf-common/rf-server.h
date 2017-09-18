@@ -3,14 +3,13 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_SERVER_CONFIGURATION_H
-#define CCRAFT_SERVER_CONFIGURATION_H
+#ifndef CCRAFT_RFCOMMON_RF_SERVER_H
+#define CCRAFT_RFCOMMON_RF_SERVER_H
 
 #include <string>
-#include <map>
 
 namespace ccraft {
-namespace common {
+namespace rfcommon {
 struct RfServer {
     RfServer() = default;
     RfServer(uint32_t id, std::string &&addr, uint16_t portForServer, uint16_t portForClient) :
@@ -49,20 +48,7 @@ struct RfServer {
     uint16_t              m_iPortForServer;
     uint16_t              m_iPortForClient;
 };
-
-class RfNodeConfiguration {
-public:
-    RfNodeConfiguration() = default;
-    ~RfNodeConfiguration() = default;
-
-    bool Initialize(std::string &path);
-    const std::map<uint32_t, RfServer>& GetAllServers() const;
-    const RfServer& operator[](uint32_t key);
-
-private:
-    std::map<uint32_t, RfServer>      m_mapServers;
-};
-} // namespace common
+} // namespace rfcommon
 } // namespace ccraft
 
-#endif //CCRAFT_SERVER_CONFIGURATION_H
+#endif //CCRAFT_RFCOMMON_RF_SERVER_H

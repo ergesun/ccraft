@@ -11,11 +11,11 @@
 
 #include "common-def.h"
 
-#include "rf-node-rpc-sync-client.h"
+#include "rf-srv-rpc-sync-client.h"
 
 #define ImplRfNodeRpcWithPeer(RpcName)                                                                  \
 std::shared_ptr<protocal::RpcName##Response>                                                            \
-    RfNodeInternalRpcClientSync::RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {             \
+    RfSrvInternalRpcClientSync::RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {              \
         auto tmpPeer = peer;                                                                            \
         auto ctx = sendMessage(#RpcName, std::move(req), std::move(peer));                              \
         if (UNLIKELY(!ctx)) {                                                                           \
@@ -33,7 +33,7 @@ std::shared_ptr<protocal::RpcName##Response>                                    
 
 namespace ccraft {
 namespace server {
-bool RfNodeInternalRpcClientSync::Start() {
+bool RfSrvInternalRpcClientSync::Start() {
     register_rpc_handlers();
 
     return rpc::ARpcClientSync::Start();
@@ -42,7 +42,7 @@ bool RfNodeInternalRpcClientSync::Start() {
 ImplRfNodeRpcWithPeer(AppendRfLog)
 ImplRfNodeRpcWithPeer(RequestVote)
 
-bool RfNodeInternalRpcClientSync::register_rpc_handlers() {
+bool RfSrvInternalRpcClientSync::register_rpc_handlers() {
     if (!registerRpc(RpcAppendRfLog, APPEND_RFLOG_RPC_ID)) {
         return false;
     }

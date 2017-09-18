@@ -7,7 +7,7 @@
 
 #include "../../common/common-def.h"
 #include "client-rpc-service.h"
-#include "node-rpc-service.h"
+#include "server-rpc-service.h"
 #include "raft-consensus.h"
 #include "raft-state-machine.h"
 
@@ -34,7 +34,7 @@ void ServiceManager::ServiceBootstrap::create_services() {
                 break;
             }
             case ServiceType::ServerRpc: {
-                ServiceManager::s_mapServices[st] = new NodeRpcService();
+                ServiceManager::s_mapServices[st] = new ServerRpcService();
                 break;
             }
             case ServiceType::RaftConsensus: {

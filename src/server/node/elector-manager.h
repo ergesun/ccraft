@@ -9,9 +9,9 @@
 #include <string>
 
 namespace ccraft {
-namespace common {
+namespace rfcommon {
 class RfServer;
-class RfNodeConfiguration;
+class RfServerConfiguration;
 }
 namespace server {
 class ElectorManager {
@@ -20,10 +20,13 @@ public:
     ~ElectorManager();
 
     bool Initialize(uint32_t myId, std::string &&serversConfPath);
-    const common::RfServer& GetSelfServerConf() const;
+    const rfcommon::RfServer& GetSelfServerConf() const;
+
+    bool MarkVoted();
+    bool MeetQuorum();
 
 private:
-    common::RfNodeConfiguration               *m_nodeConf = nullptr;
+    rfcommon::RfServerConfiguration           *m_nodeConf = nullptr;
     uint32_t                                   m_iMyId = 0;
 };
 } // namespace server

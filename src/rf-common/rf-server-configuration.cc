@@ -6,12 +6,13 @@
 #include <fstream>
 #include <sstream>
 
-#include "rfnode-configuration.h"
-#include "common-utils.h"
+#include "rf-server-configuration.h"
+#include "../common/common-def.h"
+#include "../common/common-utils.h"
 
 namespace ccraft {
-namespace common {
-bool RfNodeConfiguration::Initialize(std::string &path) {
+namespace rfcommon {
+bool RfServerConfiguration::Initialize(std::string &path) {
     std::ifstream fs(path.c_str());
     if (!fs) {
         return false;
@@ -46,12 +47,12 @@ bool RfNodeConfiguration::Initialize(std::string &path) {
     return true;
 }
 
-const std::map<uint32_t, RfServer>& RfNodeConfiguration::GetAllServers() const {
+const std::map<uint32_t, RfServer>& RfServerConfiguration::GetAllServers() const {
     return m_mapServers;
 }
 
-const RfServer& RfNodeConfiguration::operator[](uint32_t key) {
+const RfServer& RfServerConfiguration::operator[](uint32_t key) {
     return m_mapServers[key];
 }
-} // namespace common
+} // namespace rfcommon
 } // namespace ccraft

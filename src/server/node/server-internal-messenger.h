@@ -11,7 +11,7 @@
 #include "../../common/blocking-queue.h"
 #include "../../common/thread-pool.h"
 
-#include "inode-internal-rpc-handler.h"
+#include "iserver-internal-rpc-handler.h"
 
 namespace ccraft {
 namespace common {
@@ -28,19 +28,19 @@ class RequestVoteResponse;
 }
 
 namespace server {
-class NodeRpcService;
-class RfNodeInternalRpcClientSync;
-class RfNodeInternalRpcServerSync;
+class ServerRpcService;
+class RfSrvInternalRpcClientSync;
+class RfSrvInternalRpcServerSync;
 
-struct CreateNodeInternalMessengerParam {
-    CreateNodeInternalMessengerParam(NodeRpcService *prfNode, uint16_t cliRpcWorkThreadsCnt, common::cctime_t cliWaitRespTimeout,
+struct CreateServerInternalMessengerParam {
+    CreateServerInternalMessengerParam(ServerRpcService *prfNode, uint16_t cliRpcWorkThreadsCnt, common::cctime_t cliWaitRespTimeout,
                                     uint16_t srvRpcWorkThreadsCnt, uint16_t mngerWorkThreadsCnt, uint16_t inetIOThreadsCnt,
                                     uint16_t iport, common::MemPool *pMp = nullptr) :
         rfNode(prfNode), clientRpcWorkThreadsCnt(cliRpcWorkThreadsCnt), clientWaitResponseTimeout(cliWaitRespTimeout),
         serverRpcWorkThreadsCnt(srvRpcWorkThreadsCnt), mngerDispatchWorkThreadsCnt(mngerWorkThreadsCnt), netIOThreadsCnt(inetIOThreadsCnt),
         port(iport), memPool(pMp) {}
 
-    NodeRpcService             *rfNode;
+    ServerRpcService             *rfNode;
     uint16_t            clientRpcWorkThreadsCnt;
     common::cctime_t    clientWaitResponseTimeout;
     uint16_t            serverRpcWorkThreadsCnt;
@@ -51,7 +51,7 @@ struct CreateNodeInternalMessengerParam {
 };
 
 // TODO(sunchao): 考虑有必要再对messenger抽象不.
-class NodeInternalMessenger : public IService, public INodeInternalRpcHandler {
+class ServerInternalMessenger : public IService, public INodeInternalRpcHandler {
 public:
     /**
      *
@@ -62,8 +62,8 @@ public:
      * @param timeout
      * @param memPool
      */
-    explicit NodeInternalMessenger(CreateNodeInternalMessengerParam &createParam);
-    ~NodeInternalMessenger() override;
+    explicit ServerInternalMessenger(CreateServerInternalMessengerParam &createParam);
+    ~ServerInternalMessenger() override;
 
     bool Start() override;
     bool Stop() override;
@@ -85,10 +85,10 @@ private:
     /**
      * 关联关系，无需本类释放。
      */
-    NodeRpcService                                                     *m_pRfNode         = nullptr;
+    ServerRpcService                                                     *m_pRfNode         = nullptr;
     net::ISocketService                                        *m_pSocketService  = nullptr;
-    RfNodeInternalRpcClientSync                                *m_pClient         = nullptr;
-    RfNodeInternalRpcServerSync                                *m_pServer         = nullptr;
+    RfSrvInternalRpcClientSync                                *m_pClient         = nullptr;
+    RfSrvInternalRpcServerSync                                *m_pServer         = nullptr;
     bool                                                        m_bOwnMemPool     = false;
     common::MemPool                                            *m_pMemPool        = nullptr;
     uint16_t                                                    m_iDispatchTpCnt  = 0;

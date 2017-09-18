@@ -3,7 +3,7 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#include "../../common/rfnode-configuration.h"
+#include "../../rf-common/rf-server-configuration.h"
 #include "../../common/common-def.h"
 
 #include "elector-manager.h"
@@ -11,7 +11,7 @@
 namespace ccraft {
 namespace server {
 ElectorManager::ElectorManager() {
-    m_nodeConf = new common::RfNodeConfiguration();
+    m_nodeConf = new rfcommon::RfServerConfiguration();
 }
 
 ElectorManager::~ElectorManager() {
@@ -28,7 +28,7 @@ bool ElectorManager::Initialize(uint32_t myId, std::string &&serversConfPath) {
     return m_nodeConf->Initialize(serversConfPath);
 }
 
-const common::RfServer& ElectorManager::GetSelfServerConf() const {
+const rfcommon::RfServer& ElectorManager::GetSelfServerConf() const {
     return (*m_nodeConf)[m_iMyId];
 }
 } // namespace server

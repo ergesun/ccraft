@@ -71,8 +71,7 @@ void signal_handler(int sig) {
         }
         case SIGINT:
         case SIGTERM: {
-            // TODO(sunchao): 抽象一个ServiceManager和一个IService接口?
-            ccraft::server::ServiceManager::ServiceBootstrap::Run();
+            ccraft::server::ServiceManager::ServiceDestroyer::Run();
             break;
         }
         default: {

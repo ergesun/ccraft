@@ -11,17 +11,17 @@
 #include "iservice.h"
 #include "../../net/common-def.h"
 #include "../../rpc/common-def.h"
-#include "inode-internal-rpc-handler.h"
+#include "iserver-internal-rpc-handler.h"
 
 #include "common-def.h"
 
 namespace ccraft {
 namespace server {
-class NodeInternalMessenger;
-class NodeRpcService : public IService, public INodeInternalRpcHandler {
+class ServerInternalMessenger;
+class ServerRpcService : public IService, public INodeInternalRpcHandler {
 public:
-    NodeRpcService();
-    ~NodeRpcService() override;
+    ServerRpcService();
+    ~ServerRpcService() override;
 
     bool Start() override;
     bool Stop() override;
@@ -30,7 +30,7 @@ public:
     rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
 
 private:
-    NodeInternalMessenger          *m_pNodeInternalMessenger = nullptr;
+    ServerInternalMessenger          *m_pNodeInternalMessenger = nullptr;
 };
 } // namespace server
 } // namespace ccraft

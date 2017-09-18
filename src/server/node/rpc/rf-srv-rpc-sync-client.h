@@ -22,9 +22,9 @@ class RequestVoteResponse;
 }
 
 namespace server {
-class RfNodeInternalRpcClientSync : public rpc::ARpcClientSync {
+class RfSrvInternalRpcClientSync : public rpc::ARpcClientSync {
 public:
-    RfNodeInternalRpcClientSync(net::ISocketService *ss, common::cctime_t timeout,
+    RfSrvInternalRpcClientSync(net::ISocketService *ss, common::cctime_t timeout,
                                 uint16_t workThreadsCnt, common::MemPool *memPool = nullptr) :
         rpc::ARpcClientSync(ss, timeout, workThreadsCnt, memPool) {}
 

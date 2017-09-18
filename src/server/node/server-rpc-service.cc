@@ -6,19 +6,19 @@
 #include "../../codegen/node-raft.pb.h"
 #include "../../common/server-gflags-config.h"
 
-#include "node-internal-messenger.h"
+#include "server-internal-messenger.h"
 
-#include "node-rpc-service.h"
+#include "server-rpc-service.h"
 
 namespace ccraft {
 namespace server {
-NodeRpcService::NodeRpcService() {
+ServerRpcService::ServerRpcService() {
     common::cctime_t clientWaitTimeOut = {
         .sec = FLAGS_internal_rpc_client_wait_timeout_secs,
         .nsec = FLAGS_internal_rpc_client_wait_timeout_nsecs
     };
 
-    CreateNodeInternalMessengerParam cnimp = {
+    CreateServerInternalMessengerParam cnimp = {
         .rfNode = this,
         .clientRpcWorkThreadsCnt = (uint16_t)FLAGS_internal_rpc_client_threads_cnt,
         .clientWaitResponseTimeout = clientWaitTimeOut,
@@ -29,22 +29,22 @@ NodeRpcService::NodeRpcService() {
         .memPool = nullptr
     };
 
-    m_pNodeInternalMessenger = new NodeInternalMessenger(cnimp);
+    m_pNodeInternalMessenger = new ServerInternalMessenger(cnimp);
 }
 
-NodeRpcService::~NodeRpcService() {
+ServerRpcService::~ServerRpcService() {
     DELETE_PTR(m_pNodeInternalMessenger);
 }
 
-bool NodeRpcService::Start() {
+bool ServerRpcService::Start() {
     return m_pNodeInternalMessenger->Start();
 }
 
-bool NodeRpcService::Stop() {
+bool ServerRpcService::Stop() {
     return m_pNodeInternalMessenger->Stop();
 }
 
-rpc::SP_PB_MSG NodeRpcService::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
+rpc::SP_PB_MSG ServerRpcService::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
     auto appendRfLogRequest = dynamic_cast<protocal::AppendRfLogRequest*>(sspMsg.get());
     auto response = new protocal::AppendRfLogResponse();
     response->set_term(1111);
@@ -53,7 +53,7 @@ rpc::SP_PB_MSG NodeRpcService::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
     return rpc::SP_PB_MSG(response);
 }
 
-rpc::SP_PB_MSG NodeRpcService::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
+rpc::SP_PB_MSG ServerRpcService::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
     auto response = new protocal::RequestVoteResponse();
     response->set_term(1111);
     response->set_success(true);
