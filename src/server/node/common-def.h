@@ -19,15 +19,15 @@ enum class NodeRoleType {
 };
 
 enum class ServiceType {
-    ClientRpc        = 0,
-    ServerRpc        = 1,
+    ElectorManager   = 0,
+    ClientRpc        = 1,
     RaftConsensus    = 2,
     RaftStateMachine = 3
 };
 
 const vector<ServiceType> SERVICES_TYPES = {
+    ServiceType::ElectorManager,
     ServiceType::ClientRpc,
-    ServiceType::ServerRpc,
     ServiceType::RaftConsensus,
     ServiceType::RaftStateMachine
 };

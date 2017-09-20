@@ -47,7 +47,7 @@ link_directories(${EXTERN_COMPILE_THIRDPARTY_ROOT}/lib)
 #add_subdirectory(${UT_ROOT}/rf-common)
 ##----------------------------------------------------------------------------------------------
 
-if(${PROJECT_TYPE} STREQUAL "UT")
+if(${PROJECT_TYPE} MATCHES "UT")
     message(STATUS "UT_MODULE=${UT_MODULE}")
     add_definitions(-DGTEST_LANG_CXX11=1 -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)
     if(${UT_MODULE} STREQUAL "common")

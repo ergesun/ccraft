@@ -103,7 +103,7 @@
 #define LOGETAG LOG(ERROR) << __FUNCTION__ << "."
 #define LOGFTAG LOG(FATAL) << __FUNCTION__ << "."
 
-#define INOUT_LOG FuncInOutLogger __in__out_log__(__FUNCTION__);
+#define INOUT_LOG ccraft::common::FuncInOutLogger __in__out_log__(__FUNCTION__);
 
 typedef unsigned char uchar;
 

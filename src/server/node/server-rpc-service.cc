@@ -12,7 +12,7 @@
 
 namespace ccraft {
 namespace server {
-ServerRpcService::ServerRpcService() {
+ServerRpcService::ServerRpcService(uint16_t port) {
     common::cctime_t clientWaitTimeOut = {
         .sec = FLAGS_internal_rpc_client_wait_timeout_secs,
         .nsec = FLAGS_internal_rpc_client_wait_timeout_nsecs
@@ -25,7 +25,7 @@ ServerRpcService::ServerRpcService() {
         .serverRpcWorkThreadsCnt = (uint16_t)FLAGS_internal_rpc_server_threads_cnt,
         .mngerDispatchWorkThreadsCnt = (uint16_t)FLAGS_internal_rpc_messenger_threads_cnt,
         .netIOThreadsCnt = (uint16_t)FLAGS_internal_rpc_io_threads_cnt,
-        .port = (uint16_t)0,
+        .port = port,
         .memPool = nullptr
     };
 
@@ -37,10 +37,12 @@ ServerRpcService::~ServerRpcService() {
 }
 
 bool ServerRpcService::Start() {
+    INOUT_LOG;
     return m_pNodeInternalMessenger->Start();
 }
 
 bool ServerRpcService::Stop() {
+    INOUT_LOG;
     return m_pNodeInternalMessenger->Stop();
 }
 

@@ -45,5 +45,8 @@ DECLARE_string(data_dir);
 DECLARE_string(rflogger_type);
 DECLARE_int32(raft_election_interval);
 DECLARE_string(servers_conf_path);
+DECLARE_int32(leader_hb_timeout_duration);
+DECLARE_int32(start_election_rand_latency_low);
+DECLARE_int32(start_election_rand_latency_high);
 
 #endif //CCRAFT_GFLAGS_CONFIG_H

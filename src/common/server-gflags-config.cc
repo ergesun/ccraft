@@ -41,3 +41,6 @@ DEFINE_string(data_dir, "/tmp/ccraft", "数据存放目录");
 DEFINE_string(rflogger_type, "realtime-disk", "rflogger类型");
 DEFINE_int32(raft_election_interval, 30, "raft leader超时的时间间隔");
 DEFINE_string(servers_conf_path, "/tmp/ccraft/conf/servers", "集群server地址信息。");
+DEFINE_int32(leader_hb_timeout_duration, 30, "选举超时时间。即如果这段时间内没有收到leader的心跳则发起选举。单位：second。");
+DEFINE_int32(start_election_rand_latency_low, 200, "开始选举的随机延迟时间的下限。单位ms。");
+DEFINE_int32(start_election_rand_latency_high, 500, "开始选举的随机延迟时间的上限。单位ms。");

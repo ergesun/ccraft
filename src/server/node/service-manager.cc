@@ -6,8 +6,8 @@
 #include <algorithm>
 
 #include "../../common/common-def.h"
+#include "elector-manager-service.h"
 #include "client-rpc-service.h"
-#include "server-rpc-service.h"
 #include "raft-consensus.h"
 #include "raft-state-machine.h"
 
@@ -20,7 +20,9 @@ void ServiceManager::ServiceBootstrap::Run() {
         common::SpinLock l(&s_boot_mtx);
         if (!s_bServsBooted) {
             create_services();
-            start_services();
+            if (!start_services()) {
+                throw std::runtime_error("Cannot start services!");
+            }
             s_bServsBooted = true;
         }
     }
@@ -29,12 +31,11 @@ void ServiceManager::ServiceBootstrap::Run() {
 void ServiceManager::ServiceBootstrap::create_services() {
     for (auto st : SERVICES_TYPES) {
         switch (st) {
+            case ServiceType::ElectorManager: {
+                ServiceManager::s_mapServices[st] = new ElectorManagerService();
+            }
             case ServiceType::ClientRpc: {
                 ServiceManager::s_mapServices[st] = new ClientRpcService();
-                break;
-            }
-            case ServiceType::ServerRpc: {
-                ServiceManager::s_mapServices[st] = new ServerRpcService();
                 break;
             }
             case ServiceType::RaftConsensus: {
@@ -49,26 +50,29 @@ void ServiceManager::ServiceBootstrap::create_services() {
     }
 }
 
-void ServiceManager::ServiceBootstrap::start_services() {
-    std::for_each(ServiceManager::s_mapServices.begin(),
-                  ServiceManager::s_mapServices.end(),
-                  [](std::pair<ServiceType, IService*> p) {
-                      p.second->Start();
-                  });
+bool ServiceManager::ServiceBootstrap::start_services() {
+    for (auto s : ServiceManager::s_mapServices) {
+        if (!s.second->Start()) {
+            LOGEFUN << "Cannot start service " << (int32_t)s.first;
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void ServiceManager::ServiceDestroyer::Run() {
     std::unique_lock<std::mutex> l(s_mtxServsLiving);
-    try {
         std::for_each(ServiceManager::s_mapServices.begin(),
                       ServiceManager::s_mapServices.end(),
                       [](std::pair<ServiceType, IService*> p) {
                           p.second->Stop();
                       });
-    } catch (std::exception &ex) {
-        LOGEFUN << ex.what();
-    } catch (...) {
-        LOGEFUN << "Unknown error occur!";
+
+    for (auto s : ServiceManager::s_mapServices) {
+        if (!s.second->Stop()) {
+            LOGEFUN << "Cannot stop service " << (int32_t)s.first;
+        }
     }
 
     s_bAllServsStopped = true;

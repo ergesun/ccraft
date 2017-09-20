@@ -3,6 +3,7 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
+#include "../../common/common-def.h"
 #include "../../codegen/client-server.pb.h"
 
 #include "raft-state-machine.h"
@@ -18,6 +19,7 @@ RfStateMachine::~RfStateMachine() {
 }
 
 bool RfStateMachine::Start() {
+    INOUT_LOG;
     if (!m_bStopped) {
         return true;
     }
@@ -27,6 +29,7 @@ bool RfStateMachine::Start() {
 }
 
 bool RfStateMachine::Stop() {
+    INOUT_LOG;
     if (m_bStopped) {
         return true;
     }

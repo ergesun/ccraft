@@ -43,10 +43,10 @@ struct RfServer {
         return *this;
     }
 
-    uint32_t              m_iId;
+    uint32_t              m_iId              = 0;
     std::string           m_sAddr;
-    uint16_t              m_iPortForServer;
-    uint16_t              m_iPortForClient;
+    uint16_t              m_iPortForServer   = 0;
+    uint16_t              m_iPortForClient   = 0;
 };
 } // namespace rfcommon
 } // namespace ccraft

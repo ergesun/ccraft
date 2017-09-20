@@ -12,17 +12,30 @@
 #include "../../common/codec-utils.h"
 #include "../../common/io-utils.h"
 #include "../../common/buffer.h"
-#include "../../codegen/raft-state.pb.h"
 #include "../../common/protobuf-utils.h"
-
+#include "../../codegen/raft-state.pb.h"
+#include "../../rf-common/rf-server.h"
 #include "../rflog/realtime-disk-rflogger.h"
-#include "elector-manager.h"
+#include "elector-manager-service.h"
+#include "server-rpc-service.h"
 
 #include "raft-consensus.h"
+#include "service-manager.h"
 
 namespace ccraft {
 namespace server {
-RaftConsensus::RaftConsensus() {
+RaftConsensus::RaftConsensus() : m_iMyId((uint32_t)FLAGS_server_id),
+                                 m_random(common::Random::Range(FLAGS_start_election_rand_latency_low,
+                                                                FLAGS_start_election_rand_latency_high)) {
+    m_pTimer = new common::Timer();
+    m_moniterLeaderHbTimerCb = std::bind(&RaftConsensus::on_leader_hb_timeout, this, std::placeholders::_1);
+    m_monitorLeaderHbTimerEvent = {nullptr, &m_moniterLeaderHbTimerCb};
+
+    m_pElectorManager = dynamic_cast<ElectorManagerService*>(ServiceManager::GetService(ServiceType::ElectorManager));
+    assert(m_pElectorManager);
+
+    auto selfConf = m_pElectorManager->GetSelfServerConf();
+    m_pSrvRpcService = new ServerRpcService(selfConf.m_iPortForServer);
     initialize();
 }
 
@@ -33,21 +46,28 @@ RaftConsensus::~RaftConsensus() {
 
     DELETE_PTR(m_pTimer);
     DELETE_PTR(m_pRfLogger);
-    DELETE_PTR(m_pElectorManager);
 }
 
 bool RaftConsensus::Start() {
+    INOUT_LOG;
     if (!m_bStopped) {
         return true;
     }
 
     m_bStopped = false;
+    if (!m_pSrvRpcService->Start()) {
+        LOGEFUN << "Cannot start ServerRpcService.";
+        return false;
+    }
+
     m_pTimer->Start();
+    subscribe_leader_hb_timer_tick();
 
     return true;
 }
 
 bool RaftConsensus::Stop() {
+    INOUT_LOG;
     if (m_bStopped) {
         return true;
     }
@@ -59,13 +79,6 @@ bool RaftConsensus::Stop() {
 }
 
 void RaftConsensus::initialize() {
-    m_pTimer = new common::Timer();
-    m_pElectorManager = new ElectorManager();
-    if (!m_pElectorManager->Initialize((uint32_t)FLAGS_server_id, FLAGS_servers_conf_path.c_str())) {
-        LOGFFUN << "ElectorManager initialize failed!";
-    }
-
-    // rf logger
     std::stringstream ss1;
     ss1 << FLAGS_data_dir.c_str() << '/' << RFLOG_DIR;
     auto dataDirPath = ss1.str();
@@ -80,28 +93,28 @@ void RaftConsensus::initialize() {
     // rf state
     std::stringstream ss2;
     ss2 << dataDirPath.c_str() << '/' << RFSTATE_FILE_NAME;
-    m_sRfstateFilePath = ss2.str();
-    if (!common::FileUtils::Exist(m_sRfstateFilePath)) {
+    m_sRfStateFilePath = ss2.str();
+    if (!common::FileUtils::Exist(m_sRfStateFilePath)) {
         LOGDFUN2("create rfstate file ", m_sLogFilePath.c_str());
-        if (-1 == (m_iRfStateFd = common::FileUtils::Open(m_sRfstateFilePath, O_WRONLY, O_CREAT, 0644))) {
+        if (-1 == (m_iRfStateFd = common::FileUtils::Open(m_sRfStateFilePath, O_WRONLY, O_CREAT, 0644))) {
             auto err = errno;
-            LOGFFUN << "create rfstate file " << m_sRfstateFilePath.c_str() << " failed with errmsg " << strerror(err);
+            LOGFFUN << "create rfstate file " << m_sRfStateFilePath.c_str() << " failed with errmsg " << strerror(err);
         }
 
         // write file header.
         uchar header[RFSTATE_MAGIC_NO_LEN];
         ByteOrderUtils::WriteUInt32(header, RFSTATE_MAGIC_NO);
-        WriteFileFullyWithFatalLOG(m_iRfStateFd, (char*)header, RFSTATE_MAGIC_NO_LEN, m_sRfstateFilePath.c_str());
+        WriteFileFullyWithFatalLOG(m_iRfStateFd, (char*)header, RFSTATE_MAGIC_NO_LEN, m_sRfStateFilePath.c_str());
     } else {
-        if (-1 == (m_iRfStateFd = common::FileUtils::Open(m_sRfstateFilePath, O_RDWR, 0, 0))) {
+        if (-1 == (m_iRfStateFd = common::FileUtils::Open(m_sRfStateFilePath, O_RDWR, 0, 0))) {
             auto err = errno;
-            LOGFFUN << "open rfstate file " << m_sRfstateFilePath.c_str() << " failed with errmsg " << strerror(err);
+            LOGFFUN << "open rfstate file " << m_sRfStateFilePath.c_str() << " failed with errmsg " << strerror(err);
         }
 
         auto fileSize = common::FileUtils::GetFileSize(m_iRfStateFd);
         if (-1 == fileSize) {
             auto err = errno;
-            LOGFFUN << "get file size for " << m_sRfstateFilePath.c_str() << " failed with errmsg " << strerror(err);
+            LOGFFUN << "get file size for " << m_sRfStateFilePath.c_str() << " failed with errmsg " << strerror(err);
         }
         if (0 == (uint32_t)fileSize) {
             LOGDFUN3("rfstate file ", m_sLogFilePath.c_str(), " is empty!");
@@ -109,16 +122,16 @@ void RaftConsensus::initialize() {
         }
 
         if (fileSize < RFSTATE_MAGIC_NO_LEN) {
-            LOGFFUN << "rfstate file " << m_sRfstateFilePath.c_str() << " header is corrupt!";
+            LOGFFUN << "rfstate file " << m_sRfStateFilePath.c_str() << " header is corrupt!";
         }
 
         char *buf = nullptr;
-        ReadFileFullyWithFatalLOG(m_iRfStateFd, &buf, (size_t)fileSize, m_sRfstateFilePath.c_str());
+        ReadFileFullyWithFatalLOG(m_iRfStateFd, &buf, (size_t)fileSize, m_sRfStateFilePath.c_str());
         std::shared_ptr<char> sspBuf(buf, common::ArrDeleter<char>());
 
         uint32_t magicNo = ByteOrderUtils::ReadUInt32((uchar*)buf);
         if (RFSTATE_MAGIC_NO != magicNo) {
-            LOGFFUN << "rfstate " << m_sRfstateFilePath.c_str() << " header is corrupt!";
+            LOGFFUN << "rfstate " << m_sRfStateFilePath.c_str() << " header is corrupt!";
         }
 
         auto startPtr = (uchar*)(buf + RFSTATE_MAGIC_NO_LEN);
@@ -136,7 +149,8 @@ void RaftConsensus::initialize() {
 }
 
 void RaftConsensus::save_rf_state() {
-    auto rfsfp = m_sRfstateFilePath.c_str();
+    LOGDTAG;
+    auto rfsfp = m_sRfStateFilePath.c_str();
     LSeekFileWithFatalLOG(m_iRfStateFd, 0, SEEK_SET, rfsfp);
     if (-1 == ftruncate(m_iRfStateFd, 0)) {
         auto err = errno;
@@ -157,12 +171,35 @@ void RaftConsensus::save_rf_state() {
 
     common::Buffer b;
     common::ProtoBufUtils::Serialize(rs, &b, common::g_pMemPool);
-    WriteFileFullyWithFatalLOG(m_iRfStateFd, (char*)(b.GetStart()), size_t(b.AvailableLength()), m_sRfstateFilePath.c_str());
+    WriteFileFullyWithFatalLOG(m_iRfStateFd, (char*)(b.GetStart()), size_t(b.AvailableLength()), m_sRfStateFilePath.c_str());
     FDataSyncFileWithFatalLOG(m_iRfStateFd, rfsfp);
 }
 
-void RaftConsensus::on_leader_hb_timeout() {
+void RaftConsensus::on_leader_hb_timeout(void *ctx) {
+    start_new_election();
+}
 
+void RaftConsensus::start_new_election() {
+    LOGITAG;
+    m_roleType = NodeRoleType::Candidate;
+    m_iVoteFor = m_iMyId;
+
+}
+
+void RaftConsensus::subscribe_leader_hb_timer_tick() {
+    LOGDTAG;
+    auto latency = m_random.GetNew();
+    common::cctime_t interval(FLAGS_raft_election_interval, latency * 1000 * 1000);
+    m_monitorLeaderHbTimerEventId = m_pTimer->SubscribeEventAfter(interval, m_monitorLeaderHbTimerEvent);
+    if (0 == m_monitorLeaderHbTimerEventId.when) {
+        LOGFFUN << "timer event is replicated!";
+    }
+}
+
+void RaftConsensus::broadcast_request_vote(std::map<uint32_t, rfcommon::RfServer> otherSrvs) {
+    for (auto srv : otherSrvs) {
+        //m_pSrvRpcService->Req
+    }
 }
 } // namespace server
 } // namespace ccraft

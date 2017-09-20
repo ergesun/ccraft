@@ -20,7 +20,7 @@ namespace server {
 class ServerInternalMessenger;
 class ServerRpcService : public IService, public INodeInternalRpcHandler {
 public:
-    ServerRpcService();
+    explicit ServerRpcService(uint16_t port);
     ~ServerRpcService() override;
 
     bool Start() override;

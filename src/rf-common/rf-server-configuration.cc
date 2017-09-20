@@ -12,7 +12,7 @@
 
 namespace ccraft {
 namespace rfcommon {
-bool RfServerConfiguration::Initialize(std::string &path) {
+bool RfServerConfiguration::Initialize(uint32_t myId, std::string &path) {
     std::ifstream fs(path.c_str());
     if (!fs) {
         return false;
@@ -26,33 +26,41 @@ bool RfServerConfiguration::Initialize(std::string &path) {
         }
 
         std::istringstream iss(line);
-        uint32_t id;
+        int32_t id;
         std::string addr;
         uint16_t portForServer, portForClient;
         if (!(iss >> id >> addr >> portForServer >> portForClient)) {
             return false;
         }
 
-        if (0 == id) {
+        if (0 >= id) {
             LOGFFUN << "Server id must be larger than 0.";
         }
 
-        if (m_mapServers.end() != m_mapServers.find(id)) {
+        if (id == myId) {
+            if (m_selfServer.m_iId == id) {
+                LOGFFUN << "Server id " << id << " is duplicate!";
+            }
+            m_selfServer = RfServer(id, std::move(addr), portForServer, portForClient);
+            continue;
+        }
+
+        if (m_mapOtherServers.end() != m_mapOtherServers.find(id)) {
             LOGFFUN << "Server id " << id << " is duplicate!";
         }
 
-        m_mapServers.insert(std::make_pair(id, RfServer(id, std::move(addr), portForServer, portForClient)));
+        m_mapOtherServers.insert(std::make_pair(id, RfServer(id, std::move(addr), portForServer, portForClient)));
     }
 
     return true;
 }
 
-const std::map<uint32_t, RfServer>& RfServerConfiguration::GetAllServers() const {
-    return m_mapServers;
+inline const std::map<uint32_t, RfServer>& RfServerConfiguration::GetOtherServers() const {
+    return m_mapOtherServers;
 }
 
-const RfServer& RfServerConfiguration::operator[](uint32_t key) {
-    return m_mapServers[key];
+const RfServer& RfServerConfiguration::GetSelfServer() const {
+    return m_selfServer;
 }
 } // namespace rfcommon
 } // namespace ccraft

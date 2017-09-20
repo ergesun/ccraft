@@ -63,10 +63,11 @@ bool ServerInternalMessenger::Start() {
     hw_rw_memory_barrier();
     m_pSocketService->Start(m_iIOThreadsCnt, net::NonBlockingEventModel::Posix);
     m_pDispatchTp = new common::ThreadPool<std::shared_ptr<net::NotifyMessage>>(m_iDispatchTpCnt);
-    m_pClient->Start();
-    m_pServer->Start();
+    if (!m_pClient->Start()) {
+        return false;
+    }
 
-    return true;
+    return m_pServer->Start();
 }
 
 bool ServerInternalMessenger::Stop() {

@@ -7,6 +7,7 @@
 #define CCRAFT_SERVER_ELECTOR_MANAGER_H
 
 #include <string>
+#include "iservice.h"
 
 namespace ccraft {
 namespace rfcommon {
@@ -14,16 +15,21 @@ class RfServer;
 class RfServerConfiguration;
 }
 namespace server {
-class ElectorManager {
+class ElectorManagerService : public IService {
 public:
-    ElectorManager();
-    ~ElectorManager();
+    ElectorManagerService();
+    ~ElectorManagerService();
 
-    bool Initialize(uint32_t myId, std::string &&serversConfPath);
+    bool Start() override;
+    bool Stop() override;
+
     const rfcommon::RfServer& GetSelfServerConf() const;
 
     bool MarkVoted();
     bool MeetQuorum();
+
+private:
+    bool initialize(uint32_t myId, std::string &&serversConfPath);
 
 private:
     rfcommon::RfServerConfiguration           *m_nodeConf = nullptr;

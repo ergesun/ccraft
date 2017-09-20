@@ -33,13 +33,13 @@ TEST(RfCommonTest, ConfigurationTest) {
     std::string TestFileErr4 = "test-servers-err4";
     ccraft::rfcommon::RfServerConfiguration rfc;
     auto path = g_sConfTestFileRootPath + TestFileOK;
-    EXPECT_EQ(true, rfc.Initialize(path));
+    EXPECT_EQ(true, rfc.Initialize(1, path));
     path = g_sConfTestFileRootPath + TestFileErr1;
-    EXPECT_EQ(false, rfc.Initialize(path));
+    EXPECT_EQ(false, rfc.Initialize(1, path));
     path = g_sConfTestFileRootPath + TestFileErr2;
-    EXPECT_EQ(false, rfc.Initialize(path));
+    EXPECT_EQ(false, rfc.Initialize(1, path));
     path = g_sConfTestFileRootPath + TestFileErr3;
-    EXPECT_EQ(false, rfc.Initialize(path));
+    EXPECT_EQ(false, rfc.Initialize(1, path));
     path = g_sConfTestFileRootPath + TestFileErr4;
-    EXPECT_EQ(false, rfc.Initialize(path));
+    EXPECT_EQ(false, rfc.Initialize(1, path));
 }

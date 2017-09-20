@@ -18,12 +18,13 @@ public:
     RfServerConfiguration() = default;
     ~RfServerConfiguration() = default;
 
-    bool Initialize(std::string &path);
-    const std::map<uint32_t, RfServer>& GetAllServers() const;
-    const RfServer& operator[](uint32_t key);
+    bool Initialize(uint32_t myId, std::string &path);
+    inline const std::map<uint32_t, RfServer>& GetOtherServers() const;
+    const RfServer& GetSelfServer() const;
 
 private:
-    std::map<uint32_t, RfServer>      m_mapServers;
+    std::map<uint32_t, RfServer>      m_mapOtherServers;
+    RfServer                          m_selfServer;
 };
 } // namespace rfcommon
 } // namespace ccraft

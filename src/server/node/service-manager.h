@@ -31,7 +31,7 @@ public:
 
     private:
         static void create_services();
-        static void start_services();
+        static bool start_services();
 
     private:
         static common::spin_lock_t s_boot_mtx;
