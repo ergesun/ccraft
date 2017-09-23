@@ -15,11 +15,7 @@
 std::shared_ptr<protocal::RpcName##Response>                                                            \
     TestRpcClientSync::RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {                       \
         auto tmpPeer = peer;                                                                            \
-        auto ctx = sendMessage(#RpcName, std::move(req), std::move(peer));                              \
-        if (UNLIKELY(!ctx)) {                                                                           \
-            LOGFFUN << "send msg to " << tmpPeer.nat.addr << ":" << tmpPeer.nat.port << " failed!";     \
-        }                                                                                               \
-        auto sspNM = recvMessage(ctx);                                                                  \
+        auto sspNM = sendMessage(#RpcName, std::move(req), std::move(peer));                            \
         auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());                              \
         auto rm = mnm->GetContent();                                                                    \
         auto RpcName##Resp__Impl_DEF_TMP = new protocal::RpcName##Response();                           \

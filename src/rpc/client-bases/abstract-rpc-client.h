@@ -14,12 +14,11 @@
 #include <set>
 
 #include "../../common/timer.h"
-#include "../../common/spin-lock.h"
+#include "../../common/blocking-queue.h"
 #include "../../common/resource-pool.h"
 #include "../../net/common-def.h"
 #include "../../server/node/iservice.h"
 #include "../imessage-handler.h"
-#include "../../common/thread-pool.h"
 
 namespace google {
 namespace protobuf {
@@ -37,14 +36,14 @@ class NotifyMessage;
 }
 namespace rpc {
 /**
- * [Message format]
- *    client -> server :  |net common header(Message::HeaderSize() bytes)|msg type|[handler id(2bytes)|protobuf msg(n bytes)]|
- *    server -> client :  |net common header(Message::HeaderSize() bytes)|msg type|[rpc code(2bytes)|protobuf msg(n bytes or 0 bytes if no return value)]|
- */
+* [Message format]
+*    client -> server :  |net common header(Message::HeaderSize() bytes)|msg type|[handler id(2bytes)|protobuf msg(n bytes)]|
+*    server -> client :  |net common header(Message::HeaderSize() bytes)|msg type|[rpc code(2bytes)|protobuf msg(n bytes or 0 bytes if no return value)]|
+*/
 /**
- * Rpc client base class.
- */
-class ARpcClientSync : public IService, public IMessageHandler {
+* Rpc client base class.
+*/
+class ARpcClient : public IService, public IMessageHandler {
 public:
     /**
      *
@@ -52,11 +51,11 @@ public:
      * @param timeout
      * @param memPool 如果为空，则内部自己构造。
      */
-    ARpcClientSync(net::ISocketService *ss, common::cctime_t timeout, uint16_t workThreadsCnt, common::MemPool *memPool = nullptr);
-    virtual ~ARpcClientSync();
+    ARpcClient(net::ISocketService *ss, common::MemPool *memPool);
+    ~ARpcClient() override;
 
-    virtual bool Start();
-    virtual bool Stop();
+    bool Start() override;
+    bool Stop() override;
 
     void HandleMessage(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
@@ -99,16 +98,19 @@ protected:
     bool registerRpc(std::string &&rpcName, uint16_t id);
     void finishRegisterRpc();
     /**
-     *
+     * 注意：对于返回值RpcCtx*你需要在使用完之后调用m_rpcCtxPool.Put回收。
      * @param rpcName
      * @param msg
      * @return nullptr为失败，否则为成功。作为recvMessage的入参。
      */
     RpcCtx* sendMessage(std::string &&rpcName, std::shared_ptr<google::protobuf::Message> msg, net::net_peer_info_t &&peer);
-    std::shared_ptr<net::NotifyMessage> recvMessage(RpcCtx* rc);
+    virtual bool onStart() = 0;
+    virtual bool onStop() = 0;
+    virtual bool onRecvMessage(std::shared_ptr<net::NotifyMessage> sspNM) = 0;
 
-private:
-    void proc_recv_msg(std::shared_ptr<net::NotifyMessage> sspNM);
+protected:
+    common::MemPool                                               *m_pMemPool;
+    common::ResourcePool<RpcCtx>                                   m_rpcCtxPool = common::ResourcePool<RpcCtx>(200);
 
 private:
     bool                                                           m_bStopped          = true;
@@ -116,16 +118,8 @@ private:
     net::ISocketService                                           *m_pSocketService    = nullptr;
     bool                                                           m_bRegistered       = false;
     std::unordered_map<std::string, uint16_t>                      m_hmapRpcs;
-    std::unordered_map<uint64_t, RpcCtx*>                          m_hmapRpcCtxs;
-    std::unordered_map<net::net_peer_info_t, std::set<RpcCtx*>>    m_hmapPeerRpcs;
-    common::spin_lock_t                                            m_slRpcCtxs = UNLOCKED;
-    common::cctime_t                                               m_timeout;
     bool                                                           m_bOwnPool = false;
-    common::MemPool                                               *m_pMemPool;
-    common::ResourcePool<RpcCtx>                                   m_rpcCtxPool = common::ResourcePool<RpcCtx>(200);
-    uint16_t                                                       m_iWorkThreadsCnt       = 0;
-    common::ThreadPool<std::shared_ptr<net::NotifyMessage>>       *m_pWorkThreadPool = nullptr;
-}; // class ARpcClientSync
+}; // class ARpcClient
 } // namespace rpc
 } // namespace ccraft
 
