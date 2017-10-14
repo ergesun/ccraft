@@ -13,7 +13,7 @@
 #include "../../common/timer.h"
 #include "../../common/cctime.h"
 #include "../../common/random.h"
-#include "../../rf-common/rf-server.h"
+#include "../../common/rf-server.h"
 
 #define RFLOG_DIR          "rflogs"
 #define RFLOG_FILE_NAME    "rflog"
@@ -47,7 +47,7 @@ private:
     void on_leader_hb_timeout(void *ctx);
     void start_new_election();
     void subscribe_leader_hb_timer_tick();
-    void broadcast_request_vote(std::map<uint32_t, rfcommon::RfServer> otherSrvs);
+    void broadcast_request_vote(std::map<uint32_t, common::RfServer> otherSrvs);
 
 private:
     bool                           m_bStopped                    = true;

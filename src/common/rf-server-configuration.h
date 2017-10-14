@@ -12,7 +12,7 @@
 #include "rf-server.h"
 
 namespace ccraft {
-namespace rfcommon {
+namespace common {
 class RfServerConfiguration {
 public:
     RfServerConfiguration() = default;

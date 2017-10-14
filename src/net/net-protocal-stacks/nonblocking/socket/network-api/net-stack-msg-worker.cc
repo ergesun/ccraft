@@ -16,8 +16,7 @@
 namespace ccraft {
 namespace net {
 std::function<void(RcvMessage*)> ANetStackMessageWorker::s_release_rm_handle = std::bind(
-    &ANetStackMessageWorker::releaseRcvMessage,
-                                                                                         std::placeholders::_1);
+                                                    &ANetStackMessageWorker::releaseRcvMessage, std::placeholders::_1);
 ANetStackMessageWorker::ANetStackMessageWorker(AFileEventHandler *eventHandler, common::MemPool *memPool,
                                                NotifyMessageCallbackHandler msgCallbackHandler, uint32_t maxCacheMessageCnt) {
     m_pEventHandler = eventHandler;

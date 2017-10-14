@@ -99,6 +99,17 @@ public:
         return m_sWhat.c_str();
     }
 };
+
+class RpcClientIsBusyException : public RpcException {
+public:
+    RpcClientIsBusyException() {
+        m_sWhat = "Cannot push message into sent msg queue, the sent msg queue is full!";
+    }
+
+    const char *what() const noexcept override {
+        return m_sWhat.c_str();
+    }
+};
 }
 }
 

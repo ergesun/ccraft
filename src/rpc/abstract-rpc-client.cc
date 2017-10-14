@@ -3,20 +3,20 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#include "../../common/common-def.h"
-#include "../../common/global-vars.h"
-#include "../../common/timer.h"
-#include "../../common/codec-utils.h"
-#include "../../common/buffer.h"
+#include "../common/common-def.h"
+#include "../common/global-vars.h"
+#include "../common/timer.h"
+#include "../common/codec-utils.h"
+#include "../common/buffer.h"
+#include "../net/socket-service-factory.h"
+#include "../net/net-protocal-stacks/msg-worker-managers/unique-worker-manager.h"
+#include "../net/rcv-message.h"
 
-#include "../request.h"
-#include "../../net/socket-service-factory.h"
-#include "../../net/net-protocal-stacks/msg-worker-managers/unique-worker-manager.h"
-#include "../../net/rcv-message.h"
+#include "request.h"
+#include "exceptions.h"
+#include "common-def.h"
 
 #include "abstract-rpc-client.h"
-#include "../exceptions.h"
-#include "../common-def.h"
 
 namespace ccraft {
 namespace rpc {
@@ -38,14 +38,22 @@ ARpcClient::~ARpcClient() {
 }
 
 bool ARpcClient::Start() {
-    if (!m_bStopped || !m_bRegistered) {
+    if (!m_bStopped) {
+        return true;
+    }
+
+    if (!onStart()) {
+        return false;
+    }
+
+    if (!m_bRegistered) {
         return false;
     }
 
     m_bStopped = false;
     hw_rw_memory_barrier();
 
-    return onStart();
+    return true;
 }
 
 bool ARpcClient::Stop() {
@@ -53,8 +61,14 @@ bool ARpcClient::Stop() {
         return true;
     }
 
+    if (!onStop()) {
+        return false;
+    }
+
     m_bStopped = true;
-    return onStop();
+    hw_rw_memory_barrier();
+
+    return true;
 }
 
 void ARpcClient::HandleMessage(std::shared_ptr<net::NotifyMessage> sspNM) {
@@ -75,26 +89,26 @@ void ARpcClient::finishRegisterRpc() {
     hw_rw_memory_barrier();
 }
 
-ARpcClient::RpcCtx* ARpcClient::sendMessage(std::string &&rpcName, SP_PB_MSG msg, net::net_peer_info_t &&peer) {
+ARpcClient::SendRet ARpcClient::sendMessage(std::string &&rpcName, SP_PB_MSG msg, net::net_peer_info_t &&peer) {
     if (m_hmapRpcs.end() == m_hmapRpcs.find(rpcName)) {
         throw BadRpcException((uint16_t)RpcCode::ErrorNoRegisteredRpc, std::move(rpcName));
     }
 
+    SendRet sr;
     net::net_peer_info_t rcPeer = peer;
     auto handlerId = m_hmapRpcs[rpcName];
     auto rr = new RpcRequest(m_pMemPool, std::move(peer), handlerId, std::move(msg));
     auto id = rr->GetId();
     if (UNLIKELY(!m_pSocketService->SendMessage(rr))) {
         DELETE_PTR(rr);
-        return nullptr;
+        return sr;
     }
 
-    auto rc = m_rpcCtxPool.Get();
-    rc->peer = std::move(rcPeer);
-    rc->msgId = id;
-    rc->handlerId = handlerId;
+    sr.peer = std::move(rcPeer);
+    sr.msgId = id;
+    sr.handlerId = handlerId;
 
-    return rc;
+    return sr;
 }
 } // namespace rpc
 } // namespace ccraft

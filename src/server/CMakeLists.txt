@@ -10,7 +10,6 @@ set(LINK_LIBS
         protobuf
         rpc
         net
-        rfcommon
         common
         glog
         gflags
@@ -20,7 +19,6 @@ set(LINK_LIBS
 set(DEPEN_LIBS
         protobufgen
         net
-        rfcommon
         common
         )
 

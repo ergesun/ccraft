@@ -11,7 +11,7 @@
 #include "../common/common-utils.h"
 
 namespace ccraft {
-namespace rfcommon {
+namespace common {
 bool RfServerConfiguration::Initialize(uint32_t myId, std::string &path) {
     std::ifstream fs(path.c_str());
     if (!fs) {

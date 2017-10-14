@@ -6,54 +6,40 @@
 #ifndef CCRAFT_RF_NODE_RPC_ASYNC_CLIENT_H
 #define CCRAFT_RF_NODE_RPC_ASYNC_CLIENT_H
 
-#include <unordered_map>
-#include <set>
-
-#include "../../../rpc/client-bases/abstract-rpc-client.h"
-#include "../../../rpc/common-def.h"
-#include "../../../common/cctime.h"
-#include "../../../net/common-def.h"
+#include "../../../rpc/abstract-rpc-client.h"
 
 #define RpcAppendRfLog "AppendRfLog"
 #define RpcRequestVote "RequestVote"
 
 #define DefineRfNodeRpcWithPeer(RpcName)                                                                               \
-    std::shared_ptr<protocal::RpcName##Response> RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer)
+    rpc::ARpcClient::SendRet RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer)
 
 namespace ccraft {
-    namespace protocal {
-        class AppendRfLogResponse;
-        class RequestVoteResponse;
-    }
+namespace protocal {
+class AppendRfLogResponse;
+class RequestVoteResponse;
+}
 
-    namespace server {
-        class RfSrvInternalRpcClientAsync : public rpc::ARpcClient {
-        public:
-            RfSrvInternalRpcClientAsync(net::ISocketService *ss, common::cctime_t timeout,
-                                       uint16_t workThreadsCnt, common::MemPool *memPool = nullptr) :
-                rpc::ARpcClient(ss, memPool), m_timeout(timeout) {}
+namespace server {
+class RfSrvInternalRpcClientAsync : public rpc::ARpcClient {
+public:
+    RfSrvInternalRpcClientAsync(net::ISocketService *ss, uint16_t workThreadsCnt, common::MemPool *memPool = nullptr) :
+                                rpc::ARpcClient(ss, memPool) {}
 
-            // Define Rpc start
-            DefineRfNodeRpcWithPeer(AppendRfLog);
-            DefineRfNodeRpcWithPeer(RequestVote);
-            // Define Rpc end
+    // Define Rpc start
+    DefineRfNodeRpcWithPeer(AppendRfLog);
+    DefineRfNodeRpcWithPeer(RequestVote);
+    // Define Rpc end
 
-        protected:
-            bool onStart() override;
-            bool onStop() override;
-            bool onRecvMessage(std::shared_ptr<net::NotifyMessage> sspNM) override;
+protected:
+    bool onStart() override;
+    bool onStop() override;
+    bool onRecvMessage(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
-        private:
-            bool register_rpc_handlers();
-            std::shared_ptr<net::NotifyMessage> recv_message(RpcCtx *rc);
-
-        private:
-            std::unordered_map<uint64_t, RpcCtx*>                          m_hmapRpcCtxs;
-            std::unordered_map<net::net_peer_info_t, std::set<RpcCtx*>>    m_hmapPeerRpcs;
-            common::spin_lock_t                                            m_slRpcCtxs = UNLOCKED;
-            common::cctime_t                                               m_timeout;
-        };
-    } // namespace server
+private:
+    bool register_rpc_handlers();
+};
+} // namespace server
 } // namespace ccraft
 
 #endif //CCRAFT_RF_NODE_RPC_ASYNC_CLIENT_H

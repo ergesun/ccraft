@@ -23,8 +23,15 @@ using ccraft::rpc::RpcCode;
 #define ImplRfNodeRpcWithPeer(RpcName)                                                                  \
 std::shared_ptr<protocal::RpcName##Response>                                                            \
     RfSrvInternalRpcClientSync::RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {              \
-        auto tmpPeer = peer;                                                                            \
-        auto ctx = sendMessage(#RpcName, std::move(req), std::move(peer));                              \
+        auto ret = sendMessage(#RpcName, std::move(req), std::move(peer));                              \
+        if (0 == ret.msgId) {                                                                           \
+            throw RpcClientIsBusyException();                                                           \
+        }                                                                                               \
+                                                                                                        \
+        auto ctx = m_rpcCtxPool.Get();                                                                  \
+        ctx->peer = std::move(ret.peer);                                                                \
+        ctx->handlerId = ret.handlerId;                                                                 \
+        ctx->msgId = ret.msgId;                                                                         \
         auto sspNM = recv_message(ctx);                                                                 \
         auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());                              \
         auto rm = mnm->GetContent();                                                                    \
@@ -38,7 +45,28 @@ std::shared_ptr<protocal::RpcName##Response>                                    
 namespace ccraft {
 namespace server {
 ImplRfNodeRpcWithPeer(AppendRfLog)
-ImplRfNodeRpcWithPeer(RequestVote)
+//ImplRfNodeRpcWithPeer(RequestVote)
+
+std::shared_ptr<protocal::RequestVoteResponse>
+    RfSrvInternalRpcClientSync::RequestVote(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
+    auto ret = sendMessage("RequestVote", std::move(req), std::move(peer));
+    if (0 == ret.msgId) {
+        throw RpcClientIsBusyException();
+    }
+
+    auto ctx = m_rpcCtxPool.Get();
+    ctx->peer = std::move(ret.peer);
+    ctx->handlerId = ret.handlerId;
+    ctx->msgId = ret.msgId;
+    auto sspNM = recv_message(ctx);
+    auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());
+    auto rm = mnm->GetContent();
+    auto RequestVoteResp__Impl_DEF_TMP = new protocal::RequestVoteResponse();
+    auto buf = rm->GetDataBuffer();
+    buf->MoveHeadBack(sizeof(uint16_t));
+    common::ProtoBufUtils::Deserialize(buf, RequestVoteResp__Impl_DEF_TMP);
+    return std::shared_ptr<protocal::RequestVoteResponse>(RequestVoteResp__Impl_DEF_TMP);
+}
 
 bool RfSrvInternalRpcClientSync::register_rpc_handlers() {
     if (!registerRpc(RpcAppendRfLog, APPEND_RFLOG_RPC_ID)) {

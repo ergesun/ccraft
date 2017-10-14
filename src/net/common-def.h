@@ -43,12 +43,12 @@ typedef struct net_addr_s {
         return *this;
     }
 
-    net_addr_s(net_addr_s &&nas) {
+    net_addr_s(net_addr_s &&nas) noexcept {
         addr = std::move(nas.addr);
         port = nas.port;
     }
 
-    net_addr_s &operator=(net_addr_s &&nas) {
+    net_addr_s &operator=(net_addr_s &&nas) noexcept {
         addr = std::move(nas.addr);
         port = nas.port;
         return *this;
@@ -75,19 +75,14 @@ typedef struct net_peer_info_s {
         sp = npis.sp;
     }
 
-    net_peer_info_s(const net_peer_info_s &&npis) {
+    net_peer_info_s(net_peer_info_s &&npis) noexcept {
         nat = std::move(npis.nat);
         sp = npis.sp;
     }
 
-    net_peer_info_s& operator=(const net_peer_info_s &npis) {
-        nat = npis.nat;
-        sp = npis.sp;
+    net_peer_info_s& operator=(const net_peer_info_s &npis) = default;
 
-        return *this;
-    }
-
-    net_peer_info_s& operator=(const net_peer_info_s &&npis) {
+    net_peer_info_s& operator=(net_peer_info_s &&npis) {
         nat = std::move(npis.nat);
         sp = npis.sp;
 

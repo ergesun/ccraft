@@ -1,5 +1,4 @@
 add_subdirectory(${SRC_ROOT}/common)
-add_subdirectory(${SRC_ROOT}/rf-common)
 add_subdirectory(${SRC_ROOT}/net)
 add_subdirectory(${SRC_ROOT}/codegen)
 add_subdirectory(${SRC_ROOT}/rpc)

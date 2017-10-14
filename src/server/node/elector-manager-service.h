@@ -10,7 +10,7 @@
 #include "iservice.h"
 
 namespace ccraft {
-namespace rfcommon {
+namespace common {
 class RfServer;
 class RfServerConfiguration;
 }
@@ -23,7 +23,7 @@ public:
     bool Start() override;
     bool Stop() override;
 
-    const rfcommon::RfServer& GetSelfServerConf() const;
+    const common::RfServer& GetSelfServerConf() const;
 
     bool MarkVoted();
     bool MeetQuorum();
@@ -32,7 +32,7 @@ private:
     bool initialize(uint32_t myId, std::string &&serversConfPath);
 
 private:
-    rfcommon::RfServerConfiguration           *m_nodeConf = nullptr;
+    common::RfServerConfiguration             *m_nodeConf = nullptr;
     uint32_t                                   m_iMyId = 0;
 };
 } // namespace server

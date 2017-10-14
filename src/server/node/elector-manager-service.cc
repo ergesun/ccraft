@@ -3,7 +3,7 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#include "../../rf-common/rf-server-configuration.h"
+#include "../../common/rf-server-configuration.h"
 #include "../../common/common-def.h"
 #include "../../common/server-gflags-config.h"
 
@@ -12,7 +12,7 @@
 namespace ccraft {
 namespace server {
 ElectorManagerService::ElectorManagerService() {
-    m_nodeConf = new rfcommon::RfServerConfiguration();
+    m_nodeConf = new common::RfServerConfiguration();
 }
 
 ElectorManagerService::~ElectorManagerService() {
@@ -41,7 +41,7 @@ bool ElectorManagerService::initialize(uint32_t myId, std::string &&serversConfP
     return m_nodeConf->Initialize(myId, serversConfPath);
 }
 
-const rfcommon::RfServer& ElectorManagerService::GetSelfServerConf() const {
+const common::RfServer& ElectorManagerService::GetSelfServerConf() const {
     return m_nodeConf->GetSelfServer();
 }
 } // namespace server

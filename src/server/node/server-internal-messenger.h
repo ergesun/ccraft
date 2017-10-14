@@ -85,10 +85,10 @@ private:
     /**
      * 关联关系，无需本类释放。
      */
-    ServerRpcService                                                     *m_pRfNode         = nullptr;
+    ServerRpcService                                           *m_pRfNode         = nullptr;
     net::ISocketService                                        *m_pSocketService  = nullptr;
-    RfSrvInternalRpcClientSync                                *m_pClient         = nullptr;
-    RfSrvInternalRpcServerSync                                *m_pServer         = nullptr;
+    RfSrvInternalRpcClientSync                                 *m_pClient         = nullptr;
+    RfSrvInternalRpcServerSync                                 *m_pServer         = nullptr;
     bool                                                        m_bOwnMemPool     = false;
     common::MemPool                                            *m_pMemPool        = nullptr;
     uint16_t                                                    m_iDispatchTpCnt  = 0;

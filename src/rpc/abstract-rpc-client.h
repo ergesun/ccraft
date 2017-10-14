@@ -13,12 +13,11 @@
 #include <condition_variable>
 #include <set>
 
-#include "../../common/timer.h"
-#include "../../common/blocking-queue.h"
-#include "../../common/resource-pool.h"
-#include "../../net/common-def.h"
-#include "../../server/node/iservice.h"
-#include "../imessage-handler.h"
+#include "../common/timer.h"
+#include "../common/blocking-queue.h"
+#include "../net/common-def.h"
+#include "../server/node/iservice.h"
+#include "imessage-handler.h"
 
 namespace google {
 namespace protobuf {
@@ -45,6 +44,22 @@ namespace rpc {
 */
 class ARpcClient : public IService, public IMessageHandler {
 public:
+    struct SendRet {
+        SendRet() = default;
+        SendRet(SendRet &&sr) noexcept {
+            peer = std::move(sr.peer);
+            handlerId = sr.handlerId;
+            msgId = sr.msgId;
+        }
+
+        SendRet(net::net_peer_info_t &&p, uint16_t h, uint64_t m) : peer(std::move(p)), handlerId(h), msgId(m) {}
+
+        net::net_peer_info_t                 peer;
+        uint16_t                             handlerId = 0;
+        uint64_t                             msgId     = 0;
+    };
+
+public:
     /**
      *
      * @param workThreadsCnt
@@ -60,57 +75,21 @@ public:
     void HandleMessage(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
 protected:
-    class RpcCtx {
-    public:
-        enum class State {
-            Ok          = 0,
-            Timeout     = 1,
-            BrokenPipe  = 2
-        };
-    public:
-        RpcCtx() {
-            cv = new std::condition_variable();
-            mtx = new std::mutex();
-        }
-
-        ~RpcCtx() {
-            DELETE_PTR(mtx);
-            DELETE_PTR(cv);
-        }
-
-        void Release() {
-            ssp_nm.reset();
-        }
-
-    public:
-        std::condition_variable             *cv        = nullptr;
-        std::mutex                          *mtx       = nullptr;
-        net::net_peer_info_t                 peer;
-        uint16_t                             handlerId = 0;
-        uint64_t                             msgId     = 0;
-        bool                                 complete  = false;
-        State                                state     = State::Ok;
-        common::Timer::EventId               timer_ev;
-        std::shared_ptr<net::NotifyMessage>  ssp_nm;
-    };
-
-protected:
     bool registerRpc(std::string &&rpcName, uint16_t id);
     void finishRegisterRpc();
     /**
-     * 注意：对于返回值RpcCtx*你需要在使用完之后调用m_rpcCtxPool.Put回收。
      * @param rpcName
      * @param msg
-     * @return nullptr为失败，否则为成功。作为recvMessage的入参。
+     * @return SendRet::msgId如果是0则失败，否则成功。
      */
-    RpcCtx* sendMessage(std::string &&rpcName, std::shared_ptr<google::protobuf::Message> msg, net::net_peer_info_t &&peer);
+    SendRet sendMessage(std::string &&rpcName, std::shared_ptr<google::protobuf::Message> msg, net::net_peer_info_t &&peer);
+
     virtual bool onStart() = 0;
     virtual bool onStop() = 0;
     virtual bool onRecvMessage(std::shared_ptr<net::NotifyMessage> sspNM) = 0;
 
 protected:
     common::MemPool                                               *m_pMemPool;
-    common::ResourcePool<RpcCtx>                                   m_rpcCtxPool = common::ResourcePool<RpcCtx>(200);
 
 private:
     bool                                                           m_bStopped          = true;

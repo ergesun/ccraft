@@ -9,9 +9,10 @@
 #include <unordered_map>
 #include <set>
 
-#include "../../../rpc/client-bases/abstract-rpc-client.h"
+#include "../../../rpc/abstract-rpc-client.h"
 #include "../../../rpc/common-def.h"
 #include "../../../common/cctime.h"
+#include "../../../common/resource-pool.h"
 #include "../../../net/common-def.h"
 
 #define RpcAppendRfLog "AppendRfLog"
@@ -28,6 +29,41 @@ class RequestVoteResponse;
 
 namespace server {
 class RfSrvInternalRpcClientSync : public rpc::ARpcClient {
+private:
+    class RpcCtx {
+    public:
+        enum class State {
+            Ok          = 0,
+            Timeout     = 1,
+            BrokenPipe  = 2
+        };
+    public:
+        RpcCtx() {
+            cv = new std::condition_variable();
+            mtx = new std::mutex();
+        }
+
+        ~RpcCtx() {
+            DELETE_PTR(mtx);
+            DELETE_PTR(cv);
+        }
+
+        void Release() {
+            ssp_nm.reset();
+        }
+
+    public:
+        std::condition_variable             *cv        = nullptr;
+        std::mutex                          *mtx       = nullptr;
+        net::net_peer_info_t                 peer;
+        uint16_t                             handlerId = 0;
+        uint64_t                             msgId     = 0;
+        bool                                 complete  = false;
+        State                                state     = State::Ok;
+        common::Timer::EventId               timer_ev;
+        std::shared_ptr<net::NotifyMessage>  ssp_nm;
+    };
+
 public:
     RfSrvInternalRpcClientSync(net::ISocketService *ss, common::cctime_t timeout,
                                 uint16_t workThreadsCnt, common::MemPool *memPool = nullptr) :
@@ -48,6 +84,7 @@ private:
     std::shared_ptr<net::NotifyMessage> recv_message(RpcCtx *rc);
 
 private:
+    common::ResourcePool<RpcCtx>                                   m_rpcCtxPool = common::ResourcePool<RpcCtx>(200);
     std::unordered_map<uint64_t, RpcCtx*>                          m_hmapRpcCtxs;
     std::unordered_map<net::net_peer_info_t, std::set<RpcCtx*>>    m_hmapPeerRpcs;
     common::spin_lock_t                                            m_slRpcCtxs = UNLOCKED;

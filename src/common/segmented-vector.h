@@ -10,7 +10,7 @@
 #include <vector>
 #include <cassert>
 #include "common-def.h"
-#include "nocopyable.h"
+#include "noncopyable.h"
 #include "common-utils.h"
 
 #define DEFAULT_SEGMENT_SIZE                       127
@@ -20,7 +20,8 @@
 namespace ccraft {
 namespace common {
 /**
- * Not thread-safe! 所有Api没有安全检查！
+ * !目前无用，以后也不一定有用:-)
+ * Not thread-safe，所有Api没有安全检查！
  * vector的优化实现。当前版本受到idx限制__Size_t类型宽度上限为uint32_t。
  * TODO(sunchao): 加上模板元编程实现释放功能就可以增加更多的功能，比如erase_front()。
  */

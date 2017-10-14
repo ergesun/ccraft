@@ -9,7 +9,7 @@
 #include <string>
 
 namespace ccraft {
-namespace rfcommon {
+namespace common {
 struct RfServer {
     RfServer() = default;
     RfServer(uint32_t id, std::string &&addr, uint16_t portForServer, uint16_t portForClient) :

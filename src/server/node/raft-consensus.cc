@@ -14,7 +14,6 @@
 #include "../../common/buffer.h"
 #include "../../common/protobuf-utils.h"
 #include "../../codegen/raft-state.pb.h"
-#include "../../rf-common/rf-server.h"
 #include "../rflog/realtime-disk-rflogger.h"
 #include "elector-manager-service.h"
 #include "server-rpc-service.h"
@@ -196,7 +195,7 @@ void RaftConsensus::subscribe_leader_hb_timer_tick() {
     }
 }
 
-void RaftConsensus::broadcast_request_vote(std::map<uint32_t, rfcommon::RfServer> otherSrvs) {
+void RaftConsensus::broadcast_request_vote(std::map<uint32_t, common::RfServer> otherSrvs) {
     for (auto srv : otherSrvs) {
         //m_pSrvRpcService->Req
     }
