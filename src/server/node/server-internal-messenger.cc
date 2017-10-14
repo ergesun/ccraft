@@ -12,6 +12,7 @@
 #include "../../rpc/common-def.h"
 
 #include "rpc/rf-srv-rpc-sync-client.h"
+#include "rpc/rf-srv-rpc-async-client.h"
 #include "rpc/rf-srv-rpc-sync-server.h"
 #include "server-rpc-service.h"
 
@@ -38,8 +39,11 @@ ServerInternalMessenger::ServerInternalMessenger(CreateServerInternalMessengerPa
                                                                 m_pMemPool,
                                                                 std::bind(&ServerInternalMessenger::recv_msg, this, std::placeholders::_1),
                                                                 std::shared_ptr<net::INetStackWorkerManager>(new net::UniqueWorkerManager()));
-    m_pClient = new RfSrvInternalRpcClientSync(m_pSocketService, createParam.clientWaitResponseTimeout,
+    m_pSyncClient = new RfSrvInternalRpcClientSync(m_pSocketService, createParam.clientWaitResponseTimeout,
                                                 createParam.clientRpcWorkThreadsCnt, m_pMemPool);
+    m_pAsyncClient = new RfSrvInternalRpcClientAsync(m_pSocketService,
+                                                     std::bind(&ServerRpcService::OnRecvRpcCallbackMsg, createParam.rfNode, std::placeholders::_1),
+                                                     m_pMemPool);
     m_pServer = new RfSrvInternalRpcServerSync(this, createParam.serverRpcWorkThreadsCnt, m_pSocketService, m_pMemPool);
 }
 
@@ -49,7 +53,8 @@ ServerInternalMessenger::~ServerInternalMessenger() {
         DELETE_PTR(m_pMemPool);
     }
 
-    DELETE_PTR(m_pClient);
+    DELETE_PTR(m_pSyncClient);
+    DELETE_PTR(m_pAsyncClient);
     DELETE_PTR(m_pServer);
     DELETE_PTR(m_pSocketService);
 }
@@ -63,7 +68,7 @@ bool ServerInternalMessenger::Start() {
     hw_rw_memory_barrier();
     m_pSocketService->Start(m_iIOThreadsCnt, net::NonBlockingEventModel::Posix);
     m_pDispatchTp = new common::ThreadPool<std::shared_ptr<net::NotifyMessage>>(m_iDispatchTpCnt);
-    if (!m_pClient->Start()) {
+    if (!m_pSyncClient->Start()) {
         return false;
     }
 
@@ -77,7 +82,7 @@ bool ServerInternalMessenger::Stop() {
 
     m_bStopped = true;
     hw_rw_memory_barrier();
-    m_pClient->Stop();
+    m_pSyncClient->Stop();
     m_pServer->Stop();
     m_pSocketService->Stop();
     DELETE_PTR(m_pDispatchTp);
@@ -86,7 +91,11 @@ bool ServerInternalMessenger::Stop() {
 
 std::shared_ptr<protocal::AppendRfLogResponse> ServerInternalMessenger::AppendRfLogSync(rpc::SP_PB_MSG req,
                                                                                  net::net_peer_info_t &&peer) {
-    return m_pClient->AppendRfLog(req, std::move(peer));
+    return m_pSyncClient->AppendRfLog(req, std::move(peer));
+}
+
+rpc::ARpcClient::SendRet ServerInternalMessenger::AppendRfLogAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
+    return m_pAsyncClient->AppendRfLog(req, std::move(peer));
 }
 
 rpc::SP_PB_MSG ServerInternalMessenger::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
@@ -95,7 +104,11 @@ rpc::SP_PB_MSG ServerInternalMessenger::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
 
 std::shared_ptr<protocal::RequestVoteResponse> ServerInternalMessenger::RequestVoteSync(rpc::SP_PB_MSG req,
                                                                                  net::net_peer_info_t &&peer) {
-    return m_pClient->RequestVote(req, std::move(peer));
+    return m_pSyncClient->RequestVote(req, std::move(peer));
+}
+
+rpc::ARpcClient::SendRet ServerInternalMessenger::RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
+    return m_pAsyncClient->RequestVote(req, std::move(peer));
 }
 
 rpc::SP_PB_MSG ServerInternalMessenger::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
@@ -119,7 +132,7 @@ void ServerInternalMessenger::dispatch_msg(std::shared_ptr<net::NotifyMessage> s
                     m_pServer->HandleMessage(sspNM);
                     LOGDFUN1("dispatch message type = Request.");
                 } else {
-                    m_pClient->HandleMessage(sspNM);
+                    m_pSyncClient->HandleMessage(sspNM);
                     LOGDFUN1("dispatch message type = Response.");
                 }
             } else {
@@ -128,7 +141,7 @@ void ServerInternalMessenger::dispatch_msg(std::shared_ptr<net::NotifyMessage> s
             break;
         }
         case net::NotifyMessageType::Worker: {
-            m_pClient->HandleMessage(sspNM);
+            m_pSyncClient->HandleMessage(sspNM);
             m_pServer->HandleMessage(sspNM);
             break;
         }

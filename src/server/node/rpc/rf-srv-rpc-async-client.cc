@@ -14,15 +14,15 @@
 
 using ccraft::rpc::RpcCode;
 
-#define ImplRfNodeRpcWithPeer(RpcName)                                                                                   \
+#define ImplRfNodeAsyncRpcWithPeer(RpcName)                                                                              \
     rpc::ARpcClient::SendRet RfSrvInternalRpcClientAsync::RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {     \
         return sendMessage(#RpcName, std::move(req), std::move(peer));                                                   \
     }
 
 namespace ccraft {
 namespace server {
-ImplRfNodeRpcWithPeer(AppendRfLog)
-ImplRfNodeRpcWithPeer(RequestVote)
+ImplRfNodeAsyncRpcWithPeer(AppendRfLog)
+ImplRfNodeAsyncRpcWithPeer(RequestVote)
 
 bool RfSrvInternalRpcClientAsync::register_rpc_handlers() {
     if (!registerRpc(RpcAppendRfLog, APPEND_RFLOG_RPC_ID)) {
@@ -46,8 +46,10 @@ bool RfSrvInternalRpcClientAsync::onStop() {
     return true;
 }
 
-bool RfSrvInternalRpcClientAsync::onRecvMessage(std::shared_ptr<net::NotifyMessage> sspNM) {
-    return true;
+void RfSrvInternalRpcClientAsync::onRecvMessage(std::shared_ptr<net::NotifyMessage> sspNM) {
+    if (LIKELY(m_fCallback)) {
+        m_fCallback(sspNM);
+    }
 }
 } // namespace server
 } // namespace ccraft

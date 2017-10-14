@@ -10,12 +10,19 @@
 
 #include "iservice.h"
 #include "../../net/common-def.h"
+#include "../../net/notify-message.h"
 #include "../../rpc/common-def.h"
+#include "../../rpc/abstract-rpc-client.h"
 #include "iserver-internal-rpc-handler.h"
 
 #include "common-def.h"
 
 namespace ccraft {
+namespace protocal {
+    class AppendRfLogResponse;
+    class RequestVoteResponse;
+}
+
 namespace server {
 class ServerInternalMessenger;
 class ServerRpcService : public IService, public INodeInternalRpcHandler {
@@ -26,8 +33,15 @@ public:
     bool Start() override;
     bool Stop() override;
 
+    std::shared_ptr<protocal::AppendRfLogResponse> AppendRfLogSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    rpc::ARpcClient::SendRet AppendRfLogAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
+
+    std::shared_ptr<protocal::RequestVoteResponse> RequestVoteSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    rpc::ARpcClient::SendRet RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
+
+    void OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM);
 
 private:
     ServerInternalMessenger          *m_pNodeInternalMessenger = nullptr;

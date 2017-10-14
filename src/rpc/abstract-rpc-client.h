@@ -86,7 +86,7 @@ protected:
 
     virtual bool onStart() = 0;
     virtual bool onStop() = 0;
-    virtual bool onRecvMessage(std::shared_ptr<net::NotifyMessage> sspNM) = 0;
+    virtual void onRecvMessage(std::shared_ptr<net::NotifyMessage> sspNM) = 0;
 
 protected:
     common::MemPool                                               *m_pMemPool;

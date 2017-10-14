@@ -21,7 +21,7 @@
 namespace ccraft {
 namespace rpc {
 ARpcClient::ARpcClient(net::ISocketService *ss, common::MemPool *memPool) :
-    m_pSocketService(ss), m_pMemPool(memPool) {
+    m_pMemPool(memPool), m_pSocketService(ss) {
     CHECK(ss);
 
     if (!memPool) {

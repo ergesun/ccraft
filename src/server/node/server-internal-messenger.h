@@ -10,6 +10,7 @@
 #include "../../common/cctime.h"
 #include "../../common/blocking-queue.h"
 #include "../../common/thread-pool.h"
+#include "../../rpc/abstract-rpc-client.h"
 
 #include "iserver-internal-rpc-handler.h"
 
@@ -30,17 +31,18 @@ class RequestVoteResponse;
 namespace server {
 class ServerRpcService;
 class RfSrvInternalRpcClientSync;
+class RfSrvInternalRpcClientAsync;
 class RfSrvInternalRpcServerSync;
 
 struct CreateServerInternalMessengerParam {
-    CreateServerInternalMessengerParam(ServerRpcService *prfNode, uint16_t cliRpcWorkThreadsCnt, common::cctime_t cliWaitRespTimeout,
+    CreateServerInternalMessengerParam(ServerRpcService *prfNode, uint16_t cliRpcWorkThreadsCnt, const common::cctime_t &cliWaitRespTimeout,
                                     uint16_t srvRpcWorkThreadsCnt, uint16_t mngerWorkThreadsCnt, uint16_t inetIOThreadsCnt,
                                     uint16_t iport, common::MemPool *pMp = nullptr) :
         rfNode(prfNode), clientRpcWorkThreadsCnt(cliRpcWorkThreadsCnt), clientWaitResponseTimeout(cliWaitRespTimeout),
         serverRpcWorkThreadsCnt(srvRpcWorkThreadsCnt), mngerDispatchWorkThreadsCnt(mngerWorkThreadsCnt), netIOThreadsCnt(inetIOThreadsCnt),
         port(iport), memPool(pMp) {}
 
-    ServerRpcService             *rfNode;
+    ServerRpcService   *rfNode;
     uint16_t            clientRpcWorkThreadsCnt;
     common::cctime_t    clientWaitResponseTimeout;
     uint16_t            serverRpcWorkThreadsCnt;
@@ -69,9 +71,11 @@ public:
     bool Stop() override;
 
     std::shared_ptr<protocal::AppendRfLogResponse> AppendRfLogSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    rpc::ARpcClient::SendRet AppendRfLogAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
 
     std::shared_ptr<protocal::RequestVoteResponse> RequestVoteSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    rpc::ARpcClient::SendRet RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
 
 private:
@@ -87,7 +91,8 @@ private:
      */
     ServerRpcService                                           *m_pRfNode         = nullptr;
     net::ISocketService                                        *m_pSocketService  = nullptr;
-    RfSrvInternalRpcClientSync                                 *m_pClient         = nullptr;
+    RfSrvInternalRpcClientSync                                 *m_pSyncClient     = nullptr;
+    RfSrvInternalRpcClientAsync                                *m_pAsyncClient    = nullptr;
     RfSrvInternalRpcServerSync                                 *m_pServer         = nullptr;
     bool                                                        m_bOwnMemPool     = false;
     common::MemPool                                            *m_pMemPool        = nullptr;

@@ -11,7 +11,7 @@
 #define RpcAppendRfLog "AppendRfLog"
 #define RpcRequestVote "RequestVote"
 
-#define DefineRfNodeRpcWithPeer(RpcName)                                                                               \
+#define DefineRfNodeAsyncRpcWithPeer(RpcName)                                                        \
     rpc::ARpcClient::SendRet RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer)
 
 namespace ccraft {
@@ -23,21 +23,26 @@ class RequestVoteResponse;
 namespace server {
 class RfSrvInternalRpcClientAsync : public rpc::ARpcClient {
 public:
-    RfSrvInternalRpcClientAsync(net::ISocketService *ss, uint16_t workThreadsCnt, common::MemPool *memPool = nullptr) :
-                                rpc::ARpcClient(ss, memPool) {}
+    RfSrvInternalRpcClientAsync(net::ISocketService *ss, net::NotifyMessageCallbackHandler cb,
+                                common::MemPool *memPool = nullptr) : rpc::ARpcClient(ss, memPool) {
+        m_fCallback = cb;
+    }
 
     // Define Rpc start
-    DefineRfNodeRpcWithPeer(AppendRfLog);
-    DefineRfNodeRpcWithPeer(RequestVote);
+    DefineRfNodeAsyncRpcWithPeer(AppendRfLog);
+    DefineRfNodeAsyncRpcWithPeer(RequestVote);
     // Define Rpc end
 
 protected:
     bool onStart() override;
     bool onStop() override;
-    bool onRecvMessage(std::shared_ptr<net::NotifyMessage> sspNM) override;
+    void onRecvMessage(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
 private:
     bool register_rpc_handlers();
+
+private:
+    net::NotifyMessageCallbackHandler        m_fCallback;
 };
 } // namespace server
 } // namespace ccraft

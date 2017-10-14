@@ -19,7 +19,6 @@
 #include "../../codegen/node-raft.pb.h"
 #include "../../server/node/rpc/rf-srv-rpc-sync-client.h"
 
-#include "client/test-rpc-client.h"
 #include "server/test-rpc-server.h"
 
 using namespace std;
@@ -68,6 +67,7 @@ int main(int argc, char **argv) {
 
 TEST(RpcTest, ClientServerTest) {
     ccraft::common::cctime_t timeout(100, 1000000 * 200);
+    // test sync rpc client
     g_pClient = new ccraft::server::RfSrvInternalRpcClientSync(g_pSS, timeout, 1, g_mp);
 
     EXPECT_EQ(g_pClient->Start(), true);

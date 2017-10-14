@@ -14,7 +14,7 @@
 
 using namespace ccraft::common;
 
-const std::string RfCommonTestBinName = "rfcommon_test";
+const std::string CommonTestBinName = "common_test";
 
 std::string g_sConfTestFileRootPath;
 
@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     ccraft::common::initialize();
 
     std::string exePath = argv[0];
-    auto projectStartPos = exePath.find(RfCommonTestBinName);
+    auto projectStartPos = exePath.find(CommonTestBinName);
     auto projectRootPath = exePath.substr(0, projectStartPos);
     g_sConfTestFileRootPath = projectRootPath + "../../../src/unit-test/common/";
 

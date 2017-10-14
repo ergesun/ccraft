@@ -37,19 +37,19 @@ bool RfServerConfiguration::Initialize(uint32_t myId, std::string &path) {
             LOGFFUN << "Server id must be larger than 0.";
         }
 
-        if (id == myId) {
-            if (m_selfServer.m_iId == id) {
+        if (uint32_t(id) == myId) {
+            if (m_selfServer.m_iId == uint32_t(id)) {
                 LOGFFUN << "Server id " << id << " is duplicate!";
             }
-            m_selfServer = RfServer(id, std::move(addr), portForServer, portForClient);
+            m_selfServer = RfServer(uint32_t(id), std::move(addr), portForServer, portForClient);
             continue;
         }
 
-        if (m_mapOtherServers.end() != m_mapOtherServers.find(id)) {
+        if (m_mapOtherServers.end() != m_mapOtherServers.find(uint32_t(id))) {
             LOGFFUN << "Server id " << id << " is duplicate!";
         }
 
-        m_mapOtherServers.insert(std::make_pair(id, RfServer(id, std::move(addr), portForServer, portForClient)));
+        m_mapOtherServers.insert(std::make_pair(uint32_t(id), RfServer(uint32_t(id), std::move(addr), portForServer, portForClient)));
     }
 
     return true;
