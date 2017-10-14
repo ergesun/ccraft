@@ -34,7 +34,7 @@ RtDiskRfLogger::~RtDiskRfLogger() {
     }
 }
 
-RfLogEntry *RtDiskRfLogger::GetLastEntry() {
+const RfLogEntry *RtDiskRfLogger::GetLastEntry() {
     if (m_vEntries.empty()) {
         return nullptr;
     }
@@ -42,7 +42,7 @@ RfLogEntry *RtDiskRfLogger::GetLastEntry() {
     return m_vEntries[m_vEntries.size()];
 }
 
-RfLogEntry *RtDiskRfLogger::GetEntry(uint32_t index) {
+const RfLogEntry *RtDiskRfLogger::GetEntry(uint32_t index) {
     if (LIKELY(index < m_vEntries.size())) {
         return m_vEntries[index];
     }

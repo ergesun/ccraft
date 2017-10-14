@@ -30,19 +30,15 @@ typedef struct net_addr_s {
 
     net_addr_s() = default;
 
+    net_addr_s(const std::string &a, uint16_t p) : addr(a), port(p) {}
     net_addr_s(std::string &&a, uint16_t p) : addr(std::move(a)), port(p) {}
 
-    net_addr_s(const net_addr_s &nas) {
+    net_addr_s(const net_addr_s &nas) noexcept {
         addr = nas.addr;
         port = nas.port;
     }
 
-    net_addr_s &operator=(const net_addr_s &nas) {
-        addr = nas.addr;
-        port = nas.port;
-        return *this;
-    }
-
+    net_addr_s &operator=(const net_addr_s &nas) = default;
     net_addr_s(net_addr_s &&nas) noexcept {
         addr = std::move(nas.addr);
         port = nas.port;
@@ -63,8 +59,12 @@ typedef struct net_peer_info_s {
         sp = SocketProtocal::None;
     }
 
-    net_peer_info_s(net_addr_t &n, SocketProtocal s) : nat(n), sp(s) {}
+    net_peer_info_s(const net_addr_t &n, SocketProtocal s) : nat(n), sp(s) {}
     net_peer_info_s(net_addr_t &&n, SocketProtocal s) : nat(std::move(n)), sp(s) {}
+    net_peer_info_s(const std::string &addr, uint16_t port, SocketProtocal s) {
+        nat = net_addr_t(addr, port);
+        sp = s;
+    }
     net_peer_info_s(std::string &&addr, uint16_t port, SocketProtocal s) {
         nat = net_addr_t(std::move(addr), port);
         sp = s;

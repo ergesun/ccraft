@@ -54,13 +54,5 @@ bool RfServerConfiguration::Initialize(uint32_t myId, std::string &path) {
 
     return true;
 }
-
-inline const std::map<uint32_t, RfServer>& RfServerConfiguration::GetOtherServers() const {
-    return m_mapOtherServers;
-}
-
-const RfServer& RfServerConfiguration::GetSelfServer() const {
-    return m_selfServer;
-}
 } // namespace rfcommon
 } // namespace ccraft

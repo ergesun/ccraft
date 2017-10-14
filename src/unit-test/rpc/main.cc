@@ -100,7 +100,7 @@ TEST(RpcTest, ClientServerTest) {
 
     auto reqVoteRequest = new ccraft::protocal::RequestVoteRequest();
     reqVoteRequest->set_term(1234);
-    reqVoteRequest->set_leaderid(1);
+    reqVoteRequest->set_candidateid(1);
     reqVoteRequest->set_lastlogindex(22);
     reqVoteRequest->set_lastlogterm(1233);
 

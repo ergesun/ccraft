@@ -20,8 +20,16 @@ namespace rflog {
 class IRfLogger {
 public:
     virtual ~IRfLogger() = default;
-    virtual RfLogEntry* GetLastEntry() = 0;
-    virtual RfLogEntry* GetEntry(uint32_t index) = 0;
+    /**
+     *
+     * @return 你无须释放。
+     */
+    virtual const RfLogEntry* GetLastEntry() = 0;
+    /**
+     *
+     * @return 你无须释放。
+     */
+    virtual const RfLogEntry* GetEntry(uint32_t index) = 0;
     virtual void AppendEntries(RepeatedPtrField<RfLogEntry>* entries) = 0;
     virtual void AppendEntry(RfLogEntry* entry) = 0;
     virtual void Sync() = 0;

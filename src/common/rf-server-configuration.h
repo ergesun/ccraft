@@ -19,8 +19,13 @@ public:
     ~RfServerConfiguration() = default;
 
     bool Initialize(uint32_t myId, std::string &path);
-    inline const std::map<uint32_t, RfServer>& GetOtherServers() const;
-    const RfServer& GetSelfServer() const;
+    inline const std::map<uint32_t, RfServer>& GetOtherServers() const {
+        return m_mapOtherServers;
+    }
+
+    inline const RfServer& GetSelfServer() const {
+        return m_selfServer;
+    }
 
 private:
     std::map<uint32_t, RfServer>      m_mapOtherServers;

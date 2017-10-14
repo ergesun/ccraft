@@ -30,8 +30,8 @@ public:
     explicit RtDiskRfLogger(std::string &&logFilePath, bool autoSync = false);
     ~RtDiskRfLogger() override;
 
-    RfLogEntry *GetLastEntry() override;
-    RfLogEntry *GetEntry(uint32_t index) override;
+    const RfLogEntry *GetLastEntry() override;
+    const RfLogEntry *GetEntry(uint32_t index) override;
     void AppendEntries(RepeatedPtrField<RfLogEntry> *entries) override;
     void AppendEntry(RfLogEntry *entry) override;
 

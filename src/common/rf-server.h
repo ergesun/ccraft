@@ -8,6 +8,8 @@
 
 #include <string>
 
+#include "../net/common-def.h"
+
 namespace ccraft {
 namespace common {
 struct RfServer {
@@ -41,6 +43,14 @@ struct RfServer {
         this->m_iPortForClient = rs.m_iPortForClient;
 
         return *this;
+    }
+
+    net::net_peer_info_t GetAddrForServer() const {
+        return net::net_peer_info_t(m_sAddr, m_iPortForServer, net::SocketProtocal::Tcp);
+    }
+
+    net::net_peer_info_t GetAddrForClient() const {
+        return net::net_peer_info_t(m_sAddr, m_iPortForClient, net::SocketProtocal::Tcp);
     }
 
     uint32_t              m_iId              = 0;

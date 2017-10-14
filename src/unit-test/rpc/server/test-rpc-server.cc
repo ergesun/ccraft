@@ -80,11 +80,11 @@ rpc::SP_PB_MSG TestRpcServer::create_append_rflog_request() {
 rpc::SP_PB_MSG TestRpcServer::on_request_vote(rpc::SP_PB_MSG sspMsg) {
     auto requestVoteRequest = dynamic_cast<protocal::RequestVoteRequest*>(sspMsg.get());
     EXPECT_EQ(1234, requestVoteRequest->term());
-    EXPECT_EQ(1, requestVoteRequest->leaderid());
+    EXPECT_EQ(1, requestVoteRequest->candidateid());
     EXPECT_EQ(22, requestVoteRequest->lastlogindex());
     EXPECT_EQ(1233, requestVoteRequest->lastlogterm());
     std::cout << "client req: term = " << requestVoteRequest->term()
-              << ", leader id = " << requestVoteRequest->leaderid()
+              << ", leader id = " << requestVoteRequest->candidateid()
               << ", prev log idx = " << requestVoteRequest->lastlogindex()
               << ", prev log term = " << requestVoteRequest->lastlogterm() << std::endl;
     auto response = new protocal::RequestVoteResponse();

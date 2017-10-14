@@ -17,6 +17,7 @@
 #include "../rflog/realtime-disk-rflogger.h"
 #include "elector-manager-service.h"
 #include "server-rpc-service.h"
+#include "../../codegen/node-raft.pb.h"
 
 #include "raft-consensus.h"
 #include "service-manager.h"
@@ -182,7 +183,7 @@ void RaftConsensus::start_new_election() {
     LOGITAG;
     m_roleType = NodeRoleType::Candidate;
     m_iVoteFor = m_iMyId;
-
+    broadcast_request_vote(m_pElectorManager->GetOtherServersConf());
 }
 
 void RaftConsensus::subscribe_leader_hb_timer_tick() {
@@ -196,8 +197,16 @@ void RaftConsensus::subscribe_leader_hb_timer_tick() {
 }
 
 void RaftConsensus::broadcast_request_vote(std::map<uint32_t, common::RfServer> otherSrvs) {
+    auto lastRfLogEntry = m_pRfLogger->GetLastEntry();
+    auto *pq = new protocal::RequestVoteRequest();
+    pq->set_term(m_iCurrentTerm);
+    pq->set_candidateid(m_iMyId);
+    pq->set_lastlogterm(lastRfLogEntry->term());
+    pq->set_lastlogindex(lastRfLogEntry->index());
+
+    rpc::SP_PB_MSG spPbMsg(pq);
     for (auto srv : otherSrvs) {
-        //m_pSrvRpcService->Req
+        m_pSrvRpcService->RequestVoteAsync(spPbMsg, srv.second.GetAddrForServer());
     }
 }
 } // namespace server

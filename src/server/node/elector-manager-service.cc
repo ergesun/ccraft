@@ -12,11 +12,11 @@
 namespace ccraft {
 namespace server {
 ElectorManagerService::ElectorManagerService() {
-    m_nodeConf = new common::RfServerConfiguration();
+    m_pNodeConf = new common::RfServerConfiguration();
 }
 
 ElectorManagerService::~ElectorManagerService() {
-    DELETE_PTR(m_nodeConf);
+    DELETE_PTR(m_pNodeConf);
 }
 
 bool ElectorManagerService::Start() {
@@ -38,11 +38,15 @@ bool ElectorManagerService::initialize(uint32_t myId, std::string &&serversConfP
 
     m_iMyId = myId;
 
-    return m_nodeConf->Initialize(myId, serversConfPath);
+    return m_pNodeConf->Initialize(myId, serversConfPath);
 }
 
 const common::RfServer& ElectorManagerService::GetSelfServerConf() const {
-    return m_nodeConf->GetSelfServer();
+    return m_pNodeConf->GetSelfServer();
+}
+
+const std::map<uint32_t, common::RfServer>& ElectorManagerService::GetOtherServersConf() const {
+    return m_pNodeConf->GetOtherServers();
 }
 } // namespace server
 } // namespace ccraft

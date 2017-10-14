@@ -6,6 +6,7 @@
 #ifndef CCRAFT_SERVER_ELECTOR_MANAGER_H
 #define CCRAFT_SERVER_ELECTOR_MANAGER_H
 
+#include <map>
 #include <string>
 #include "iservice.h"
 
@@ -24,6 +25,7 @@ public:
     bool Stop() override;
 
     const common::RfServer& GetSelfServerConf() const;
+    const std::map<uint32_t, common::RfServer>& GetOtherServersConf() const;
 
     bool MarkVoted();
     bool MeetQuorum();
@@ -32,7 +34,7 @@ private:
     bool initialize(uint32_t myId, std::string &&serversConfPath);
 
 private:
-    common::RfServerConfiguration             *m_nodeConf = nullptr;
+    common::RfServerConfiguration             *m_pNodeConf = nullptr;
     uint32_t                                   m_iMyId = 0;
 };
 } // namespace server
