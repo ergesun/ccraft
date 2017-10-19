@@ -20,6 +20,7 @@ namespace net {
 typedef std::function<bool(AFileEventHandler*)> ValidHandlerFunc;
 /**
  * socket出错了manager检测到后会释放。
+ * TODO(sunchao): 考虑一下本类stop后，其管理的所有AFileEventHandler的释放问题。
  */
 class PosixEventManager : public AEventManager {
 public:

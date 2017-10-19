@@ -8,6 +8,7 @@
 
 #include "isocket-service.h"
 #include "notify-message.h"
+#include "net-protocal-stacks/nonblocking/nss-config.h"
 
 namespace ccraft {
 namespace common {
@@ -24,9 +25,7 @@ public:
      * @param memPool 内存池对象
      * @param sspMgr  worker的管理策略，传入nullptr则默认创建UniqueWorkerManager。
      */
-    static ISocketService* CreateService(SocketProtocal sp, std::shared_ptr<net_addr_t> sspNat, uint16_t logicPort,
-                                         common::MemPool *memPool, NotifyMessageCallbackHandler msgCallbackHandler,
-                                         std::shared_ptr<INetStackWorkerManager> sspMgr);
+    static ISocketService* CreateService(NssConfig nssConfig);
 }; // class SocketServiceFactory
 } // namespace net
 } // namespace ccraft

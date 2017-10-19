@@ -15,6 +15,7 @@ UniqueWorkerManager::~UniqueWorkerManager() {
     }
     m_hmap_workers.clear();
     m_hmap_rp_lp.clear();
+    m_hmap_handler_rp.clear();
 }
 
 AFileEventHandler* UniqueWorkerManager::GetWorkerEventHandler(net_peer_info_t logicNpt) {
@@ -33,6 +34,7 @@ bool UniqueWorkerManager::PutWorkerEventHandler(AFileEventHandler *workerEventHa
     } else {
         m_hmap_workers[lnpt] = workerEventHandler;
         m_hmap_rp_lp[rnpt] = lnpt;
+        m_hmap_handler_rp[uintptr_t(workerEventHandler)] = rnpt;
         res = true;
     }
 
@@ -49,6 +51,21 @@ AFileEventHandler* UniqueWorkerManager::RemoveWorkerEventHandler(net_peer_info_t
     auto handler = lookup_worker(logicNpt);
     if (handler) {
         m_hmap_workers.erase(logicNpt);
+        return handler;
+    } else {
+        return nullptr;
+    }
+}
+
+AFileEventHandler* UniqueWorkerManager::RemoveWorkerEventHandler(net_peer_info_t logicNpt) {
+    common::SpinLock l(&m_sl);
+    auto handler = lookup_worker(logicNpt);
+    if (handler) {
+        m_hmap_workers.erase(logicNpt);
+        auto realNpt = m_hmap_handler_rp[uintptr_t(handler)];
+        m_hmap_handler_rp.erase(uintptr_t(handler));
+        m_hmap_rp_lp.erase(realNpt);
+
         return handler;
     } else {
         return nullptr;

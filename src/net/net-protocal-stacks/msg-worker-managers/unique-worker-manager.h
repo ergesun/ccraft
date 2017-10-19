@@ -35,11 +35,19 @@ public:
     bool PutWorkerEventHandler(AFileEventHandler *workerEventHandler) override;
 
     /**
-     * 移除一个worker。
+     * 检测到对端连接断开了时，需要调用这个API去移除handler。
      * @param logicNpt
-     * @return 被移除的worker。如果不存在则为nullptr。
+     * @param realNpt
+     * @return
      */
     AFileEventHandler* RemoveWorkerEventHandler(net_peer_info_t logicNpt, net_peer_info_t realNpt) override;
+
+    /**
+     * 本端主动断开时，需要调用这个API去移除handler。
+     * @param logicNpt
+     * @return
+     */
+    virtual AFileEventHandler* RemoveWorkerEventHandler(net_peer_info_t logicNpt) override;
 
 private:
     inline AFileEventHandler *lookup_worker(net_peer_info_t &logicNpt);
@@ -51,6 +59,7 @@ private:
      */
     std::unordered_map<net_peer_info_t, AFileEventHandler*>          m_hmap_workers;
     std::unordered_map<net_peer_info_t, net_peer_info_t>             m_hmap_rp_lp;
+    std::unordered_map<uintptr_t, net_peer_info_t>                   m_hmap_handler_rp;
 }; // class UniqueWorkerManager
 }  // namespace net
 }  // namespace ccraft

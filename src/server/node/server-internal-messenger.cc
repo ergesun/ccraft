@@ -23,6 +23,7 @@ namespace server {
 ServerInternalMessenger::ServerInternalMessenger(CreateServerInternalMessengerParam &createParam) :
         m_pRfNode(createParam.rfNode), m_iDispatchTpCnt(createParam.mngerDispatchWorkThreadsCnt) {
     CHECK(createParam.rfNode);
+    m_pMemPool = createParam.memPool;
     if (!createParam.memPool) {
         m_bOwnMemPool = true;
         // TODO(sunchao): 优化此内存池参数。
@@ -33,12 +34,20 @@ ServerInternalMessenger::ServerInternalMessenger(CreateServerInternalMessengerPa
     m_iPort = createParam.port;
     auto nat = new net::net_addr_t("0.0.0.0", createParam.port);
     std::shared_ptr<net::net_addr_t> sspNat(nat);
-    m_pSocketService = net::SocketServiceFactory::CreateService(net::SocketProtocal::Tcp,
-                                                                sspNat,
-                                                                createParam.port,
-                                                                m_pMemPool,
-                                                                std::bind(&ServerInternalMessenger::recv_msg, this, std::placeholders::_1),
-                                                                std::shared_ptr<net::INetStackWorkerManager>(new net::UniqueWorkerManager()));
+    timeval connTimeout = {
+        .tv_sec = createParam.connectTimeout / 1000,
+        .tv_usec = (createParam.connectTimeout % 1000) * 1000
+    };
+    net::NssConfig nc = {
+        .sp = net::SocketProtocal::Tcp,
+        .sspNat = sspNat,
+        .logicPort = createParam.port,
+        .sspMgr = std::shared_ptr<net::INetStackWorkerManager>(new net::UniqueWorkerManager()),
+        .memPool = m_pMemPool,
+        .msgCallbackHandler = std::bind(&ServerInternalMessenger::recv_msg, this, std::placeholders::_1),
+        .connectTimeout = connTimeout
+    };
+    m_pSocketService = net::SocketServiceFactory::CreateService(nc);
     m_pSyncClient = new RfSrvInternalRpcClientSync(m_pSocketService, createParam.clientWaitResponseTimeout,
                                                 createParam.clientRpcWorkThreadsCnt, m_pMemPool);
     m_pAsyncClient = new RfSrvInternalRpcClientAsync(m_pSocketService,

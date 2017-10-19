@@ -36,6 +36,13 @@ public:
      * @return
      */
     virtual bool SendMessage(SndMessage *m) = 0;
+
+    /**
+     * 断开一个TCP连接。
+     * @param peer
+     * @return
+     */
+    virtual bool Disconnect(net_peer_info_t peer) = 0;
 }; // interface ISocketService
 } // namespace net
 } // namespace ccraft

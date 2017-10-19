@@ -26,7 +26,8 @@ ServerRpcService::ServerRpcService(uint16_t port) {
         .mngerDispatchWorkThreadsCnt = (uint16_t)FLAGS_internal_rpc_messenger_threads_cnt,
         .netIOThreadsCnt = (uint16_t)FLAGS_internal_rpc_io_threads_cnt,
         .port = port,
-        .memPool = nullptr
+        .memPool = nullptr,
+        FLAGS_net_server_connect_timeout
     };
 
     m_pNodeInternalMessenger = new ServerInternalMessenger(cnimp);

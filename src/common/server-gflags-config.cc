@@ -22,6 +22,7 @@ DEFINE_bool(colorglogtostderr, true, "设置记录到标准输出的颜色消息
  * net common
  */
 DEFINE_int32(net_server_handshake_threads_cnt, 16, "网络框架服务端处理握手的线程个数");
+DEFINE_int32(net_server_connect_timeout, 100, "tcp连接超时时间。单位ms。");
 
 /**
  * rpc server common

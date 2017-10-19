@@ -40,12 +40,23 @@ int main(int argc, char **argv) {
     g_mp = new ccraft::common::MemPool();
     auto nat = new ccraft::net::net_addr_t("0.0.0.0", TEST_PORT);
     std::shared_ptr<ccraft::net::net_addr_t> sspNat(nat);
-    g_pSS = ccraft::net::SocketServiceFactory::CreateService(ccraft::net::SocketProtocal::Tcp,
-                                                             sspNat,
-                                                             TEST_PORT,
-                                                             g_mp,
-                                                             std::bind(&dispatch_msg, std::placeholders::_1),
-                                                             std::shared_ptr<ccraft::net::INetStackWorkerManager>(new ccraft::net::UniqueWorkerManager()));
+    timeval connTimeout = {
+        .tv_sec = 0,
+        .tv_usec = 100 * 1000
+    };
+
+    {
+        ccraft::net::NssConfig nc = {
+            .sp = ccraft::net::SocketProtocal::Tcp,
+            .sspNat = sspNat,
+            .logicPort = TEST_PORT,
+            .sspMgr = std::shared_ptr<ccraft::net::INetStackWorkerManager>(new ccraft::net::UniqueWorkerManager()),
+            .memPool = g_mp,
+            .msgCallbackHandler = std::bind(&dispatch_msg, std::placeholders::_1),
+            .connectTimeout = connTimeout
+        };
+        g_pSS = ccraft::net::SocketServiceFactory::CreateService(nc);
+    }
 
     g_pSS->Start(2, ccraft::net::NonBlockingEventModel::Posix);
     g_pServer = new ccraft::test::TestRpcServer(1, g_pSS, g_mp);

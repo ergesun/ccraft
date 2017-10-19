@@ -13,16 +13,11 @@ using namespace std::placeholders;
 
 namespace ccraft {
 namespace net {
-NBSocketService::NBSocketService(SocketProtocal sp, std::shared_ptr<net_addr_t> sspNat, uint16_t logicPort,
-                                 std::shared_ptr<INetStackWorkerManager> sspMgr,
-                                 common::MemPool *memPool, NotifyMessageCallbackHandler msgCallbackHandler) :
-    ASocketService(sp, sspNat), m_iLogicPort(logicPort), m_pMemPool(memPool) {
-    assert(memPool);
-    m_msgCallback = msgCallbackHandler;
-    if (sspMgr.get()) {
-        m_pNetStackWorkerManager = sspMgr;
-    } else {
-        m_pNetStackWorkerManager = std::shared_ptr<INetStackWorkerManager>(new UniqueWorkerManager());
+NBSocketService::NBSocketService(NssConfig nssConfig) :
+    ASocketService(nssConfig.sp, nssConfig.sspNat), m_conf(nssConfig) {
+    assert(nssConfig.memPool);
+    if (!nssConfig.sspMgr.get()) {
+        m_conf.sspMgr = std::shared_ptr<INetStackWorkerManager>(new UniqueWorkerManager());
     }
 }
 
@@ -37,11 +32,11 @@ bool NBSocketService::Start(uint16_t ioThreadsCnt, NonBlockingEventModel m) {
     }
     m_bStopped = false;
     hw_rw_memory_barrier();
-    m_pEventManager = new PosixEventManager(m_sp, m_nlt, m_pMemPool, MAX_EVENTS, ioThreadsCnt,
+    m_pEventManager = new PosixEventManager(m_sp, m_nlt, m_conf.memPool, MAX_EVENTS, ioThreadsCnt,
                                             std::bind(&NBSocketService::on_stack_connect, this, _1),
                                             std::bind(&NBSocketService::on_logic_connect, this, _1),
                                             std::bind(&NBSocketService::on_finish, this, _1),
-                                            m_msgCallback);
+                                            m_conf.msgCallbackHandler);
     return m_pEventManager->Start(m);
 }
 
@@ -51,7 +46,7 @@ bool NBSocketService::Stop() {
     }
     m_bStopped = true;
     hw_rw_memory_barrier();
-    m_pNetStackWorkerManager.reset();
+    m_conf.sspMgr.reset();
     return m_pEventManager->Stop();
 }
 
@@ -67,10 +62,10 @@ bool NBSocketService::SendMessage(SndMessage *m) {
 
     bool rc = false;
     auto peer = m->GetPeerInfo();
-    auto handler = m_pNetStackWorkerManager->GetWorkerEventHandler(peer);
+    auto handler = m_conf.sspMgr->GetWorkerEventHandler(peer);
     if (!handler) {
         if (connect(peer)) {
-            handler = m_pNetStackWorkerManager->GetWorkerEventHandler(peer);
+            handler = m_conf.sspMgr->GetWorkerEventHandler(peer);
         }
     }
 
@@ -83,8 +78,32 @@ bool NBSocketService::SendMessage(SndMessage *m) {
     return rc;
 }
 
+bool NBSocketService::Disconnect(net_peer_info_t peer) {
+    if (SocketProtocal::Tcp != peer.sp) {
+        LOGWFUN << "Someone call disconnect isn't on tcp.";
+        return false;
+    }
+
+    if (UNLIKELY(m_bStopped)) {
+        return false;
+    }
+
+    auto handler = m_conf.sspMgr->RemoveWorkerEventHandler(peer);
+    if (!handler) {
+        return false;
+    }
+
+    auto ew = handler->GetOwnWorker();
+    if (LIKELY(ew)) {
+        ew->AddExternalEpDelEvent(handler);
+        ew->Wakeup();
+    }
+
+    return true;
+}
+
 bool NBSocketService::connect(net_peer_info_t &npt) {
-    if (m_pNetStackWorkerManager->GetWorkerEventHandler(npt)) {
+    if (m_conf.sspMgr->GetWorkerEventHandler(npt)) {
         return true;
     }
 
@@ -95,12 +114,12 @@ bool NBSocketService::connect(net_peer_info_t &npt) {
         if (!ptcs->Socket()) {
             goto Label_failed;
         }
-        if (!ptcs->Connect(nullptr)) {
+        if (!ptcs->Connect(&m_conf.connectTimeout)) {
             ptcs->Close();
             goto Label_failed;
         }
         // m_iLogicPort： self logic port(for logic service id)
-        eventHandler = new PosixTcpConnectionEventHandler(ptcs, m_pMemPool, m_msgCallback, m_iLogicPort,
+        eventHandler = new PosixTcpConnectionEventHandler(ptcs, m_conf.memPool, m_conf.msgCallbackHandler, m_conf.logicPort,
                                                           std::bind(&NBSocketService::on_logic_connect, this, _1));
         // logic peer info： peer ip:port。
         eventHandler->GetStackMsgWorker()->GetEventHandler()->GetSocketDescriptor()->SetLogicPeerInfo(net_peer_info_t(npt));
@@ -113,7 +132,7 @@ bool NBSocketService::connect(net_peer_info_t &npt) {
         m_pEventManager->AddEvent(eventHandler, EVENT_NONE, EVENT_READ|EVENT_WRITE);
         return true;
 
-        Label_failed:
+    Label_failed:
         DELETE_PTR(ptcs);
         return false;
     } else {
@@ -134,16 +153,20 @@ bool NBSocketService::on_logic_connect(AFileEventHandler *handler) {
     if (UNLIKELY(m_bStopped)) {
         return false;
     }
-    return m_pNetStackWorkerManager->PutWorkerEventHandler(handler);
+    return m_conf.sspMgr->PutWorkerEventHandler(handler);
 }
 
 void NBSocketService::on_finish(AFileEventHandler *handler) {
     if (UNLIKELY(m_bStopped)) {
         return;
     }
+
     auto lnpt = handler->GetSocketDescriptor()->GetLogicPeerInfo();
     auto rnpt = handler->GetSocketDescriptor()->GetRealPeerInfo();
-    m_pNetStackWorkerManager->RemoveWorkerEventHandler(lnpt, rnpt);
+    if (!m_conf.sspMgr->RemoveWorkerEventHandler(lnpt, rnpt)) {
+        return;
+    }
+
     auto ew = handler->GetOwnWorker();
     if (LIKELY(ew)) {
         ew->AddExternalEpDelEvent(handler);

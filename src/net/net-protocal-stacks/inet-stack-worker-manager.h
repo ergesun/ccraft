@@ -22,7 +22,19 @@ public:
 
     virtual AFileEventHandler *GetWorkerEventHandler(net_peer_info_t npt) = 0;
     virtual bool PutWorkerEventHandler(AFileEventHandler *handler) = 0;
+    /**
+     * 检测到对端连接断开了时，需要调用这个API去移除handler。
+     * @param logicNpt
+     * @param realNpt
+     * @return
+     */
     virtual AFileEventHandler* RemoveWorkerEventHandler(net_peer_info_t logicNpt, net_peer_info_t realNpt) = 0;
+    /**
+     * 本端主动断开时，需要调用这个API去移除handler。
+     * @param logicNpt
+     * @return
+     */
+    virtual AFileEventHandler* RemoveWorkerEventHandler(net_peer_info_t logicNpt) = 0;
 }; // interface INetStackWorkerManager
 }  // namespace net
 } // namespace ccraft

@@ -38,21 +38,40 @@ TEST(NetTest, ServerTest) {
         .sp = ccraft::net::SocketProtocal::Tcp
     };
 
+    timeval connTimeout = {
+        .tv_sec = 0,
+        .tv_usec = 100 * 1000
+    };
+
     std::shared_ptr<ccraft::net::net_addr_t> ssp_npt(nullptr);
     std::shared_ptr<ccraft::net::INetStackWorkerManager> sspMgr1 =
         std::shared_ptr<ccraft::net::INetStackWorkerManager>(new ccraft::net::UniqueWorkerManager());
-    auto netService1 = ccraft::net::SocketServiceFactory::CreateService(ccraft::net::SocketProtocal::Tcp, ssp_npt, 2210, ccraft::common::g_pMemPool,
-                                                                       std::bind(recv_msg, std::placeholders::_1),
-                                                                       sspMgr1);
+    ccraft::net::NssConfig nc1 = {
+        .sp = ccraft::net::SocketProtocal::Tcp,
+        .sspNat = ssp_npt,
+        .logicPort = 2210,
+        .sspMgr = sspMgr1,
+        .memPool = ccraft::common::g_pMemPool,
+        .msgCallbackHandler = std::bind(recv_msg, std::placeholders::_1),
+        .connectTimeout = connTimeout
+    };
+    auto netService1 = ccraft::net::SocketServiceFactory::CreateService(nc1);
     EXPECT_EQ(netService1->Start(2, ccraft::net::NonBlockingEventModel::Posix), true);
     auto *tsm11 = new ccraft::test::TestSndMessage(ccraft::common::g_pMemPool, ccraft::net::net_peer_info_t(peerInfo), "1-1 ---client request: hello server!");
     EXPECT_EQ(netService1->SendMessage(tsm11), true);
 
     std::shared_ptr<ccraft::net::INetStackWorkerManager> sspMgr2 =
         std::shared_ptr<ccraft::net::INetStackWorkerManager>(new ccraft::net::UniqueWorkerManager());
-    auto netService2 = ccraft::net::SocketServiceFactory::CreateService(ccraft::net::SocketProtocal::Tcp, ssp_npt, 2210, ccraft::common::g_pMemPool,
-                                                                        std::bind(recv_msg, std::placeholders::_1),
-                                                                        sspMgr2);
+    ccraft::net::NssConfig nc2 = {
+        .sp = ccraft::net::SocketProtocal::Tcp,
+        .sspNat = ssp_npt,
+        .logicPort = 2210,
+        .sspMgr = sspMgr2,
+        .memPool = ccraft::common::g_pMemPool,
+        .msgCallbackHandler = std::bind(recv_msg, std::placeholders::_1),
+        .connectTimeout = connTimeout
+    };
+    auto netService2 = ccraft::net::SocketServiceFactory::CreateService(nc2);
     EXPECT_EQ(netService2->Start(2, ccraft::net::NonBlockingEventModel::Posix), true);
     auto *tsm2 = new ccraft::test::TestSndMessage(ccraft::common::g_pMemPool, ccraft::net::net_peer_info_t(peerInfo), "2 ---client request: hello server!");
     EXPECT_EQ(netService2->SendMessage(tsm2), false);
@@ -62,9 +81,16 @@ TEST(NetTest, ServerTest) {
 
     std::shared_ptr<ccraft::net::INetStackWorkerManager> sspMgr3 =
         std::shared_ptr<ccraft::net::INetStackWorkerManager>(new ccraft::net::UniqueWorkerManager());
-    auto netService3 = ccraft::net::SocketServiceFactory::CreateService(ccraft::net::SocketProtocal::Tcp, ssp_npt, 2211, ccraft::common::g_pMemPool,
-                                                                        std::bind(recv_msg, std::placeholders::_1),
-                                                                        sspMgr3);
+    ccraft::net::NssConfig nc3 = {
+        .sp = ccraft::net::SocketProtocal::Tcp,
+        .sspNat = ssp_npt,
+        .logicPort = 2211,
+        .sspMgr = sspMgr3,
+        .memPool = ccraft::common::g_pMemPool,
+        .msgCallbackHandler = std::bind(recv_msg, std::placeholders::_1),
+        .connectTimeout = connTimeout
+    };
+    auto netService3 = ccraft::net::SocketServiceFactory::CreateService(nc3);
 
     EXPECT_EQ(netService3->Start(2, ccraft::net::NonBlockingEventModel::Posix), true);
 

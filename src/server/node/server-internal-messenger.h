@@ -35,12 +35,24 @@ class RfSrvInternalRpcClientAsync;
 class RfSrvInternalRpcServerSync;
 
 struct CreateServerInternalMessengerParam {
+    /**
+     *
+     * @param prfNode
+     * @param cliRpcWorkThreadsCnt
+     * @param cliWaitRespTimeout
+     * @param srvRpcWorkThreadsCnt
+     * @param mngerWorkThreadsCnt
+     * @param inetIOThreadsCnt
+     * @param iport
+     * @param pMp 可以为nullptr
+     * @param connTimeout
+     */
     CreateServerInternalMessengerParam(ServerRpcService *prfNode, uint16_t cliRpcWorkThreadsCnt, const common::cctime_t &cliWaitRespTimeout,
                                     uint16_t srvRpcWorkThreadsCnt, uint16_t mngerWorkThreadsCnt, uint16_t inetIOThreadsCnt,
-                                    uint16_t iport, common::MemPool *pMp = nullptr) :
+                                    uint16_t iport, common::MemPool *pMp, int32_t connTimeout) :
         rfNode(prfNode), clientRpcWorkThreadsCnt(cliRpcWorkThreadsCnt), clientWaitResponseTimeout(cliWaitRespTimeout),
         serverRpcWorkThreadsCnt(srvRpcWorkThreadsCnt), mngerDispatchWorkThreadsCnt(mngerWorkThreadsCnt), netIOThreadsCnt(inetIOThreadsCnt),
-        port(iport), memPool(pMp) {}
+        port(iport), memPool(pMp), connectTimeout(connTimeout) {}
 
     ServerRpcService   *rfNode;
     uint16_t            clientRpcWorkThreadsCnt;
@@ -50,6 +62,7 @@ struct CreateServerInternalMessengerParam {
     uint16_t            netIOThreadsCnt;
     uint16_t            port;
     common::MemPool    *memPool;
+    int32_t             connectTimeout;
 };
 
 // TODO(sunchao): 考虑有必要再对messenger抽象不.

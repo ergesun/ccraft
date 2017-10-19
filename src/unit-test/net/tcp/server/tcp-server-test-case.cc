@@ -25,10 +25,20 @@ void TcpServerTest::Run() {
     m_mp = new ccraft::common::MemPool();
     std::shared_ptr<ccraft::net::INetStackWorkerManager> sspMgr =
         std::shared_ptr<ccraft::net::INetStackWorkerManager>(new ccraft::net::UniqueWorkerManager());
-    s_ss = net::SocketServiceFactory::CreateService(ccraft::net::SocketProtocal::Tcp, ssp_npt, 2210, m_mp,
-                                                    std::bind(&TcpServerTest::recv_msg,
-                                                              std::placeholders::_1),
-                                                    sspMgr);
+    timeval connTimeout = {
+        .tv_sec = 0,
+        .tv_usec = 100 * 1000
+    };
+    net::NssConfig nc = {
+        .sp = ccraft::net::SocketProtocal::Tcp,
+        .sspNat = ssp_npt,
+        .logicPort = 2210,
+        .sspMgr = sspMgr,
+        .memPool = m_mp,
+        .msgCallbackHandler = std::bind(&TcpServerTest::recv_msg, std::placeholders::_1),
+        .connectTimeout = connTimeout
+    };
+    s_ss = net::SocketServiceFactory::CreateService(nc);
     if (!s_ss->Start(2, ccraft::net::NonBlockingEventModel::Posix)) {
         throw std::runtime_error("cannot start SocketService");
     }
