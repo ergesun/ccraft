@@ -89,7 +89,7 @@ rpc::SP_PB_MSG TestRpcServer::on_request_vote(rpc::SP_PB_MSG sspMsg) {
               << ", prev log term = " << requestVoteRequest->lastlogterm() << std::endl;
     auto response = new protocal::RequestVoteResponse();
     response->set_term(1111);
-    response->set_success(true);
+    response->set_votegranted(true);
 
     return rpc::SP_PB_MSG(response);
 }

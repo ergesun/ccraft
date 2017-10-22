@@ -47,7 +47,7 @@ private:
     void on_leader_hb_timeout(void *ctx);
     void start_new_election();
     void subscribe_leader_hb_timer_tick();
-    void broadcast_request_vote(std::map<uint32_t, common::RfServer> otherSrvs);
+    void broadcast_request_vote(const std::map<uint32_t, common::RfServer> &otherSrvs);
 
 private:
     bool                           m_bStopped                    = true;
@@ -58,7 +58,6 @@ private:
      * zero is no server.
      */
     uint32_t                       m_iVoteFor                    = 0;
-    common::cctime_t               m_keepVoteUtil;
     std::string                    m_sRfStateFilePath;
     rflog::IRfLogger              *m_pRfLogger                   = nullptr;
     int32_t                        m_iRfStateFd                  = -1;

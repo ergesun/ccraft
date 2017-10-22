@@ -196,6 +196,8 @@ void RtDiskRfLogger::initialize() {
             LOGFFUN << "munmap file " << m_sLogFilePath.c_str() << " failed with errmsg " << strerror(err);
         }
     }
+
+    LSeekFileWithFatalLOG(m_iFd, 0, SEEK_END, m_sLogFilePath.c_str());
 }
 } // namespace rflog
 } // namespace ccraft

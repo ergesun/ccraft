@@ -26,7 +26,7 @@ int FileUtils::CreateDir(const char *dir, __mode_t mode) {
             LOGEFUN << "CreateDir " << dir << " failed because there is a file named it.";
             return -1;
         }
-    } else { // 如果dir文件(夹)不存在，则创建文件夹(0777权限)
+    } else { // 如果dir文件(夹)不存在，则创建文件夹
         if (0 != mkdir(dir, mode)) {
             err = errno;
             if (EEXIST == err) {
