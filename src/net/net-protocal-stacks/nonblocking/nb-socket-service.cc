@@ -80,7 +80,7 @@ bool NBSocketService::SendMessage(SndMessage *m) {
 
 bool NBSocketService::Disconnect(net_peer_info_t peer) {
     if (SocketProtocal::Tcp != peer.sp) {
-        LOGWFUN << "Someone call disconnect isn't on tcp.";
+        LOGWFUN << "Not support SocketProtocal " << (int32_t)(peer.sp);
         return false;
     }
 

@@ -12,7 +12,7 @@
 
 namespace ccraft {
 namespace server {
-ServerRpcService::ServerRpcService(uint16_t port, INodeInternalRpcHandler *internalRpcHandler) :
+ServerRpcService::ServerRpcService(uint16_t port, uint16_t rpcThreadsCnt, INodeInternalRpcHandler *internalRpcHandler) :
     m_pNodeInternalRpcHandler(internalRpcHandler) {
     assert(m_pNodeInternalRpcHandler);
     common::cctime_t clientWaitTimeOut = {
@@ -33,10 +33,12 @@ ServerRpcService::ServerRpcService(uint16_t port, INodeInternalRpcHandler *inter
     };
 
     m_pNodeInternalMessenger = new ServerInternalMessenger(cnimp);
+    m_pExecRpcTp = new common::ThreadPool<RpcTask>(rpcThreadsCnt);
 }
 
 ServerRpcService::~ServerRpcService() {
     DELETE_PTR(m_pNodeInternalMessenger);
+    DELETE_PTR(m_pExecRpcTp);
 }
 
 bool ServerRpcService::Start() {
@@ -63,12 +65,22 @@ rpc::SP_PB_MSG ServerRpcService::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
 }
 
 std::shared_ptr<protocal::RequestVoteResponse> ServerRpcService::RequestVoteSync(rpc::SP_PB_MSG req,
-                                                                                        net::net_peer_info_t &&peer) {
+                                                                                net::net_peer_info_t &&peer) {
     return m_pNodeInternalMessenger->RequestVoteSync(req, std::move(peer));
 }
 
-rpc::ARpcClient::SendRet ServerRpcService::RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
-    return m_pNodeInternalMessenger->RequestVoteAsync(req, std::move(peer));
+void ServerRpcService::RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
+    static auto send_req_vote = [this](RpcTask rt) {
+        rt.pSim->RequestVoteAsync(rt.msg, std::move(rt.peer));
+    };
+
+    RpcTask rt = {
+        .msg = req,
+        .pSim = m_pNodeInternalMessenger,
+        .peer = std::move(peer)
+    };
+
+    m_pExecRpcTp->AddTask(send_req_vote, rt);
 }
 
 rpc::SP_PB_MSG ServerRpcService::OnRequestVote(rpc::SP_PB_MSG sspMsg) {

@@ -31,11 +31,14 @@ RaftConsensus::RaftConsensus() : m_iMyId((uint32_t)FLAGS_server_id),
     m_moniterLeaderHbTimerCb = std::bind(&RaftConsensus::on_leader_hb_timeout, this, std::placeholders::_1);
     m_monitorLeaderHbTimerEvent = {nullptr, &m_moniterLeaderHbTimerCb};
 
-    m_pElectorManager = dynamic_cast<ElectorManagerService*>(ServiceManager::GetService(ServiceType::ElectorManager));
+    m_pElectorManager = dynamic_cast<ElectorManagerService*>(
+            ServiceManager::GetService(ServiceType::ElectorManager));
     assert(m_pElectorManager);
 
     auto selfConf = m_pElectorManager->GetSelfServerConf();
-    m_pSrvRpcService = new ServerRpcService(selfConf.m_iPortForServer, this);
+    m_pSrvRpcService = new ServerRpcService(selfConf.m_iPortForServer,
+                                            (uint16_t)m_pElectorManager->GetOtherServersConf().size(),
+                                            this);
     initialize();
 }
 
@@ -172,16 +175,6 @@ void RaftConsensus::initialize() {
 void RaftConsensus::save_rf_state() {
     LOGDTAG;
     auto rfsfp = m_sRfStateFilePath.c_str();
-    LSeekFileWithFatalLOG(m_iRfStateFd, 0, SEEK_SET, rfsfp);
-    if (-1 == ftruncate(m_iRfStateFd, 0)) {
-        auto err = errno;
-        LOGFFUN << "ftruncate file " << rfsfp << " failed with errmsg " << strerror(err) << ".";
-    }
-
-    // write file header.
-    uchar header[RFSTATE_MAGIC_NO_LEN];
-    ByteOrderUtils::WriteUInt32(header, RFSTATE_MAGIC_NO);
-    WriteFileFullyWithFatalLOG(m_iRfStateFd, (char*)header, RFSTATE_MAGIC_NO_LEN, rfsfp);
 
     // write state.
     // mpo will be Putted in Buffer 'b'.
@@ -192,6 +185,7 @@ void RaftConsensus::save_rf_state() {
 
     common::Buffer b;
     common::ProtoBufUtils::Serialize(rs, &b, common::g_pMemPool);
+    LSeekFileWithFatalLOG(m_iRfStateFd, RFSTATE_MAGIC_NO_LEN, SEEK_SET, rfsfp);
     WriteFileFullyWithFatalLOG(m_iRfStateFd, (char*)(b.GetStart()), size_t(b.AvailableLength()), m_sRfStateFilePath.c_str());
     FDataSyncFileWithFatalLOG(m_iRfStateFd, rfsfp);
 }
@@ -203,7 +197,13 @@ void RaftConsensus::on_leader_hb_timeout(void *ctx) {
 void RaftConsensus::start_new_election() {
     LOGITAG;
     m_roleType = NodeRoleType::Candidate;
+    ++m_iCurrentTerm;
+    if (m_iVoteFor == m_iMyId) {
+        save_rf_state();
+    }
+
     m_iVoteFor = m_iMyId;
+
     broadcast_request_vote(m_pElectorManager->GetOtherServersConf());
 }
 
@@ -217,7 +217,7 @@ void RaftConsensus::subscribe_leader_hb_timer_tick() {
     }
 }
 
-void RaftConsensus::broadcast_request_vote(std::map<uint32_t, common::RfServer> otherSrvs) {
+void RaftConsensus::broadcast_request_vote(const std::map<uint32_t, common::RfServer> &otherSrvs) {
     auto lastRfLogEntry = m_pRfLogger->GetLastEntry();
     auto *pq = new protocal::RequestVoteRequest();
     pq->set_term(m_iCurrentTerm);
@@ -226,7 +226,7 @@ void RaftConsensus::broadcast_request_vote(std::map<uint32_t, common::RfServer> 
     pq->set_lastlogindex(lastRfLogEntry->index());
 
     rpc::SP_PB_MSG spPbMsg(pq);
-    for (auto srv : otherSrvs) {
+    for (auto const &srv : otherSrvs) {
         m_pSrvRpcService->RequestVoteAsync(spPbMsg, srv.second.GetAddrForServer());
     }
 }

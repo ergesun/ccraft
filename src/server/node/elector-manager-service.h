@@ -19,7 +19,7 @@ namespace server {
 class ElectorManagerService : public IService {
 public:
     ElectorManagerService();
-    ~ElectorManagerService();
+    ~ElectorManagerService() override;
 
     bool Start() override;
     bool Stop() override;

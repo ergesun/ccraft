@@ -69,6 +69,6 @@ message RequestVoteRequest {
 }
 
 message RequestVoteResponse {
-    uint32 term = 1;
-    bool   success = 2;
+    uint32 term        = 1;
+    bool   voteGranted = 2;
 }

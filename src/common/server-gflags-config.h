@@ -27,7 +27,6 @@ DECLARE_bool(colorglogtostderr);
 DECLARE_int32(net_server_handshake_threads_cnt);
 DECLARE_int32(net_server_connect_timeout);
 
-
 /**
  * internal rpc server
  */

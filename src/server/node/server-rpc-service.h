@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "iservice.h"
+#include "../../common/thread-pool.h"
 #include "../../net/common-def.h"
 #include "../../net/notify-message.h"
 #include "../../rpc/common-def.h"
@@ -27,7 +28,19 @@ namespace server {
 class ServerInternalMessenger;
 class ServerRpcService : public IService, public INodeInternalRpcHandler {
 public:
-    ServerRpcService(uint16_t port, INodeInternalRpcHandler *internalRpcHandler);
+    struct RpcTask {
+        RpcTask() {}
+        RpcTask(rpc::SP_PB_MSG m, ServerInternalMessenger *sim, net::net_peer_info_t &p) :
+                msg(m), pSim(sim), peer(p) {}
+        RpcTask(rpc::SP_PB_MSG m, ServerInternalMessenger *sim, net::net_peer_info_t &&p) :
+                msg(m), pSim(sim), peer(std::move(p)) {}
+
+        rpc::SP_PB_MSG           msg;
+        ServerInternalMessenger *pSim = nullptr;
+        net::net_peer_info_t     peer;
+    };
+
+    ServerRpcService(uint16_t port, uint16_t rpcThreadsCnt, INodeInternalRpcHandler *internalRpcHandler);
     ~ServerRpcService() override;
 
     bool Start() override;
@@ -38,14 +51,15 @@ public:
     rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
 
     std::shared_ptr<protocal::RequestVoteResponse> RequestVoteSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
-    rpc::ARpcClient::SendRet RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    void RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
 
     void OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
 private:
     INodeInternalRpcHandler          *m_pNodeInternalRpcHandler   = nullptr;
-    ServerInternalMessenger          *m_pNodeInternalMessenger    = nullptr;
+    ServerInternalMessenger          *m_pNodeInternalMessenger = nullptr;
+    common::ThreadPool<RpcTask>      *m_pExecRpcTp             = nullptr;
 };
 } // namespace server
 } // namespace ccraft

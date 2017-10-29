@@ -48,18 +48,18 @@ public:
         }
 
         std::function<void(TaskCtxType)>  action;
-        TaskCtxType                       ctx = nullptr;
+        TaskCtxType                       ctx;
     };
 
     /**
      *
      * @param threads_cnt 线程个数。如果小于等于0则为cpu核数 * 2个。
      */
-    explicit ThreadPool(int threads_cnt = 0) {
+    explicit ThreadPool(uint32_t threads_cnt = 0) {
         m_iActiveWorkersCnt.store(0);
-        threads_cnt = threads_cnt > 0 ? threads_cnt : common::LOGIC_CPUS_CNT * 2;
+        threads_cnt = threads_cnt > 0 ? threads_cnt : (uint32_t)common::LOGIC_CPUS_CNT * 2;
         m_vThreadps.reserve(threads_cnt);
-        for (int i = 0; i < threads_cnt; ++i) {
+        for (uint32_t i = 0; i < threads_cnt; ++i) {
             m_vThreadps.push_back(new std::thread(std::bind(&ThreadPool::proc, this)));
         }
     }

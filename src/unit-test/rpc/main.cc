@@ -118,8 +118,8 @@ TEST(RpcTest, ClientServerTest) {
     std::shared_ptr<ccraft::protocal::RequestVoteResponse> reqVoteSspResp;
     EXPECT_NO_THROW(reqVoteSspResp = g_pClient->RequestVote(ccraft::rpc::SP_PB_MSG(reqVoteRequest), std::move(tmpPeer = peer)));
     EXPECT_EQ(reqVoteSspResp->term(), 1111);
-    EXPECT_EQ(reqVoteSspResp->success(), true);
-    std::cout << "server resp: term = " << reqVoteSspResp->term() << ", ok = " << reqVoteSspResp->success() << std::endl;
+    EXPECT_EQ(reqVoteSspResp->votegranted(), true);
+    std::cout << "server resp: term = " << reqVoteSspResp->term() << ", ok = " << reqVoteSspResp->votegranted() << std::endl;
 
     EXPECT_EQ(g_pClient->Stop(), true);
 }
