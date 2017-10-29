@@ -133,6 +133,7 @@ void PosixEventManager::worker_loop(EventWorker *ew) {
             }
         }
 
+        // TODO(sunchao): 重新设计handler的回收逻辑，目前会有已经被释放了的handler依旧被使用的风险。
         for (auto deleteEventHandler : pendingDeleteEventHandlers) {
             DELETE_PTR(deleteEventHandler);
         }

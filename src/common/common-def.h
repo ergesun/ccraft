@@ -30,6 +30,7 @@
 #define DELETE_ARR_PTR(p) if (p) {delete [](p); (p) = nullptr;}
 #define FREE_PTR(p) if (p) {free (p); (p) = NULL;}
 
+// TODO(sunchao): 实现一个打log的库，glog性能不行。
 // 不要使用此宏打debug log，而要使用LOGDFUNx系列。
 #define LOGDFUN LOG(INFO) << " [DEBUG] " << __FUNCTION__ << ": "
 

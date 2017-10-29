@@ -29,7 +29,6 @@ class RequestVoteResponse;
 }
 
 namespace server {
-class ServerRpcService;
 class RfSrvInternalRpcClientSync;
 class RfSrvInternalRpcClientAsync;
 class RfSrvInternalRpcServerSync;
@@ -37,7 +36,7 @@ class RfSrvInternalRpcServerSync;
 struct CreateServerInternalMessengerParam {
     /**
      *
-     * @param prfNode
+     * @param handler
      * @param cliRpcWorkThreadsCnt
      * @param cliWaitRespTimeout
      * @param srvRpcWorkThreadsCnt
@@ -47,22 +46,22 @@ struct CreateServerInternalMessengerParam {
      * @param pMp 可以为nullptr
      * @param connTimeout
      */
-    CreateServerInternalMessengerParam(ServerRpcService *prfNode, uint16_t cliRpcWorkThreadsCnt, const common::cctime_t &cliWaitRespTimeout,
+    CreateServerInternalMessengerParam(INodeInternalRpcHandler *handler, uint16_t cliRpcWorkThreadsCnt, const common::cctime_t &cliWaitRespTimeout,
                                     uint16_t srvRpcWorkThreadsCnt, uint16_t mngerWorkThreadsCnt, uint16_t inetIOThreadsCnt,
                                     uint16_t iport, common::MemPool *pMp, int32_t connTimeout) :
-        rfNode(prfNode), clientRpcWorkThreadsCnt(cliRpcWorkThreadsCnt), clientWaitResponseTimeout(cliWaitRespTimeout),
+        nodeInternalRpcHandler(handler), clientRpcWorkThreadsCnt(cliRpcWorkThreadsCnt), clientWaitResponseTimeout(cliWaitRespTimeout),
         serverRpcWorkThreadsCnt(srvRpcWorkThreadsCnt), mngerDispatchWorkThreadsCnt(mngerWorkThreadsCnt), netIOThreadsCnt(inetIOThreadsCnt),
         port(iport), memPool(pMp), connectTimeout(connTimeout) {}
 
-    ServerRpcService   *rfNode;
-    uint16_t            clientRpcWorkThreadsCnt;
-    common::cctime_t    clientWaitResponseTimeout;
-    uint16_t            serverRpcWorkThreadsCnt;
-    uint16_t            mngerDispatchWorkThreadsCnt;
-    uint16_t            netIOThreadsCnt;
-    uint16_t            port;
-    common::MemPool    *memPool;
-    int32_t             connectTimeout;
+    INodeInternalRpcHandler   *nodeInternalRpcHandler;
+    uint16_t                   clientRpcWorkThreadsCnt;
+    common::cctime_t           clientWaitResponseTimeout;
+    uint16_t                   serverRpcWorkThreadsCnt;
+    uint16_t                   mngerDispatchWorkThreadsCnt;
+    uint16_t                   netIOThreadsCnt;
+    uint16_t                   port;
+    common::MemPool           *memPool;
+    int32_t                    connectTimeout;
 };
 
 // TODO(sunchao): 考虑有必要再对messenger抽象不.
@@ -91,8 +90,9 @@ public:
     rpc::ARpcClient::SendRet RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
 
+    void OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) override;
+
 private:
-    void recv_msg(std::shared_ptr<net::NotifyMessage> sspNM);
     void dispatch_msg(std::shared_ptr<net::NotifyMessage> sspNM);
 
 private:
@@ -102,15 +102,15 @@ private:
     /**
      * 关联关系，无需本类释放。
      */
-    ServerRpcService                                           *m_pRfNode         = nullptr;
-    net::ISocketService                                        *m_pSocketService  = nullptr;
-    RfSrvInternalRpcClientSync                                 *m_pSyncClient     = nullptr;
-    RfSrvInternalRpcClientAsync                                *m_pAsyncClient    = nullptr;
-    RfSrvInternalRpcServerSync                                 *m_pServer         = nullptr;
-    bool                                                        m_bOwnMemPool     = false;
-    common::MemPool                                            *m_pMemPool        = nullptr;
-    uint16_t                                                    m_iDispatchTpCnt  = 0;
-    common::ThreadPool<std::shared_ptr<net::NotifyMessage>>    *m_pDispatchTp     = nullptr;
+    INodeInternalRpcHandler                                    *m_pNodeINRpcHandler  = nullptr;
+    net::ISocketService                                        *m_pSocketService     = nullptr;
+    RfSrvInternalRpcClientSync                                 *m_pSyncClient        = nullptr;
+    RfSrvInternalRpcClientAsync                                *m_pAsyncClient       = nullptr;
+    RfSrvInternalRpcServerSync                                 *m_pServer            = nullptr;
+    bool                                                        m_bOwnMemPool        = false;
+    common::MemPool                                            *m_pMemPool           = nullptr;
+    uint16_t                                                    m_iDispatchTpCnt     = 0;
+    common::ThreadPool<std::shared_ptr<net::NotifyMessage>>    *m_pDispatchTp        = nullptr;
 };
 } // namespace server
 } // namespace ccraft

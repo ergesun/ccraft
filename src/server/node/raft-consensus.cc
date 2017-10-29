@@ -35,7 +35,7 @@ RaftConsensus::RaftConsensus() : m_iMyId((uint32_t)FLAGS_server_id),
     assert(m_pElectorManager);
 
     auto selfConf = m_pElectorManager->GetSelfServerConf();
-    m_pSrvRpcService = new ServerRpcService(selfConf.m_iPortForServer);
+    m_pSrvRpcService = new ServerRpcService(selfConf.m_iPortForServer, this);
     initialize();
 }
 
@@ -76,6 +76,27 @@ bool RaftConsensus::Stop() {
     m_pTimer->Stop();
 
     return true;
+}
+
+rpc::SP_PB_MSG RaftConsensus::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
+    auto appendRfLogRequest = dynamic_cast<protocal::AppendRfLogRequest*>(sspMsg.get());
+    auto response = new protocal::AppendRfLogResponse();
+    response->set_term(1111);
+    response->set_success(true);
+
+    return rpc::SP_PB_MSG(response);
+}
+
+rpc::SP_PB_MSG RaftConsensus::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
+    auto response = new protocal::RequestVoteResponse();
+    response->set_term(1111);
+    response->set_success(true);
+
+    return rpc::SP_PB_MSG(response);
+}
+
+void RaftConsensus::OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) {
+
 }
 
 void RaftConsensus::initialize() {

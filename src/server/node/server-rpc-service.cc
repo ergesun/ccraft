@@ -12,14 +12,16 @@
 
 namespace ccraft {
 namespace server {
-ServerRpcService::ServerRpcService(uint16_t port) {
+ServerRpcService::ServerRpcService(uint16_t port, INodeInternalRpcHandler *internalRpcHandler) :
+    m_pNodeInternalRpcHandler(internalRpcHandler) {
+    assert(m_pNodeInternalRpcHandler);
     common::cctime_t clientWaitTimeOut = {
         .sec = FLAGS_internal_rpc_client_wait_timeout_secs,
         .nsec = FLAGS_internal_rpc_client_wait_timeout_nsecs
     };
 
     CreateServerInternalMessengerParam cnimp = {
-        .rfNode = this,
+        .nodeInternalRpcHandler = this,
         .clientRpcWorkThreadsCnt = (uint16_t)FLAGS_internal_rpc_client_threads_cnt,
         .clientWaitResponseTimeout = clientWaitTimeOut,
         .serverRpcWorkThreadsCnt = (uint16_t)FLAGS_internal_rpc_server_threads_cnt,
@@ -57,12 +59,7 @@ rpc::ARpcClient::SendRet ServerRpcService::AppendRfLogAsync(rpc::SP_PB_MSG req, 
 }
 
 rpc::SP_PB_MSG ServerRpcService::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
-    auto appendRfLogRequest = dynamic_cast<protocal::AppendRfLogRequest*>(sspMsg.get());
-    auto response = new protocal::AppendRfLogResponse();
-    response->set_term(1111);
-    response->set_success(true);
-
-    return rpc::SP_PB_MSG(response);
+    return m_pNodeInternalMessenger->OnAppendRfLog(sspMsg);
 }
 
 std::shared_ptr<protocal::RequestVoteResponse> ServerRpcService::RequestVoteSync(rpc::SP_PB_MSG req,
@@ -75,15 +72,11 @@ rpc::ARpcClient::SendRet ServerRpcService::RequestVoteAsync(rpc::SP_PB_MSG req, 
 }
 
 rpc::SP_PB_MSG ServerRpcService::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
-    auto response = new protocal::RequestVoteResponse();
-    response->set_term(1111);
-    response->set_success(true);
-
-    return rpc::SP_PB_MSG(response);
+    return m_pNodeInternalMessenger->OnRequestVote(sspMsg);
 }
 
 void ServerRpcService::OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) {
-
+    m_pNodeInternalRpcHandler->OnRecvRpcCallbackMsg(sspNM);
 }
 } // namespace server
 } // namespace ccraft

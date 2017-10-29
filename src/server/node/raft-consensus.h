@@ -15,6 +15,8 @@
 #include "../../common/random.h"
 #include "../../common/rf-server.h"
 
+#include "iserver-internal-rpc-handler.h"
+
 #define RFLOG_DIR          "rflogs"
 #define RFLOG_FILE_NAME    "rflog"
 #define RFSTATE_FILE_NAME  "rfstate"
@@ -30,13 +32,18 @@ class IRfLogger;
 namespace server {
 class ServerRpcService;
 class ElectorManagerService;
-class RaftConsensus : public IService {
+class RaftConsensus : public IService, public INodeInternalRpcHandler {
 public:
     RaftConsensus();
     ~RaftConsensus() override;
 
     bool Start() override;
     bool Stop() override;
+
+    // INodeInternalRpcHandler IF
+    rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
+    rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
+    void OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
 private:
     void initialize();

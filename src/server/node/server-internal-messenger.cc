@@ -21,8 +21,8 @@
 namespace ccraft {
 namespace server {
 ServerInternalMessenger::ServerInternalMessenger(CreateServerInternalMessengerParam &createParam) :
-        m_pRfNode(createParam.rfNode), m_iDispatchTpCnt(createParam.mngerDispatchWorkThreadsCnt) {
-    CHECK(createParam.rfNode);
+        m_pNodeINRpcHandler(createParam.nodeInternalRpcHandler), m_iDispatchTpCnt(createParam.mngerDispatchWorkThreadsCnt) {
+    CHECK(createParam.nodeInternalRpcHandler);
     m_pMemPool = createParam.memPool;
     if (!createParam.memPool) {
         m_bOwnMemPool = true;
@@ -44,14 +44,14 @@ ServerInternalMessenger::ServerInternalMessenger(CreateServerInternalMessengerPa
         .logicPort = createParam.port,
         .sspMgr = std::shared_ptr<net::INetStackWorkerManager>(new net::UniqueWorkerManager()),
         .memPool = m_pMemPool,
-        .msgCallbackHandler = std::bind(&ServerInternalMessenger::recv_msg, this, std::placeholders::_1),
+        .msgCallbackHandler = std::bind(&INodeInternalRpcHandler::OnRecvRpcCallbackMsg, this, std::placeholders::_1),
         .connectTimeout = connTimeout
     };
     m_pSocketService = net::SocketServiceFactory::CreateService(nc);
     m_pSyncClient = new RfSrvInternalRpcClientSync(m_pSocketService, createParam.clientWaitResponseTimeout,
                                                 createParam.clientRpcWorkThreadsCnt, m_pMemPool);
     m_pAsyncClient = new RfSrvInternalRpcClientAsync(m_pSocketService,
-                                                     std::bind(&ServerRpcService::OnRecvRpcCallbackMsg, createParam.rfNode, std::placeholders::_1),
+                                                     std::bind(&INodeInternalRpcHandler::OnRecvRpcCallbackMsg, createParam.nodeInternalRpcHandler, std::placeholders::_1),
                                                      m_pMemPool);
     m_pServer = new RfSrvInternalRpcServerSync(this, createParam.serverRpcWorkThreadsCnt, m_pSocketService, m_pMemPool);
 }
@@ -108,7 +108,7 @@ rpc::ARpcClient::SendRet ServerInternalMessenger::AppendRfLogAsync(rpc::SP_PB_MS
 }
 
 rpc::SP_PB_MSG ServerInternalMessenger::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
-    return m_pRfNode->OnAppendRfLog(sspMsg);
+    return m_pNodeINRpcHandler->OnAppendRfLog(sspMsg);
 }
 
 std::shared_ptr<protocal::RequestVoteResponse> ServerInternalMessenger::RequestVoteSync(rpc::SP_PB_MSG req,
@@ -121,7 +121,7 @@ rpc::ARpcClient::SendRet ServerInternalMessenger::RequestVoteAsync(rpc::SP_PB_MS
 }
 
 rpc::SP_PB_MSG ServerInternalMessenger::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
-    return m_pRfNode->OnRequestVote(sspMsg);
+    return m_pNodeINRpcHandler->OnRequestVote(sspMsg);
 }
 
 void ServerInternalMessenger::dispatch_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
@@ -160,7 +160,7 @@ void ServerInternalMessenger::dispatch_msg(std::shared_ptr<net::NotifyMessage> s
     }
 }
 
-void ServerInternalMessenger::recv_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
+void ServerInternalMessenger::OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) {
     if (UNLIKELY(m_bStopped)) {
         return;
     }

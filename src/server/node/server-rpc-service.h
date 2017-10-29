@@ -27,7 +27,7 @@ namespace server {
 class ServerInternalMessenger;
 class ServerRpcService : public IService, public INodeInternalRpcHandler {
 public:
-    explicit ServerRpcService(uint16_t port);
+    ServerRpcService(uint16_t port, INodeInternalRpcHandler *internalRpcHandler);
     ~ServerRpcService() override;
 
     bool Start() override;
@@ -41,10 +41,11 @@ public:
     rpc::ARpcClient::SendRet RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
 
-    void OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM);
+    void OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
 private:
-    ServerInternalMessenger          *m_pNodeInternalMessenger = nullptr;
+    INodeInternalRpcHandler          *m_pNodeInternalRpcHandler   = nullptr;
+    ServerInternalMessenger          *m_pNodeInternalMessenger    = nullptr;
 };
 } // namespace server
 } // namespace ccraft
