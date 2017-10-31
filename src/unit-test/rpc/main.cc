@@ -45,18 +45,16 @@ int main(int argc, char **argv) {
         .tv_usec = 100 * 1000
     };
 
-    {
-        ccraft::net::NssConfig nc = {
-            .sp = ccraft::net::SocketProtocal::Tcp,
-            .sspNat = sspNat,
-            .logicPort = TEST_PORT,
-            .sspMgr = std::shared_ptr<ccraft::net::INetStackWorkerManager>(new ccraft::net::UniqueWorkerManager()),
-            .memPool = g_mp,
-            .msgCallbackHandler = std::bind(&dispatch_msg, std::placeholders::_1),
-            .connectTimeout = connTimeout
-        };
-        g_pSS = ccraft::net::SocketServiceFactory::CreateService(nc);
-    }
+    ccraft::net::NssConfig nc = {
+        .sp = ccraft::net::SocketProtocal::Tcp,
+        .sspNat = sspNat,
+        .logicPort = TEST_PORT,
+        .netMgrType = ccraft::net::NetStackWorkerMgrType::Unique,
+        .memPool = g_mp,
+        .msgCallbackHandler = std::bind(&dispatch_msg, std::placeholders::_1),
+        .connectTimeout = connTimeout
+    };
+    g_pSS = ccraft::net::SocketServiceFactory::CreateService(nc);
 
     g_pSS->Start(2, ccraft::net::NonBlockingEventModel::Posix);
     g_pServer = new ccraft::test::TestRpcServer(1, g_pSS, g_mp);

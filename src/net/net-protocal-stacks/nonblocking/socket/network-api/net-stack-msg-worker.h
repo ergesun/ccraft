@@ -29,9 +29,9 @@ class ANetStackMessageWorker {
 protected:
     enum class NetWorkerState {
         StartToRcvHeader = 0,
-            RcvingHeader,
-            StartToRcvPayload,
-            RcvingPayload
+        RcvingHeader,
+        StartToRcvPayload,
+        RcvingPayload
     };
 
 public:
@@ -39,7 +39,8 @@ public:
      *
      * @param maxCacheMessageCnt 消息缓冲队列的最大消息个数。0为无限制。
      */
-    ANetStackMessageWorker(AFileEventHandler *eventHandler, common::MemPool *memPool, NotifyMessageCallbackHandler msgCallbackHandler, uint32_t maxCacheMessageCnt = 0);
+    ANetStackMessageWorker(AFileEventHandler *eventHandler, common::MemPool *memPool,
+                           NotifyMessageCallbackHandler msgCallbackHandler, uint32_t maxCacheMessageCnt = 0);
     virtual ~ANetStackMessageWorker();
 
     /**
@@ -48,15 +49,21 @@ public:
      */
     virtual bool Initialize() = 0;
     /**
-     *
+     * 发送消息。会触发消息事件以驱动发送。
      */
     bool SendMessage(SndMessage *m);
 
     void HandleMessage(NotifyMessage *m);
     /**
-     *
+     * 插入消息。不会触发消息事件去驱动发送。
      */
     bool InsertMessage(SndMessage *m);
+
+    /**
+     * 清空消息。
+     */
+    void ClearMessage();
+
     /**
      * 错误: 返回false(无论是[socket错误或对端关闭]还是[codec校验错误])
      * 正常: 返回true(即便是遇到了EAGAIN，只要没有发生错误)

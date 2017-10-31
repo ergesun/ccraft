@@ -107,7 +107,7 @@ void PosixEventManager::AddEvent(AFileEventHandler *socketEventHandler, int cur_
 
 void PosixEventManager::worker_loop(EventWorker *ew) {
     auto events = ew->GetEventsContainer();
-    while (LIKELY(!m_bStopped)) {
+    while (LIKELY(!m_bStopped)) { // 里面有锁，其具有内存屏障作用会刷新m_bStopped.
         auto nevents = ew->GetInternalEvent(events, nullptr);
         if (UNLIKELY(m_bStopped)) {
             break;
@@ -133,7 +133,6 @@ void PosixEventManager::worker_loop(EventWorker *ew) {
             }
         }
 
-        // TODO(sunchao): 重新设计handler的回收逻辑，目前会有已经被释放了的handler依旧被使用的风险。
         for (auto deleteEventHandler : pendingDeleteEventHandlers) {
             DELETE_PTR(deleteEventHandler);
         }
@@ -144,8 +143,6 @@ void PosixEventManager::worker_loop(EventWorker *ew) {
             ew->AddEvent(addEv.socketEventHandler, addEv.cur_mask, addEv.mask);
         }
         addEvs.clear();
-
-        hw_rw_memory_barrier();
     }
 }
 

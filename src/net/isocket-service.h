@@ -42,7 +42,7 @@ public:
      * @param peer
      * @return
      */
-    virtual bool Disconnect(net_peer_info_t peer) = 0;
+    virtual bool Disconnect(const net_peer_info_t &peer) = 0;
 }; // interface ISocketService
 } // namespace net
 } // namespace ccraft

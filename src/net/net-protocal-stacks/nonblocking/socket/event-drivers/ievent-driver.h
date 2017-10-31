@@ -9,7 +9,6 @@
 #include <vector>
 #include <cstdint>
 #include "../../ievent-handler.h"
-#include "../network-api/abstract-file-event-handler.h"
 
 #define EVENT_NONE       0
 #define EVENT_READ       1
@@ -17,6 +16,7 @@
 
 namespace ccraft {
 namespace net {
+class AFileEventHandler;
 struct NetEvent {
     AFileEventHandler  *eh;
     int                 mask;

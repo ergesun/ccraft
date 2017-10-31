@@ -10,6 +10,7 @@
 namespace ccraft {
 namespace net {
 UniqueWorkerManager::~UniqueWorkerManager() {
+    common::SpinLock l(&m_sl);
     for (auto p : m_hmap_workers) {
         DELETE_PTR(p.second);
     }
@@ -18,9 +19,19 @@ UniqueWorkerManager::~UniqueWorkerManager() {
     m_hmap_handler_rp.clear();
 }
 
-AFileEventHandler* UniqueWorkerManager::GetWorkerEventHandler(net_peer_info_t logicNpt) {
+AFileEventHandler* UniqueWorkerManager::GetWorkerEventHandler(const net_peer_info_t &logicNpt) {
     common::SpinLock l(&m_sl);
     return lookup_worker(logicNpt);
+}
+
+AFileEventHandler* UniqueWorkerManager::GetWorkerEventHandlerWithRef(const net_peer_info_t &logicNpt) {
+    common::SpinLock l(&m_sl);
+    auto handler = lookup_worker(logicNpt);
+    if (handler) {
+        handler->AddRef();
+    }
+
+    return handler;
 }
 
 bool UniqueWorkerManager::PutWorkerEventHandler(AFileEventHandler *workerEventHandler) {
@@ -41,7 +52,7 @@ bool UniqueWorkerManager::PutWorkerEventHandler(AFileEventHandler *workerEventHa
     return res;
 }
 
-AFileEventHandler* UniqueWorkerManager::RemoveWorkerEventHandler(net_peer_info_t logicNpt, net_peer_info_t realNpt) {
+AFileEventHandler* UniqueWorkerManager::RemoveWorkerEventHandler(const net_peer_info_t &logicNpt, const net_peer_info_t &realNpt) {
     common::SpinLock l(&m_sl);
     if (m_hmap_rp_lp.find(realNpt) == m_hmap_rp_lp.end()) {
         return nullptr;
@@ -57,7 +68,7 @@ AFileEventHandler* UniqueWorkerManager::RemoveWorkerEventHandler(net_peer_info_t
     }
 }
 
-AFileEventHandler* UniqueWorkerManager::RemoveWorkerEventHandler(net_peer_info_t logicNpt) {
+AFileEventHandler* UniqueWorkerManager::RemoveWorkerEventHandler(const net_peer_info_t &logicNpt) {
     common::SpinLock l(&m_sl);
     auto handler = lookup_worker(logicNpt);
     if (handler) {
@@ -72,7 +83,7 @@ AFileEventHandler* UniqueWorkerManager::RemoveWorkerEventHandler(net_peer_info_t
     }
 }
 
-inline AFileEventHandler *UniqueWorkerManager::lookup_worker(net_peer_info_t &logicNpt) {
+inline AFileEventHandler *UniqueWorkerManager::lookup_worker(const net_peer_info_t &logicNpt) {
     auto p = m_hmap_workers.find(logicNpt);
     if (m_hmap_workers.end() != p) {
         return p->second;

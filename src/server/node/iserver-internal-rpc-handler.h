@@ -11,11 +11,28 @@
 
 namespace ccraft {
 namespace server {
+/**
+ * 内部rpc通信的消息接收接口。
+ */
 class INodeInternalRpcHandler {
 public:
     virtual ~INodeInternalRpcHandler() = default;
+    /**
+     * 收到AppendRfLog请求。
+     * @param sspMsg
+     * @return
+     */
     virtual rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg)                  = 0;
+    /**
+     * 收到RequestVote请求。
+     * @param sspMsg
+     * @return
+     */
     virtual rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg)                  = 0;
+    /**
+     * 收到了rpc的响应。
+     * @param sspNM
+     */
     virtual void OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) = 0;
 }; // class IMessageHandler
 } // namespace rpc

@@ -23,8 +23,6 @@ void TcpServerTest::Run() {
     auto nat = new ccraft::net::net_addr_t("0.0.0.0", 2210);
     std::shared_ptr<ccraft::net::net_addr_t> ssp_npt(nat);
     m_mp = new ccraft::common::MemPool();
-    std::shared_ptr<ccraft::net::INetStackWorkerManager> sspMgr =
-        std::shared_ptr<ccraft::net::INetStackWorkerManager>(new ccraft::net::UniqueWorkerManager());
     timeval connTimeout = {
         .tv_sec = 0,
         .tv_usec = 100 * 1000
@@ -33,7 +31,7 @@ void TcpServerTest::Run() {
         .sp = ccraft::net::SocketProtocal::Tcp,
         .sspNat = ssp_npt,
         .logicPort = 2210,
-        .sspMgr = sspMgr,
+        .netMgrType = ccraft::net::NetStackWorkerMgrType::Unique,
         .memPool = m_mp,
         .msgCallbackHandler = std::bind(&TcpServerTest::recv_msg, std::placeholders::_1),
         .connectTimeout = connTimeout

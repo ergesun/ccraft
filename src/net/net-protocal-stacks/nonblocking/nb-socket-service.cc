@@ -16,8 +16,11 @@ namespace net {
 NBSocketService::NBSocketService(NssConfig nssConfig) :
     ASocketService(nssConfig.sp, nssConfig.sspNat), m_conf(nssConfig) {
     assert(nssConfig.memPool);
-    if (!nssConfig.sspMgr.get()) {
-        m_conf.sspMgr = std::shared_ptr<INetStackWorkerManager>(new UniqueWorkerManager());
+    switch (nssConfig.netMgrType) {
+        case NetStackWorkerMgrType::Unique :{
+            m_sspMgr = std::shared_ptr<INetStackWorkerManager>(new UniqueWorkerManager());
+            break;
+        }
     }
 }
 
@@ -46,7 +49,7 @@ bool NBSocketService::Stop() {
     }
     m_bStopped = true;
     hw_rw_memory_barrier();
-    m_conf.sspMgr.reset();
+    m_sspMgr.reset();
     return m_pEventManager->Stop();
 }
 
@@ -62,15 +65,16 @@ bool NBSocketService::SendMessage(SndMessage *m) {
 
     bool rc = false;
     auto peer = m->GetPeerInfo();
-    auto handler = m_conf.sspMgr->GetWorkerEventHandler(peer);
+    auto handler = m_sspMgr->GetWorkerEventHandlerWithRef(peer);
     if (!handler) {
         if (connect(peer)) {
-            handler = m_conf.sspMgr->GetWorkerEventHandler(peer);
+            handler = m_sspMgr->GetWorkerEventHandlerWithRef(peer);
         }
     }
 
     if (handler) {
         rc = handler->GetStackMsgWorker()->SendMessage(m);
+        handler->Release();
     } else {
         LOGWFUN << "There is no worker for peer " << peer.nat.addr.c_str() << ":" << peer.nat.port;
     }
@@ -78,7 +82,7 @@ bool NBSocketService::SendMessage(SndMessage *m) {
     return rc;
 }
 
-bool NBSocketService::Disconnect(net_peer_info_t peer) {
+bool NBSocketService::Disconnect(const net_peer_info_t &peer) {
     if (SocketProtocal::Tcp != peer.sp) {
         LOGWFUN << "Not support SocketProtocal " << (int32_t)(peer.sp);
         return false;
@@ -88,22 +92,20 @@ bool NBSocketService::Disconnect(net_peer_info_t peer) {
         return false;
     }
 
-    auto handler = m_conf.sspMgr->RemoveWorkerEventHandler(peer);
+    auto handler = m_sspMgr->RemoveWorkerEventHandler(peer);
     if (!handler) {
-        return false;
+        return true;
     }
 
-    auto ew = handler->GetOwnWorker();
-    if (LIKELY(ew)) {
-        ew->AddExternalEpDelEvent(handler);
-        ew->Wakeup();
-    }
+    handler->GetStackMsgWorker()->ClearMessage();
+    handler->Release();
 
     return true;
 }
 
+// TODO(sunchao): 添加connecting状态以防止刚开始多次连接。
 bool NBSocketService::connect(net_peer_info_t &npt) {
-    if (m_conf.sspMgr->GetWorkerEventHandler(npt)) {
+    if (m_sspMgr->GetWorkerEventHandler(npt)) {
         return true;
     }
 
@@ -153,7 +155,7 @@ bool NBSocketService::on_logic_connect(AFileEventHandler *handler) {
     if (UNLIKELY(m_bStopped)) {
         return false;
     }
-    return m_conf.sspMgr->PutWorkerEventHandler(handler);
+    return m_sspMgr->PutWorkerEventHandler(handler);
 }
 
 void NBSocketService::on_finish(AFileEventHandler *handler) {
@@ -161,17 +163,18 @@ void NBSocketService::on_finish(AFileEventHandler *handler) {
         return;
     }
 
+    // 无需担心并发的时候NBSocketService::Disconnect函数先被调用从而导致handler被释放了本函数下面还在使用。
+    // 因为我们目前的对某个worker的处理都是在同一个线程内按序在PosixEventManager::worker_loop中进行的，
+    // 假如NBSocketService::Disconnect的后续动作先进行，那么本函数压根不会被调用;假如本函数先调用，那么NBSocketService::Disconnect
+    // 的动作一定会排在后面。
     auto lnpt = handler->GetSocketDescriptor()->GetLogicPeerInfo();
     auto rnpt = handler->GetSocketDescriptor()->GetRealPeerInfo();
-    if (!m_conf.sspMgr->RemoveWorkerEventHandler(lnpt, rnpt)) {
+    if (!m_sspMgr->RemoveWorkerEventHandler(lnpt, rnpt)) {
         return;
     }
 
-    auto ew = handler->GetOwnWorker();
-    if (LIKELY(ew)) {
-        ew->AddExternalEpDelEvent(handler);
-        ew->Wakeup();
-    }
+    handler->GetStackMsgWorker()->ClearMessage();
+    handler->Release();
 }
 } // namespace net
 } // namespace ccraft

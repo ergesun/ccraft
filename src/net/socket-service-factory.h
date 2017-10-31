@@ -21,9 +21,6 @@ class SocketServiceFactory {
 public:
     /**
      *
-     * @param sspNat 如果为空，则是为仅仅一个服务于client的服务，否则为server信息，会开启server的服务。
-     * @param memPool 内存池对象
-     * @param sspMgr  worker的管理策略，传入nullptr则默认创建UniqueWorkerManager。
      */
     static ISocketService* CreateService(NssConfig nssConfig);
 }; // class SocketServiceFactory

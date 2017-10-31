@@ -21,11 +21,18 @@ public:
     ~UniqueWorkerManager();
 
     /**
-     * 获取一个worker。
+     * 获取worker handler但不增加其引用。
      * @param logicNpt
      * @return 查找到的worker。如果不存在则为nullptr。
      */
-    AFileEventHandler *GetWorkerEventHandler(net_peer_info_t logicNpt) override;
+    AFileEventHandler *GetWorkerEventHandler(const net_peer_info_t &logicNpt) override;
+
+    /**
+     * 获取worker handler并增加其一个引用。
+     * @param npt
+     * @return
+     */
+    AFileEventHandler *GetWorkerEventHandlerWithRef(const net_peer_info_t &logicNpt) override;
 
     /**
      * 放入一个worker。如果已经存在了会失败。
@@ -40,17 +47,17 @@ public:
      * @param realNpt
      * @return
      */
-    AFileEventHandler* RemoveWorkerEventHandler(net_peer_info_t logicNpt, net_peer_info_t realNpt) override;
+    AFileEventHandler* RemoveWorkerEventHandler(const net_peer_info_t &logicNpt, const net_peer_info_t &realNpt) override;
 
     /**
      * 本端主动断开时，需要调用这个API去移除handler。
      * @param logicNpt
      * @return
      */
-    virtual AFileEventHandler* RemoveWorkerEventHandler(net_peer_info_t logicNpt) override;
+    AFileEventHandler* RemoveWorkerEventHandler(const net_peer_info_t &logicNpt) override;
 
 private:
-    inline AFileEventHandler *lookup_worker(net_peer_info_t &logicNpt);
+    inline AFileEventHandler *lookup_worker(const net_peer_info_t &logicNpt);
 
 private:
     common::spin_lock_t                                              m_sl = UNLOCKED;

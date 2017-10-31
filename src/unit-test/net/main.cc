@@ -44,13 +44,11 @@ TEST(NetTest, ServerTest) {
     };
 
     std::shared_ptr<ccraft::net::net_addr_t> ssp_npt(nullptr);
-    std::shared_ptr<ccraft::net::INetStackWorkerManager> sspMgr1 =
-        std::shared_ptr<ccraft::net::INetStackWorkerManager>(new ccraft::net::UniqueWorkerManager());
     ccraft::net::NssConfig nc1 = {
         .sp = ccraft::net::SocketProtocal::Tcp,
         .sspNat = ssp_npt,
         .logicPort = 2210,
-        .sspMgr = sspMgr1,
+        .netMgrType = ccraft::net::NetStackWorkerMgrType::Unique,
         .memPool = ccraft::common::g_pMemPool,
         .msgCallbackHandler = std::bind(recv_msg, std::placeholders::_1),
         .connectTimeout = connTimeout
@@ -60,13 +58,11 @@ TEST(NetTest, ServerTest) {
     auto *tsm11 = new ccraft::test::TestSndMessage(ccraft::common::g_pMemPool, ccraft::net::net_peer_info_t(peerInfo), "1-1 ---client request: hello server!");
     EXPECT_EQ(netService1->SendMessage(tsm11), true);
 
-    std::shared_ptr<ccraft::net::INetStackWorkerManager> sspMgr2 =
-        std::shared_ptr<ccraft::net::INetStackWorkerManager>(new ccraft::net::UniqueWorkerManager());
     ccraft::net::NssConfig nc2 = {
         .sp = ccraft::net::SocketProtocal::Tcp,
         .sspNat = ssp_npt,
         .logicPort = 2210,
-        .sspMgr = sspMgr2,
+        .netMgrType = ccraft::net::NetStackWorkerMgrType::Unique,
         .memPool = ccraft::common::g_pMemPool,
         .msgCallbackHandler = std::bind(recv_msg, std::placeholders::_1),
         .connectTimeout = connTimeout
@@ -79,13 +75,11 @@ TEST(NetTest, ServerTest) {
     auto *tsm12 = new ccraft::test::TestSndMessage(ccraft::common::g_pMemPool, ccraft::net::net_peer_info_t(peerInfo), "1-2 ---client request: hello server!");
     EXPECT_EQ(netService1->SendMessage(tsm12), true);
 
-    std::shared_ptr<ccraft::net::INetStackWorkerManager> sspMgr3 =
-        std::shared_ptr<ccraft::net::INetStackWorkerManager>(new ccraft::net::UniqueWorkerManager());
     ccraft::net::NssConfig nc3 = {
         .sp = ccraft::net::SocketProtocal::Tcp,
         .sspNat = ssp_npt,
         .logicPort = 2211,
-        .sspMgr = sspMgr3,
+        .netMgrType = ccraft::net::NetStackWorkerMgrType::Unique,
         .memPool = ccraft::common::g_pMemPool,
         .msgCallbackHandler = std::bind(recv_msg, std::placeholders::_1),
         .connectTimeout = connTimeout

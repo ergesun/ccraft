@@ -30,11 +30,6 @@ class AEventManager;
 class NBSocketService : public ASocketService {
 public:
     /**
-     * TODO(sunchao): 入参改为右值，必须！否则会有易用性问题：内存控制，可以参考rpc单元测试main.cc的代码就清楚了。
-     * @param nlt 如果为空，则是为仅仅一个服务于client的服务，否则为server信息，会开启server的服务。
-     * @param sspMgr  worker的管理策略。
-     * @param memPool 内存池。
-     * @param sspMgr 所有权归本类所有，用户不可以保留。
      */
     explicit NBSocketService(NssConfig nssConfig);
 
@@ -66,7 +61,7 @@ public:
      * @param peer
      * @return
      */
-    bool Disconnect(net_peer_info_t peer) override;
+    bool Disconnect(const net_peer_info_t &peer) override;
 
 private:
     bool connect(net_peer_info_t &npt);
@@ -75,9 +70,10 @@ private:
     void on_finish(AFileEventHandler *handler);
 
 private:
-    NssConfig           m_conf;
-    AEventManager      *m_pEventManager = nullptr;
-    bool                m_bStopped = true;
+    NssConfig                                 m_conf;
+    std::shared_ptr<INetStackWorkerManager>   m_sspMgr;
+    AEventManager                            *m_pEventManager = nullptr;
+    bool                                      m_bStopped      = true;
 }; // class NBSocketService
 }  // namespace net
 } // namespace ccraft

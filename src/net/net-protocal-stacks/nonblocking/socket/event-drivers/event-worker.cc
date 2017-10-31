@@ -18,7 +18,7 @@ EventWorker::EventWorker(uint32_t maxEvents, NonBlockingEventModel m) {
     int fds[2];
     if (pipe(fds) < 0) {
         auto err = errno;
-        std::cerr << __func__ << " can't create notify pipe with errmsg = " << strerror(err) << std::endl;
+        LOGEFUN << " can't create notify pipe with errmsg = " << strerror(err);
         throw std::runtime_error("Create notify pipe failed!");
     }
 
@@ -27,14 +27,14 @@ EventWorker::EventWorker(uint32_t maxEvents, NonBlockingEventModel m) {
     auto r = common::CommonUtils::SetNonBlocking(m_notifyRecvFd);
     if (r < 0) {
         auto err = errno;
-        std::cerr << __func__ << " can't set notify pipe non-blocking with errmsg = " << strerror(err) << std::endl;
+        LOGEFUN << " can't set notify pipe non-blocking with errmsg = " << strerror(err);
         throw std::runtime_error("Set notify pipe non-blocking failed!");
     }
 
     r = common::CommonUtils::SetNonBlocking(m_notifySendFd);
     if (r < 0) {
         auto err = errno;
-        std::cerr << __func__ << " can't set notify pipe non-blocking with errmsg = " << strerror(err) << std::endl;
+        LOGEFUN << " can't set notify pipe non-blocking with errmsg = " << strerror(err);
         throw std::runtime_error("Set notify pipe non-blocking failed!");
     }
 
@@ -56,7 +56,7 @@ void EventWorker::Wakeup() {
     // wake up "event_wait"
     auto n = ::write(m_notifySendFd, &buf, sizeof(buf));
     if (n < 0) {
-        std::cerr << __func__ << " write notify pipe failed: " << strerror(errno) << std::endl;
+        LOGEFUN << " write notify pipe failed: " << strerror(errno);
         throw std::runtime_error("Write notify pipe failed!");
     }
 

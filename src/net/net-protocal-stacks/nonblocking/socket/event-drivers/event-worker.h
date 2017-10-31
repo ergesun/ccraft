@@ -90,6 +90,9 @@ public:
         return std::move(tmp);
     }
 
+    /**
+     * 一个字符的IO是原子的，无需加lock。
+     */
     void Wakeup();
 
 private:

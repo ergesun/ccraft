@@ -68,6 +68,10 @@ bool ANetStackMessageWorker::InsertMessage(SndMessage *m) {
     return m_bqMessages->TryPush(m);
 }
 
+void ANetStackMessageWorker::ClearMessage() {
+    m_bqMessages->Clear();
+}
+
 RcvMessage* ANetStackMessageWorker::getNewRcvMessage(common::MemPool *mp, net_peer_info_t peerInfo,
                                                      Message::Header h, common::Buffer *buffer) {
     auto rmMpo = mp->Get(sizeof(RcvMessage));

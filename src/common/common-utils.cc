@@ -26,7 +26,7 @@ int CommonUtils::SetNonBlocking(int fd) {
     int err;
     if ((opts = fcntl(fd, F_GETFL)) == -1) {
         err = errno;
-        std::cerr << "get fd opts err = " << err << std::endl;
+        LOGEFUN << "get fd opts err = " << err;
 
         return -1;
     }
@@ -34,7 +34,7 @@ int CommonUtils::SetNonBlocking(int fd) {
     opts = opts | O_NONBLOCK;
     if ((err = fcntl(fd, F_SETFL, opts)) == -1) {
         err = errno;
-        std::cerr << "set fd O_NONBLOCK err = " << err << std::endl;
+        LOGEFUN << "set fd O_NONBLOCK err = " << err;
         return -1;
     }
 
@@ -46,7 +46,7 @@ int CommonUtils::SetBlocking(int fd) {
     int err;
     if ((opts = fcntl(fd, F_GETFL)) == -1) {
         err = errno;
-        std::cerr << "get fd opts err = " << err << std::endl;
+        LOGEFUN << "get fd opts err = " << err;
 
         return -1;
     }
@@ -54,7 +54,7 @@ int CommonUtils::SetBlocking(int fd) {
     opts = opts & ~O_NONBLOCK;
     if (fcntl(fd, F_SETFL, opts) == -1) {
         err = errno;
-        std::cerr << "set fd BLOCKing err = " << err << std::endl;
+        LOGEFUN << "set fd BLOCKing err = " << err;
         return -1;
     }
 
