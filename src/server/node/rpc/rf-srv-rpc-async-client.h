@@ -11,11 +11,14 @@
 #define RpcAppendRfLog "AppendRfLog"
 #define RpcRequestVote "RequestVote"
 
+/**
+ * 返回值SentRet的msgId为INVALID_MSG_ID(0)表示发送失败，原因为发送队列满了。
+ */
 #define DefineRfNodeAsyncRpcWithPeer(RpcName)                                                        \
-    rpc::ARpcClient::SendRet RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer)
+    rpc::ARpcClient::SentRet RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer)
 
 namespace ccraft {
-namespace protocal {
+namespace protocol {
 class AppendRfLogResponse;
 class RequestVoteResponse;
 }

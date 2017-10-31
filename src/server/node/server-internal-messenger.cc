@@ -7,7 +7,7 @@
 
 #include "../../common/buffer.h"
 #include "../../net/socket-service-factory.h"
-#include "../../net/net-protocal-stacks/msg-worker-managers/unique-worker-manager.h"
+#include "../../net/net-protocol-stacks/msg-worker-managers/unique-worker-manager.h"
 #include "../../net/rcv-message.h"
 #include "../../rpc/common-def.h"
 
@@ -39,10 +39,10 @@ ServerInternalMessenger::ServerInternalMessenger(CreateServerInternalMessengerPa
         .tv_usec = (createParam.connectTimeout % 1000) * 1000
     };
     net::NssConfig nc = {
-        .sp = net::SocketProtocal::Tcp,
+        .sp = net::SocketProtocol::Tcp,
         .sspNat = sspNat,
         .logicPort = createParam.port,
-        .sspMgr = std::shared_ptr<net::INetStackWorkerManager>(new net::UniqueWorkerManager()),
+        .netMgrType = net::NetStackWorkerMgrType::Unique,
         .memPool = m_pMemPool,
         .msgCallbackHandler = std::bind(&INodeInternalRpcHandler::OnRecvRpcCallbackMsg, this, std::placeholders::_1),
         .connectTimeout = connTimeout
@@ -98,12 +98,12 @@ bool ServerInternalMessenger::Stop() {
     return true;
 }
 
-std::shared_ptr<protocal::AppendRfLogResponse> ServerInternalMessenger::AppendRfLogSync(rpc::SP_PB_MSG req,
+std::shared_ptr<protocol::AppendRfLogResponse> ServerInternalMessenger::AppendRfLogSync(rpc::SP_PB_MSG req,
                                                                                  net::net_peer_info_t &&peer) {
     return m_pSyncClient->AppendRfLog(req, std::move(peer));
 }
 
-rpc::ARpcClient::SendRet ServerInternalMessenger::AppendRfLogAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
+rpc::ARpcClient::SentRet ServerInternalMessenger::AppendRfLogAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
     return m_pAsyncClient->AppendRfLog(req, std::move(peer));
 }
 
@@ -111,12 +111,12 @@ rpc::SP_PB_MSG ServerInternalMessenger::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
     return m_pNodeINRpcHandler->OnAppendRfLog(sspMsg);
 }
 
-std::shared_ptr<protocal::RequestVoteResponse> ServerInternalMessenger::RequestVoteSync(rpc::SP_PB_MSG req,
+std::shared_ptr<protocol::RequestVoteResponse> ServerInternalMessenger::RequestVoteSync(rpc::SP_PB_MSG req,
                                                                                  net::net_peer_info_t &&peer) {
     return m_pSyncClient->RequestVote(req, std::move(peer));
 }
 
-rpc::ARpcClient::SendRet ServerInternalMessenger::RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
+rpc::ARpcClient::SentRet ServerInternalMessenger::RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
     return m_pAsyncClient->RequestVote(req, std::move(peer));
 }
 

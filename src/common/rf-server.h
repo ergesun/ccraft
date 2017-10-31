@@ -46,11 +46,11 @@ struct RfServer {
     }
 
     net::net_peer_info_t GetAddrForServer() const {
-        return net::net_peer_info_t(m_sAddr, m_iPortForServer, net::SocketProtocal::Tcp);
+        return net::net_peer_info_t(m_sAddr, m_iPortForServer, net::SocketProtocol::Tcp);
     }
 
     net::net_peer_info_t GetAddrForClient() const {
-        return net::net_peer_info_t(m_sAddr, m_iPortForClient, net::SocketProtocal::Tcp);
+        return net::net_peer_info_t(m_sAddr, m_iPortForClient, net::SocketProtocol::Tcp);
     }
 
     uint32_t              m_iId              = 0;

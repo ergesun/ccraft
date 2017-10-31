@@ -23,7 +23,7 @@ class ISocketService;
 class NotifyMessage;
 }
 
-namespace protocal {
+namespace protocol {
 class AppendRfLogResponse;
 class RequestVoteResponse;
 }
@@ -82,12 +82,12 @@ public:
     bool Start() override;
     bool Stop() override;
 
-    std::shared_ptr<protocal::AppendRfLogResponse> AppendRfLogSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
-    rpc::ARpcClient::SendRet AppendRfLogAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    std::shared_ptr<protocol::AppendRfLogResponse> AppendRfLogSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    rpc::ARpcClient::SentRet AppendRfLogAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
 
-    std::shared_ptr<protocal::RequestVoteResponse> RequestVoteSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
-    rpc::ARpcClient::SendRet RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    std::shared_ptr<protocol::RequestVoteResponse> RequestVoteSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    rpc::ARpcClient::SentRet RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
 
     void OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) override;

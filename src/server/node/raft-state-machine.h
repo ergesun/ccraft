@@ -13,7 +13,7 @@
 #include "iservice.h"
 
 namespace ccraft {
-namespace protocal {
+namespace protocol {
     class StateMachineCommand;
 }
 namespace server {
@@ -29,7 +29,7 @@ public:
     bool Start() override;
     bool Stop() override;
 
-    void Apply(std::vector<protocal::StateMachineCommand*> commands);
+    void Apply(std::vector<protocol::StateMachineCommand*> commands);
     std::string GetValue(const std::string &key);
 
 private:

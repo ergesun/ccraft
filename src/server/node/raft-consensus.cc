@@ -82,8 +82,8 @@ bool RaftConsensus::Stop() {
 }
 
 rpc::SP_PB_MSG RaftConsensus::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
-    auto appendRfLogRequest = dynamic_cast<protocal::AppendRfLogRequest*>(sspMsg.get());
-    auto response = new protocal::AppendRfLogResponse();
+    auto appendRfLogRequest = dynamic_cast<protocol::AppendRfLogRequest*>(sspMsg.get());
+    auto response = new protocol::AppendRfLogResponse();
     response->set_term(1111);
     response->set_success(true);
 
@@ -91,11 +91,17 @@ rpc::SP_PB_MSG RaftConsensus::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
 }
 
 rpc::SP_PB_MSG RaftConsensus::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
-    auto response = new protocal::RequestVoteResponse();
+    auto response = new protocol::RequestVoteResponse();
     response->set_term(1111);
-    response->set_success(true);
+    response->set_votegranted(true);
 
     return rpc::SP_PB_MSG(response);
+}
+
+void RaftConsensus::OnMessageSent(rpc::ARpcClient::SentRet &&sentRet) {
+    if (INVALID_MSG_ID == sentRet.msgId) {
+        LOGWFUN << "send rpc(id = " << sentRet.handlerId << ") to " << sentRet.peer << " failed because send msg queue is full!";
+    }
 }
 
 void RaftConsensus::OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) {
@@ -163,7 +169,7 @@ void RaftConsensus::initialize() {
         common::Buffer b;
 
         b.Refresh(startPtr, endPtr, startPtr, endPtr, nullptr);
-        auto rs = new protocal::RaftState();
+        auto rs = new protocol::RaftState();
         common::ProtoBufUtils::Deserialize(&b, rs);
         m_iCurrentTerm = rs->currentterm();
         m_iVoteFor = rs->votedfor();
@@ -178,7 +184,7 @@ void RaftConsensus::save_rf_state() {
 
     // write state.
     // mpo will be Putted in Buffer 'b'.
-    auto rs = new protocal::RaftState();
+    auto rs = new protocol::RaftState();
 
     rs->set_currentterm(m_iCurrentTerm);
     rs->set_votedfor(m_iVoteFor);
@@ -198,7 +204,7 @@ void RaftConsensus::start_new_election() {
     LOGITAG;
     m_roleType = NodeRoleType::Candidate;
     ++m_iCurrentTerm;
-    if (m_iVoteFor == m_iMyId) {
+    if (m_iVoteFor != m_iMyId) {
         save_rf_state();
     }
 
@@ -219,7 +225,7 @@ void RaftConsensus::subscribe_leader_hb_timer_tick() {
 
 void RaftConsensus::broadcast_request_vote(const std::map<uint32_t, common::RfServer> &otherSrvs) {
     auto lastRfLogEntry = m_pRfLogger->GetLastEntry();
-    auto *pq = new protocal::RequestVoteRequest();
+    auto *pq = new protocol::RequestVoteRequest();
     pq->set_term(m_iCurrentTerm);
     pq->set_candidateid(m_iMyId);
     pq->set_lastlogterm(lastRfLogEntry->term());

@@ -9,7 +9,7 @@
 #include "../common/codec-utils.h"
 #include "../common/buffer.h"
 #include "../net/socket-service-factory.h"
-#include "../net/net-protocal-stacks/msg-worker-managers/unique-worker-manager.h"
+#include "../net/net-protocol-stacks/msg-worker-managers/unique-worker-manager.h"
 #include "../net/rcv-message.h"
 
 #include "request.h"
@@ -89,12 +89,12 @@ void ARpcClient::finishRegisterRpc() {
     hw_rw_memory_barrier();
 }
 
-ARpcClient::SendRet ARpcClient::sendMessage(std::string &&rpcName, SP_PB_MSG msg, net::net_peer_info_t &&peer) {
+ARpcClient::SentRet ARpcClient::sendMessage(std::string &&rpcName, SP_PB_MSG msg, net::net_peer_info_t &&peer) {
     if (m_hmapRpcs.end() == m_hmapRpcs.find(rpcName)) {
         throw BadRpcException((uint16_t)RpcCode::ErrorNoRegisteredRpc, std::move(rpcName));
     }
 
-    SendRet sr;
+    SentRet sr;
     net::net_peer_info_t rcPeer = peer;
     auto handlerId = m_hmapRpcs[rpcName];
     auto rr = new RpcRequest(m_pMemPool, std::move(peer), handlerId, std::move(msg));

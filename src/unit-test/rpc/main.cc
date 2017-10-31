@@ -13,9 +13,9 @@
 #include "../../rpc/common-def.h"
 #include "../../net/rcv-message.h"
 #include "../../common/buffer.h"
-#include "../../net/net-protocal-stacks/inet-stack-worker-manager.h"
+#include "../../net/net-protocol-stacks/inet-stack-worker-manager.h"
 #include "../../net/socket-service-factory.h"
-#include "../../net/net-protocal-stacks/msg-worker-managers/unique-worker-manager.h"
+#include "../../net/net-protocol-stacks/msg-worker-managers/unique-worker-manager.h"
 #include "../../codegen/node-raft.pb.h"
 #include "../../server/node/rpc/rf-srv-rpc-sync-client.h"
 
@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
     };
 
     ccraft::net::NssConfig nc = {
-        .sp = ccraft::net::SocketProtocal::Tcp,
+        .sp = ccraft::net::SocketProtocol::Tcp,
         .sspNat = sspNat,
         .logicPort = TEST_PORT,
         .netMgrType = ccraft::net::NetStackWorkerMgrType::Unique,
@@ -85,10 +85,10 @@ TEST(RpcTest, ClientServerTest) {
             .addr = "localhost",
             .port = TEST_PORT
         },
-        .sp = ccraft::net::SocketProtocal::Tcp
+        .sp = ccraft::net::SocketProtocol::Tcp
     };
 
-    auto appendRfLogRequest = new ccraft::protocal::AppendRfLogRequest();
+    auto appendRfLogRequest = new ccraft::protocol::AppendRfLogRequest();
     appendRfLogRequest->set_term(1234);
     appendRfLogRequest->set_leaderid(1);
     appendRfLogRequest->set_prevlogindex(22);
@@ -97,23 +97,23 @@ TEST(RpcTest, ClientServerTest) {
     auto entry = appendRfLogRequest->mutable_entries(0);
     entry->set_term(1233);
     entry->set_index(25);
-    entry->set_type(ccraft::protocal::RfLogEntryType::CONFIGURATION);
+    entry->set_type(ccraft::protocol::RfLogEntryType::CONFIGURATION);
     entry->set_data("test entry data!");
 
     auto tmpPeer = peer;
-    std::shared_ptr<ccraft::protocal::AppendRfLogResponse> appendRfLogSspResp;
+    std::shared_ptr<ccraft::protocol::AppendRfLogResponse> appendRfLogSspResp;
     EXPECT_NO_THROW(appendRfLogSspResp = g_pClient->AppendRfLog(ccraft::rpc::SP_PB_MSG(appendRfLogRequest), std::move(tmpPeer)));
     EXPECT_EQ(appendRfLogSspResp->term(), 1111);
     EXPECT_EQ(appendRfLogSspResp->success(), true);
     std::cout << "server resp: term = " << appendRfLogSspResp->term() << ", ok = " << appendRfLogSspResp->success() << std::endl;
 
-    auto reqVoteRequest = new ccraft::protocal::RequestVoteRequest();
+    auto reqVoteRequest = new ccraft::protocol::RequestVoteRequest();
     reqVoteRequest->set_term(1234);
     reqVoteRequest->set_candidateid(1);
     reqVoteRequest->set_lastlogindex(22);
     reqVoteRequest->set_lastlogterm(1233);
 
-    std::shared_ptr<ccraft::protocal::RequestVoteResponse> reqVoteSspResp;
+    std::shared_ptr<ccraft::protocol::RequestVoteResponse> reqVoteSspResp;
     EXPECT_NO_THROW(reqVoteSspResp = g_pClient->RequestVote(ccraft::rpc::SP_PB_MSG(reqVoteRequest), std::move(tmpPeer = peer)));
     EXPECT_EQ(reqVoteSspResp->term(), 1111);
     EXPECT_EQ(reqVoteSspResp->votegranted(), true);

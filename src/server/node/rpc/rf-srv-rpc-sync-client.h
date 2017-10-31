@@ -19,10 +19,10 @@
 #define RpcRequestVote "RequestVote"
 
 #define DefineRfNodeSyncRpcWithPeer(RpcName)                                                                 \
-    std::shared_ptr<protocal::RpcName##Response> RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer)
+    std::shared_ptr<protocol::RpcName##Response> RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer)
 
 namespace ccraft {
-namespace protocal {
+namespace protocol {
 class AppendRfLogResponse;
 class RequestVoteResponse;
 }

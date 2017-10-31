@@ -11,11 +11,11 @@
 using namespace google::protobuf;
 
 namespace ccraft {
-namespace protocal {
+namespace protocol {
     class RfLogEntry;
 }
 
-using protocal::RfLogEntry;
+using protocol::RfLogEntry;
 namespace rflog {
 class IRfLogger {
 public:

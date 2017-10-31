@@ -15,7 +15,7 @@
 using ccraft::rpc::RpcCode;
 
 #define ImplRfNodeAsyncRpcWithPeer(RpcName)                                                                              \
-    rpc::ARpcClient::SendRet RfSrvInternalRpcClientAsync::RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {     \
+    rpc::ARpcClient::SentRet RfSrvInternalRpcClientAsync::RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {     \
         return sendMessage(#RpcName, std::move(req), std::move(peer));                                                   \
     }
 

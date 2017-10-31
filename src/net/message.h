@@ -28,6 +28,7 @@
  * 那么就要开启这个宏以保证消息序号的正确性。当然这块实现可以改为开启后不加ts而是用uint64_t代替以节省流量。
  */
 #if WITH_MSG_ID
+    #define INVALID_MSG_ID 0
     //#define BULK_MSG_ID 1 // 开启此宏则会使用无论如何都不可能重复的id机制，但是header占比更大。
     #define BIG_MSG_ID 1    // 开启此宏则会使用uint64_t作为id，用户超时机制的作用下极为不可能重复。
     //#define NORMAL_MSG_ID 1 // 默认为此种形式。只要上面两个xxx_xxx_ID的宏是关闭的，则为此uint32_t作为id，用户超时机制下基本不可能重复。

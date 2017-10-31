@@ -39,7 +39,7 @@ bool RfStateMachine::Stop() {
     return true;
 }
 
-void RfStateMachine::Apply(std::vector<protocal::StateMachineCommand*> commands) {
+void RfStateMachine::Apply(std::vector<protocol::StateMachineCommand*> commands) {
     for (auto command : commands) {
         m_mapKVs[command->key()] = command->value();
     }

@@ -6,15 +6,16 @@
 #include "../../codegen/node-raft.pb.h"
 #include "../../common/server-gflags-config.h"
 
+#include "raft-consensus.h"
 #include "server-internal-messenger.h"
 
 #include "server-rpc-service.h"
 
 namespace ccraft {
 namespace server {
-ServerRpcService::ServerRpcService(uint16_t port, uint16_t rpcThreadsCnt, INodeInternalRpcHandler *internalRpcHandler) :
-    m_pNodeInternalRpcHandler(internalRpcHandler) {
-    assert(m_pNodeInternalRpcHandler);
+ServerRpcService::ServerRpcService(uint16_t port, uint16_t rpcThreadsCnt, RaftConsensus *pRaftConsensus) :
+    m_pRaftConsensus(pRaftConsensus) {
+    assert(m_pRaftConsensus);
     common::cctime_t clientWaitTimeOut = {
         .sec = FLAGS_internal_rpc_client_wait_timeout_secs,
         .nsec = FLAGS_internal_rpc_client_wait_timeout_nsecs
@@ -51,12 +52,12 @@ bool ServerRpcService::Stop() {
     return m_pNodeInternalMessenger->Stop();
 }
 
-std::shared_ptr<protocal::AppendRfLogResponse> ServerRpcService::AppendRfLogSync(rpc::SP_PB_MSG req,
+std::shared_ptr<protocol::AppendRfLogResponse> ServerRpcService::AppendRfLogSync(rpc::SP_PB_MSG req,
                                                                                         net::net_peer_info_t &&peer) {
     return m_pNodeInternalMessenger->AppendRfLogSync(req, std::move(peer));
 }
 
-rpc::ARpcClient::SendRet ServerRpcService::AppendRfLogAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
+rpc::ARpcClient::SentRet ServerRpcService::AppendRfLogAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
     return m_pNodeInternalMessenger->AppendRfLogAsync(req, std::move(peer));
 }
 
@@ -64,14 +65,15 @@ rpc::SP_PB_MSG ServerRpcService::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
     return m_pNodeInternalMessenger->OnAppendRfLog(sspMsg);
 }
 
-std::shared_ptr<protocal::RequestVoteResponse> ServerRpcService::RequestVoteSync(rpc::SP_PB_MSG req,
+std::shared_ptr<protocol::RequestVoteResponse> ServerRpcService::RequestVoteSync(rpc::SP_PB_MSG req,
                                                                                 net::net_peer_info_t &&peer) {
     return m_pNodeInternalMessenger->RequestVoteSync(req, std::move(peer));
 }
 
 void ServerRpcService::RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
     static auto send_req_vote = [this](RpcTask rt) {
-        rt.pSim->RequestVoteAsync(rt.msg, std::move(rt.peer));
+        auto sr = rt.pSim->RequestVoteAsync(rt.msg, std::move(rt.peer));
+        m_pRaftConsensus->OnMessageSent(std::move(sr));
     };
 
     RpcTask rt = {
@@ -88,7 +90,7 @@ rpc::SP_PB_MSG ServerRpcService::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
 }
 
 void ServerRpcService::OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) {
-    m_pNodeInternalRpcHandler->OnRecvRpcCallbackMsg(sspNM);
+    m_pRaftConsensus->OnRecvRpcCallbackMsg(sspNM);
 }
 } // namespace server
 } // namespace ccraft

@@ -21,7 +21,7 @@
 using ccraft::rpc::RpcCode;
 
 #define ImplRfNodeSyncRpcWithPeer(RpcName)                                                              \
-std::shared_ptr<protocal::RpcName##Response>                                                            \
+std::shared_ptr<protocol::RpcName##Response>                                                            \
     RfSrvInternalRpcClientSync::RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {              \
         auto ret = sendMessage(#RpcName, std::move(req), std::move(peer));                              \
         if (0 == ret.msgId) {                                                                           \
@@ -35,11 +35,11 @@ std::shared_ptr<protocal::RpcName##Response>                                    
         auto sspNM = recv_message(ctx);                                                                 \
         auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());                              \
         auto rm = mnm->GetContent();                                                                    \
-        auto RpcName##Resp__Impl_DEF_TMP = new protocal::RpcName##Response();                           \
+        auto RpcName##Resp__Impl_DEF_TMP = new protocol::RpcName##Response();                           \
         auto buf = rm->GetDataBuffer();                                                                 \
         buf->MoveHeadBack(sizeof(uint16_t));                                                            \
         common::ProtoBufUtils::Deserialize(buf, RpcName##Resp__Impl_DEF_TMP);                           \
-        return std::shared_ptr<protocal::RpcName##Response>(RpcName##Resp__Impl_DEF_TMP);               \
+        return std::shared_ptr<protocol::RpcName##Response>(RpcName##Resp__Impl_DEF_TMP);               \
     }
 
 namespace ccraft {

@@ -11,7 +11,7 @@ using namespace std::placeholders;
 
 namespace ccraft {
 namespace net {
-PosixEventManager::PosixEventManager(SocketProtocal sp, std::shared_ptr<net_addr_t> sspNat, common::MemPool *memPool, uint32_t maxEvents,
+PosixEventManager::PosixEventManager(SocketProtocol sp, std::shared_ptr<net_addr_t> sspNat, common::MemPool *memPool, uint32_t maxEvents,
                                      uint32_t connWorkersCnt, ConnectHandler stackConnectHandler, ConnectFunc logicConnectHandler,
                                      FinishHandler finishHandler, NotifyMessageCallbackHandler msgCallbackHandler)  :
     AEventManager(memPool, maxEvents), m_sp(sp), m_sspNat(std::move(sspNat)), m_iConnWorkersCnt(connWorkersCnt) {
@@ -33,7 +33,7 @@ bool PosixEventManager::Start(NonBlockingEventModel m) {
 
     m_bStopped = false;
     hw_rw_memory_barrier();
-    if (SocketProtocal::Tcp == m_sp) {
+    if (SocketProtocol::Tcp == m_sp) {
         if (m_sspNat.get()) {
             auto ew = new EventWorker(m_iMaxEvents, m);
             m_pServerEventHandler = new PosixTcpServerEventHandler(ew, m_sspNat.get(), m_onStackConnect,

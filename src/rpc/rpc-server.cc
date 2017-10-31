@@ -6,7 +6,7 @@
 #include <glog/logging.h>
 
 #include "../net/socket-service-factory.h"
-#include "../net/net-protocal-stacks/msg-worker-managers/unique-worker-manager.h"
+#include "../net/net-protocol-stacks/msg-worker-managers/unique-worker-manager.h"
 #include "../net/rcv-message.h"
 #include "../common/buffer.h"
 #include "../common/protobuf-utils.h"

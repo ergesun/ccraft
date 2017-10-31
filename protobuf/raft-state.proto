@@ -1,7 +1,7 @@
 syntax="proto3";
 //option cc_generic_services = true;
 
-package ccraft.protocal;
+package ccraft.protocol;
 
 message RaftState {
     uint32 currentTerm = 1;

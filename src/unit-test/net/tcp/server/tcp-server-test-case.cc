@@ -12,7 +12,7 @@
 #include "../../../../common/mem-pool.h"
 
 #include "tcp-server-test-case.h"
-#include "../../../../net/net-protocal-stacks/msg-worker-managers/unique-worker-manager.h"
+#include "../../../../net/net-protocol-stacks/msg-worker-managers/unique-worker-manager.h"
 
 namespace ccraft {
 namespace test {
@@ -28,7 +28,7 @@ void TcpServerTest::Run() {
         .tv_usec = 100 * 1000
     };
     net::NssConfig nc = {
-        .sp = ccraft::net::SocketProtocal::Tcp,
+        .sp = ccraft::net::SocketProtocol::Tcp,
         .sspNat = ssp_npt,
         .logicPort = 2210,
         .netMgrType = ccraft::net::NetStackWorkerMgrType::Unique,

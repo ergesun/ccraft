@@ -1,7 +1,7 @@
 syntax="proto3";
 //option cc_generic_services = true;
 
-package ccraft.protocal;
+package ccraft.protocol;
 
 // 当前只实现最简单的赋值命令，有时间扩展为Tree。甚至把command加个type做成可插拔的各种命令。
 message StateMachineCommand {

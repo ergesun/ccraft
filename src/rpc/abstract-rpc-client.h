@@ -44,15 +44,15 @@ namespace rpc {
 */
 class ARpcClient : public IService, public IMessageHandler {
 public:
-    struct SendRet {
-        SendRet() = default;
-        SendRet(SendRet &&sr) noexcept {
+    struct SentRet {
+        SentRet() = default;
+        SentRet(SentRet &&sr) noexcept {
             peer = std::move(sr.peer);
             handlerId = sr.handlerId;
             msgId = sr.msgId;
         }
 
-        SendRet(net::net_peer_info_t &&p, uint16_t h, uint64_t m) : peer(std::move(p)), handlerId(h), msgId(m) {}
+        SentRet(net::net_peer_info_t &&p, uint16_t h, uint64_t m) : peer(std::move(p)), handlerId(h), msgId(m) {}
 
         net::net_peer_info_t                 peer;
         uint16_t                             handlerId = 0;
@@ -80,9 +80,9 @@ protected:
     /**
      * @param rpcName
      * @param msg
-     * @return SendRet::msgId如果是0则失败，否则成功。
+     * @return SentRet::msgId如果是INVALID_MSG_ID(0)则失败，否则成功。
      */
-    SendRet sendMessage(std::string &&rpcName, std::shared_ptr<google::protobuf::Message> msg, net::net_peer_info_t &&peer);
+    SentRet sendMessage(std::string &&rpcName, std::shared_ptr<google::protobuf::Message> msg, net::net_peer_info_t &&peer);
 
     virtual bool onStart() = 0;
     virtual bool onStop() = 0;

@@ -9,8 +9,8 @@
 #include "./tcp/server/tcp-server-test-case.h"
 #include "../../net/common-def.h"
 #include "../../common/mem-pool.h"
-#include "../../net/net-protocal-stacks/inet-stack-worker-manager.h"
-#include "../../net/net-protocal-stacks/msg-worker-managers/unique-worker-manager.h"
+#include "../../net/net-protocol-stacks/inet-stack-worker-manager.h"
+#include "../../net/net-protocol-stacks/msg-worker-managers/unique-worker-manager.h"
 #include "../../net/socket-service-factory.h"
 #include "../../net/rcv-message.h"
 #include "../../common/buffer.h"
@@ -35,7 +35,7 @@ TEST(NetTest, ServerTest) {
             .addr = "localhost",
             .port = 2210
         },
-        .sp = ccraft::net::SocketProtocal::Tcp
+        .sp = ccraft::net::SocketProtocol::Tcp
     };
 
     timeval connTimeout = {
@@ -45,7 +45,7 @@ TEST(NetTest, ServerTest) {
 
     std::shared_ptr<ccraft::net::net_addr_t> ssp_npt(nullptr);
     ccraft::net::NssConfig nc1 = {
-        .sp = ccraft::net::SocketProtocal::Tcp,
+        .sp = ccraft::net::SocketProtocol::Tcp,
         .sspNat = ssp_npt,
         .logicPort = 2210,
         .netMgrType = ccraft::net::NetStackWorkerMgrType::Unique,
@@ -59,7 +59,7 @@ TEST(NetTest, ServerTest) {
     EXPECT_EQ(netService1->SendMessage(tsm11), true);
 
     ccraft::net::NssConfig nc2 = {
-        .sp = ccraft::net::SocketProtocal::Tcp,
+        .sp = ccraft::net::SocketProtocol::Tcp,
         .sspNat = ssp_npt,
         .logicPort = 2210,
         .netMgrType = ccraft::net::NetStackWorkerMgrType::Unique,
@@ -76,7 +76,7 @@ TEST(NetTest, ServerTest) {
     EXPECT_EQ(netService1->SendMessage(tsm12), true);
 
     ccraft::net::NssConfig nc3 = {
-        .sp = ccraft::net::SocketProtocal::Tcp,
+        .sp = ccraft::net::SocketProtocol::Tcp,
         .sspNat = ssp_npt,
         .logicPort = 2211,
         .netMgrType = ccraft::net::NetStackWorkerMgrType::Unique,

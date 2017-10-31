@@ -7,9 +7,12 @@
 #define CCRAFT_NET_CORE_COMMON_DEF_H
 
 #include <string>
+#include <iostream>
 #include <sstream>
 
 #include "../common/hash-algorithms.h"
+
+using std::ostream;
 
 namespace ccraft {
 namespace net {
@@ -18,7 +21,7 @@ enum class NonBlockingEventModel {
     Posix
 };
 
-enum class SocketProtocal {
+enum class SocketProtocol {
     None = 0,
     Tcp,
     Udp
@@ -53,19 +56,19 @@ typedef struct net_addr_s {
 
 typedef struct net_peer_info_s {
     net_addr_t nat;
-    SocketProtocal sp;
+    SocketProtocol sp;
 
     net_peer_info_s() {
-        sp = SocketProtocal::None;
+        sp = SocketProtocol::None;
     }
 
-    net_peer_info_s(const net_addr_t &n, SocketProtocal s) : nat(n), sp(s) {}
-    net_peer_info_s(net_addr_t &&n, SocketProtocal s) : nat(std::move(n)), sp(s) {}
-    net_peer_info_s(const std::string &addr, uint16_t port, SocketProtocal s) {
+    net_peer_info_s(const net_addr_t &n, SocketProtocol s) : nat(n), sp(s) {}
+    net_peer_info_s(net_addr_t &&n, SocketProtocol s) : nat(std::move(n)), sp(s) {}
+    net_peer_info_s(const std::string &addr, uint16_t port, SocketProtocol s) {
         nat = net_addr_t(addr, port);
         sp = s;
     }
-    net_peer_info_s(std::string &&addr, uint16_t port, SocketProtocal s) {
+    net_peer_info_s(std::string &&addr, uint16_t port, SocketProtocol s) {
         nat = net_addr_t(std::move(addr), port);
         sp = s;
     }
@@ -88,10 +91,17 @@ typedef struct net_peer_info_s {
 
         return *this;
     }
+
+    friend ostream& operator<<(ostream &os, const net_peer_info_s &peer);
 } net_peer_info_t, net_local_info_t;
 
 inline bool operator==(const net_peer_info_t &a, const net_peer_info_t &b) {
     return a.sp == b.sp && a.nat.port == b.nat.port && (0 == a.nat.addr.compare(b.nat.addr));
+}
+
+inline ostream& operator<<(ostream &os, const net_peer_info_s &peer){
+    os << "peer{protocol = " << int32_t(peer.sp) << ", addr = " <<  peer.nat.addr.c_str() << ":" << peer.nat.port << "}";
+    return os;
 }
 } // namespace net
 } // namespace ccraft

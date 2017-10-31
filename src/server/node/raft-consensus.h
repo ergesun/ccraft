@@ -15,6 +15,7 @@
 #include "../../common/random.h"
 #include "../../common/rf-server.h"
 
+#include "../../rpc/abstract-rpc-client.h"
 #include "iserver-internal-rpc-handler.h"
 
 #define RFLOG_DIR          "rflogs"
@@ -43,6 +44,7 @@ public:
     // INodeInternalRpcHandler IF
     rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
     rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
+    void OnMessageSent(rpc::ARpcClient::SentRet &&sentRet);
     void OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
 private:
