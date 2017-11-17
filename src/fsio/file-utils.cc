@@ -9,21 +9,22 @@
 #include <fstream>
 #include <dirent.h>
 
+#include "../common/common-def.h"
+
 #include "file-utils.h"
-#include "common-def.h"
 
 using std::ifstream;
 using std::stringstream;
 
 namespace ccraft {
-namespace common {
+namespace fsio {
 int FileUtils::CreateDir(const char *dir, __mode_t mode) {
     int err;
     struct stat dir_stat;
     // 检查生成文件夹
     if (0 == stat(dir, &dir_stat)) { // 如果dir文件(夹)存在
         if (!S_ISDIR(dir_stat.st_mode)) { // 如果不是文件夹
-            LOGEFUN << "CreateDir " << dir << " failed because there is a file named it.";
+            LOGEFUN << "CreateDir " << dir << " failed because there is a file namfsioed it.";
             return -1;
         }
     } else { // 如果dir文件(夹)不存在，则创建文件夹

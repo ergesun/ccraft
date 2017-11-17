@@ -25,7 +25,8 @@ int main(int argc, char **argv) {
 
     auto res = RUN_ALL_TESTS();
 
-    getchar();
+    sleep(6);
+    //getchar();
     return res;
 }
 

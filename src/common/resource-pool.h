@@ -11,9 +11,10 @@
 #include <cassert>
 
 #include "common-def.h"
-#include "spin-lock.h"
+#include "../ccsys/spin-lock.h"
 
 namespace ccraft {
+using namespace ccsys;
 namespace common {
 /**
  *

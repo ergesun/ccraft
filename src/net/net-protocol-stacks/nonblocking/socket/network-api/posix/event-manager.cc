@@ -91,7 +91,7 @@ bool PosixEventManager::Stop() {
 
 void PosixEventManager::AddEvent(AFileEventHandler *socketEventHandler, int cur_mask, int mask) {
     {
-        common::SpinLock l(&m_slSelectEvents);
+        ccsys::SpinLock l(&m_slSelectEvents);
         /**
          * 轮询各个非listen的worker。
          */

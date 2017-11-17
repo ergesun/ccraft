@@ -6,7 +6,7 @@
 #include "random.h"
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 const int32_t Random::Range::INVALID_RANGE = -1;
 
 int32_t Random::GetNew() {

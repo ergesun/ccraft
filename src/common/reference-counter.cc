@@ -4,7 +4,7 @@
  */
 
 #include <atomic>
-#include "common-def.h"
+#include "../ccsys/gcc-buildin.h"
 
 #include "reference-counter.h"
 

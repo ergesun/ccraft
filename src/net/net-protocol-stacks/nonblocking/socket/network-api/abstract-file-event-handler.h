@@ -6,6 +6,7 @@
 #ifndef CCRAFT_NET_CORE_SOCKETAPI_SOCKET_EVENT_HANDLER_H
 #define CCRAFT_NET_CORE_SOCKETAPI_SOCKET_EVENT_HANDLER_H
 
+#include "../../../../../ccsys/gcc-buildin.h"
 #include "../../../../../common/common-def.h"
 #include "../../../../../common/reference-counter.h"
 

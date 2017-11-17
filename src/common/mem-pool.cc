@@ -6,8 +6,9 @@
 #include <cassert>
 #include <cmath>
 
-#include "mem-pool.h"
 #include "common-utils.h"
+
+#include "mem-pool.h"
 
 namespace ccraft {
 namespace common {

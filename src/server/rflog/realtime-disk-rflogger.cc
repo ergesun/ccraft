@@ -7,8 +7,8 @@
 #include <unistd.h>
 #include <sys/mman.h>
 
-#include "../../common/file-utils.h"
-#include "../../common/io-utils.h"
+#include "../../fsio/file-utils.h"
+#include "../../fsio/io-utils.h"
 #include "../../common/codec-utils.h"
 #include "../../common/buffer.h"
 #include "../../common/protobuf-utils.h"
@@ -121,9 +121,9 @@ void RtDiskRfLogger::Sync() {
 }
 
 void RtDiskRfLogger::initialize() {
-    if (!common::FileUtils::Exist(m_sLogFilePath)) {
+    if (!fsio::FileUtils::Exist(m_sLogFilePath)) {
         LOGDFUN2("create rflog file ", m_sLogFilePath.c_str());
-        if (-1 == (m_iFd = common::FileUtils::Open(m_sLogFilePath, O_WRONLY, O_CREAT, 0644))) {
+        if (-1 == (m_iFd = fsio::FileUtils::Open(m_sLogFilePath, O_WRONLY, O_CREAT, 0644))) {
             auto err = errno;
             LOGFFUN << "create rflog file " << m_sLogFilePath.c_str() << " failed with errmsg " << strerror(err);
         }
@@ -133,13 +133,13 @@ void RtDiskRfLogger::initialize() {
         ByteOrderUtils::WriteUInt32(header, RFLOG_MAGIC_NO);
         WriteFileFullyWithFatalLOG(m_iFd, (char*)header, RFLOG_MAGIC_NO_LEN, m_sLogFilePath.c_str());
     } else {
-        if (-1 == (m_iFd = common::FileUtils::Open(m_sLogFilePath, O_RDWR, 0, 0))) {
+        if (-1 == (m_iFd = fsio::FileUtils::Open(m_sLogFilePath, O_RDWR, 0, 0))) {
             auto err = errno;
             LOGFFUN << "open rflog file " << m_sLogFilePath.c_str() << " failed with errmsg " << strerror(err);
         }
 
         // 1. check if file is empty.
-        auto fileSize = common::FileUtils::GetFileSize(m_iFd);
+        auto fileSize = fsio::FileUtils::GetFileSize(m_iFd);
         if (-1 == fileSize) {
             auto err = errno;
             LOGFFUN << "get file size for " << m_sLogFilePath.c_str() << " failed with errmsg " << strerror(err);

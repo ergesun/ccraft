@@ -10,7 +10,7 @@
 namespace ccraft {
 namespace net {
 UniqueWorkerManager::~UniqueWorkerManager() {
-    common::SpinLock l(&m_sl);
+    ccsys::SpinLock l(&m_sl);
     for (auto p : m_hmap_workers) {
         DELETE_PTR(p.second);
     }
@@ -20,12 +20,12 @@ UniqueWorkerManager::~UniqueWorkerManager() {
 }
 
 AFileEventHandler* UniqueWorkerManager::GetWorkerEventHandler(const net_peer_info_t &logicNpt) {
-    common::SpinLock l(&m_sl);
+    ccsys::SpinLock l(&m_sl);
     return lookup_worker(logicNpt);
 }
 
 AFileEventHandler* UniqueWorkerManager::GetWorkerEventHandlerWithRef(const net_peer_info_t &logicNpt) {
-    common::SpinLock l(&m_sl);
+    ccsys::SpinLock l(&m_sl);
     auto handler = lookup_worker(logicNpt);
     if (handler) {
         handler->AddRef();
@@ -35,7 +35,7 @@ AFileEventHandler* UniqueWorkerManager::GetWorkerEventHandlerWithRef(const net_p
 }
 
 bool UniqueWorkerManager::PutWorkerEventHandler(AFileEventHandler *workerEventHandler) {
-    common::SpinLock l(&m_sl);
+    ccsys::SpinLock l(&m_sl);
     auto lnpt = workerEventHandler->GetSocketDescriptor()->GetLogicPeerInfo();
     auto rnpt = workerEventHandler->GetSocketDescriptor()->GetRealPeerInfo();
     auto handler = lookup_worker(lnpt);
@@ -53,7 +53,7 @@ bool UniqueWorkerManager::PutWorkerEventHandler(AFileEventHandler *workerEventHa
 }
 
 AFileEventHandler* UniqueWorkerManager::RemoveWorkerEventHandler(const net_peer_info_t &logicNpt, const net_peer_info_t &realNpt) {
-    common::SpinLock l(&m_sl);
+    ccsys::SpinLock l(&m_sl);
     if (m_hmap_rp_lp.find(realNpt) == m_hmap_rp_lp.end()) {
         return nullptr;
     }
@@ -69,7 +69,7 @@ AFileEventHandler* UniqueWorkerManager::RemoveWorkerEventHandler(const net_peer_
 }
 
 AFileEventHandler* UniqueWorkerManager::RemoveWorkerEventHandler(const net_peer_info_t &logicNpt) {
-    common::SpinLock l(&m_sl);
+    ccsys::SpinLock l(&m_sl);
     auto handler = lookup_worker(logicNpt);
     if (handler) {
         m_hmap_workers.erase(logicNpt);

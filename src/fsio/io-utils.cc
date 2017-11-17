@@ -5,11 +5,12 @@
 
 #include <unistd.h>
 
-#include "common-def.h"
+#include "../common/common-def.h"
+
 #include "io-utils.h"
 
 namespace ccraft {
-namespace common {
+namespace fsio {
 ssize_t IOUtils::WriteFully(int fd, const char *buf, size_t size) {
     if (-1 == fd || !buf) {
         return -1;

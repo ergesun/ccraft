@@ -7,7 +7,7 @@
 #define CCRAFT_NODE_INTERNAL_MESSENGER_H
 
 #include "iservice.h"
-#include "../../common/cctime.h"
+#include "../../ccsys/cctime.h"
 #include "../../common/blocking-queue.h"
 #include "../../common/thread-pool.h"
 #include "../../rpc/abstract-rpc-client.h"
@@ -46,7 +46,7 @@ struct CreateServerInternalMessengerParam {
      * @param pMp 可以为nullptr
      * @param connTimeout
      */
-    CreateServerInternalMessengerParam(INodeInternalRpcHandler *handler, uint16_t cliRpcWorkThreadsCnt, const common::cctime_t &cliWaitRespTimeout,
+    CreateServerInternalMessengerParam(INodeInternalRpcHandler *handler, uint16_t cliRpcWorkThreadsCnt, const ccsys::cctime &cliWaitRespTimeout,
                                     uint16_t srvRpcWorkThreadsCnt, uint16_t mngerWorkThreadsCnt, uint16_t inetIOThreadsCnt,
                                     uint16_t iport, common::MemPool *pMp, int32_t connTimeout) :
         nodeInternalRpcHandler(handler), clientRpcWorkThreadsCnt(cliRpcWorkThreadsCnt), clientWaitResponseTimeout(cliWaitRespTimeout),
@@ -55,7 +55,7 @@ struct CreateServerInternalMessengerParam {
 
     INodeInternalRpcHandler   *nodeInternalRpcHandler;
     uint16_t                   clientRpcWorkThreadsCnt;
-    common::cctime_t           clientWaitResponseTimeout;
+    ccsys::cctime            clientWaitResponseTimeout;
     uint16_t                   serverRpcWorkThreadsCnt;
     uint16_t                   mngerDispatchWorkThreadsCnt;
     uint16_t                   netIOThreadsCnt;

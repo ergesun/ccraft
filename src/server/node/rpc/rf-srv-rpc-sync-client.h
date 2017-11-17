@@ -9,9 +9,9 @@
 #include <unordered_map>
 #include <set>
 
+#include "../../../ccsys/timer.h"
 #include "../../../rpc/abstract-rpc-client.h"
 #include "../../../rpc/common-def.h"
-#include "../../../common/cctime.h"
 #include "../../../common/resource-pool.h"
 #include "../../../net/common-def.h"
 
@@ -60,12 +60,12 @@ private:
         uint64_t                             msgId     = 0;
         bool                                 complete  = false;
         State                                state     = State::Ok;
-        common::Timer::EventId               timer_ev;
+        ccsys::Timer::EventId                timer_ev;
         std::shared_ptr<net::NotifyMessage>  ssp_nm;
     };
 
 public:
-    RfSrvInternalRpcClientSync(net::ISocketService *ss, const common::cctime_t &timeout,
+    RfSrvInternalRpcClientSync(net::ISocketService *ss, const ccsys::cctime &timeout,
                                 uint16_t workThreadsCnt, common::MemPool *memPool = nullptr) :
         rpc::ARpcClient(ss, memPool), m_timeout(timeout) {}
 
@@ -87,8 +87,8 @@ private:
     common::ResourcePool<RpcCtx>                                   m_rpcCtxPool = common::ResourcePool<RpcCtx>(200);
     std::unordered_map<uint64_t, RpcCtx*>                          m_hmapRpcCtxs;
     std::unordered_map<net::net_peer_info_t, std::set<RpcCtx*>>    m_hmapPeerRpcs;
-    common::spin_lock_t                                            m_slRpcCtxs = UNLOCKED;
-    common::cctime_t                                               m_timeout;
+    ccsys::spin_lock_t                                             m_slRpcCtxs = UNLOCKED;
+    ccsys::cctime                                                m_timeout;
 };
 } // namespace server
 } // namespace ccraft

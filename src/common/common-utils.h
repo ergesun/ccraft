@@ -12,8 +12,9 @@
 #include <cctype>
 #include <locale>
 
+#include "../ccsys/cctime.h"
+
 #include "common-def.h"
-#include "cctime.h"
 #include "mem-pool.h"
 
 namespace ccraft {
@@ -21,12 +22,6 @@ namespace common {
 class Buffer;
 class CommonUtils {
 public:
-    /**
-     * 获取当前系统时间(unix epoch到现在的秒+纳秒数)。
-     * @return
-     */
-    static cctime_t GetCurrentTime();
-
     /**
      * 设置fd为非阻塞。
      * @param fd

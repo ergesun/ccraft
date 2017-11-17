@@ -17,7 +17,7 @@ namespace ccraft {
 namespace server {
 void ServiceManager::ServiceBootstrap::Run() {
     if (!s_bServsBooted) {
-        common::SpinLock l(&s_boot_mtx);
+        ccsys::SpinLock l(&s_boot_mtx);
         if (!s_bServsBooted) {
             create_services();
             if (!start_services()) {
@@ -94,7 +94,7 @@ void ServiceManager::ServiceDestroyer::WaitAllServicesStopped() {
 }
 
 std::map<ServiceType, IService*> ServiceManager::s_mapServices = std::map<ServiceType, IService*>{};
-common::spin_lock_t ServiceManager::ServiceBootstrap::s_boot_mtx = UNLOCKED;
+ccsys::spin_lock_t ServiceManager::ServiceBootstrap::s_boot_mtx = UNLOCKED;
 bool ServiceManager::ServiceBootstrap::s_bServsBooted = false;
 std::mutex ServiceManager::ServiceDestroyer::s_mtxServsLiving;
 bool ServiceManager::ServiceDestroyer::s_bAllServsStopped = false;

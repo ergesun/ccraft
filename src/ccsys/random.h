@@ -3,18 +3,17 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_COMMON_RANDOM_H
-#define CCRAFT_COMMON_RANDOM_H
+#ifndef CCRAFT_CCSYS_RANDOM_H
+#define CCRAFT_CCSYS_RANDOM_H
 
 #include <sys/time.h>
 #include <cstdint>
 #include <cstdlib>
 #include <stdexcept>
-
-#include "errors.h"
+#include <cassert>
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 class Random {
 public:
     struct Range {
@@ -22,9 +21,7 @@ public:
             start = end = INVALID_RANGE;
         }
         Range(int32_t s, int32_t e) throw(std::invalid_argument) : start(s), end(e) {
-            if (s > e || s < 0 || e < 0) {
-                THROW_PARAM_OUT_RANGE_ERR();
-            }
+            assert(s < e && s > 0 && e > 0);
         }
 
     private:
@@ -69,4 +66,4 @@ private:
 }
 }
 
-#endif //CCRAFT_COMMON_RANDOM_H
+#endif //CCRAFT_CCSYS_RANDOM_H

@@ -3,12 +3,15 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_GLOBAL_VARS_H
-#define CCRAFT_GLOBAL_VARS_H
+#ifndef CCRAFT_CCSYS_SYS_CONFS_H
+#define CCRAFT_CCSYS_SYS_CONFS_H
 
 namespace ccraft {
+namespace ccsys {
+    class Timer;
+}
 namespace common {
-class Timer;
+using ccsys::Timer;
 class MemPool;
 
 extern int      LOGIC_CPUS_CNT;
@@ -26,7 +29,7 @@ void initialize();
  * 本文件内容的反初始化。
  */
 void uninitialize();
-} // namespace gv
+} // namespace common
 } // namespace ccraft
 
-#endif //CCRAFT_GLOBAL_VARS_H
+#endif //CCRAFT_CCSYS_SYS_CONFS_H

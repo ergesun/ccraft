@@ -9,7 +9,7 @@
 
 namespace ccraft {
 namespace net {
-common::spin_lock_t Message::s_freeBufferLock = UNLOCKED;
+ccsys::spin_lock_t Message::s_freeBufferLock = UNLOCKED;
 std::list<common::Buffer*> Message::s_freeBuffers = std::list<common::Buffer*>();
 
 Message::Message(common::MemPool *mp) :
@@ -17,7 +17,7 @@ Message::Message(common::MemPool *mp) :
 }
 
 common::Buffer* Message::GetNewBuffer() {
-    common::SpinLock l(&s_freeBufferLock);
+    ccsys::SpinLock l(&s_freeBufferLock);
     if (s_freeBuffers.empty()) {
         return new common::Buffer();
     } else {
@@ -49,7 +49,7 @@ common::Buffer* Message::GetNewAvailableBuffer(common::MemPoolObject *mpo, uint3
 }
 
 void Message::PutBuffer(common::Buffer *buffer) {
-    common::SpinLock l(&s_freeBufferLock);
+    ccsys::SpinLock l(&s_freeBufferLock);
     buffer->Put();
     s_freeBuffers.push_back(buffer);
 }

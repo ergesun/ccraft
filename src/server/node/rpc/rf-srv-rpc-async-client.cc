@@ -3,6 +3,7 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
+#include "../../../ccsys/gcc-buildin.h"
 #include "../../../net/notify-message.h"
 #include "../../../net/rcv-message.h"
 #include "../../../rpc/common-def.h"

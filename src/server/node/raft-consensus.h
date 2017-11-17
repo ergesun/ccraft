@@ -10,9 +10,9 @@
 
 #include "common-def.h"
 #include "iservice.h"
-#include "../../common/timer.h"
-#include "../../common/cctime.h"
-#include "../../common/random.h"
+#include "../../ccsys/timer.h"
+#include "../../ccsys/cctime.h"
+#include "../../ccsys/random.h"
 #include "../../common/rf-server.h"
 
 #include "../../rpc/abstract-rpc-client.h"
@@ -26,6 +26,9 @@
 #define    RFSTATE_MAGIC_NO      0x72667374
 #define    RFSTATE_MAGIC_NO_LEN  4
 
+/**
+ * TODO(sunchao): 考虑有没有必要摒弃流水线模式，改成一个peer独占一个线程玩心跳以及选举。
+ */
 namespace ccraft {
 namespace rflog {
 class IRfLogger;
@@ -50,12 +53,18 @@ public:
 private:
     void initialize();
     void save_rf_state();
-    /**
-     * leader超时开始选举。
-     */
-    void on_leader_hb_timeout(void *ctx);
     void start_new_election();
-    void subscribe_leader_hb_timer_tick();
+    inline void subscribe_leader_hb_timer_tick();
+    /**
+     * leader心跳超时。
+     */
+    inline void on_leader_hb_timeout(void *ctx);
+    inline void subscribe_request_vote_timeout_tick();
+    /**
+     * 广播选举请求到收到major响应超时。
+     * @param ctx
+     */
+    void on_request_vote_timeout(void *ctx);
     void broadcast_request_vote(const std::map<uint32_t, common::RfServer> &otherSrvs);
 
 private:
@@ -70,11 +79,15 @@ private:
     std::string                    m_sRfStateFilePath;
     rflog::IRfLogger              *m_pRfLogger                   = nullptr;
     int32_t                        m_iRfStateFd                  = -1;
-    common::Timer                 *m_pTimer                      = nullptr;
-    common::Timer::Event           m_monitorLeaderHbTimerEvent;
-    common::Timer::EventId         m_monitorLeaderHbTimerEventId;
-    common::Timer::TimerCallback   m_moniterLeaderHbTimerCb;
-    common::Random                 m_random;
+    ccsys::Timer                  *m_pTimer                      = nullptr;
+    ccsys::Timer::Event            m_monitorLeaderHbTimerEvent;
+    ccsys::Timer::EventId          m_monitorLeaderHbTimerEventId;
+    ccsys::Timer::TimerCallback    m_moniterLeaderHbTimerCb;
+    ccsys::Timer::Event            m_monitorRVTimeoTimerEvent;
+    ccsys::Timer::EventId          m_monitorRVTimeoTimerEventId;
+    ccsys::Timer::TimerCallback    m_moniterRVTimeoTimerCb;
+    ccsys::Random                  m_random;
+    uint32_t                       m_iRequestVoteTimeoutInterval = 0;
     /**
      * 关联关系，无需本类释放。
      */

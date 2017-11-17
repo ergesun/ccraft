@@ -16,7 +16,7 @@ namespace server {
 ServerRpcService::ServerRpcService(uint16_t port, uint16_t rpcThreadsCnt, RaftConsensus *pRaftConsensus) :
     m_pRaftConsensus(pRaftConsensus) {
     assert(m_pRaftConsensus);
-    common::cctime_t clientWaitTimeOut = {
+    ccsys::cctime clientWaitTimeOut = {
         .sec = FLAGS_internal_rpc_client_wait_timeout_secs,
         .nsec = FLAGS_internal_rpc_client_wait_timeout_nsecs
     };

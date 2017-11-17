@@ -16,6 +16,7 @@ function print_usage {
     echo_yellow "where COMMAND is one of:"
     echo_yellow "  -conf \t clean generated supervisor conf."
     echo_yellow "  -pack \t clean packed dist."
+    echo_yellow "  -gen  \t clean generated files."
     echo_yellow "  -all  \t clean all generated targets(reset to just git clone state)."
     echo_yellow "  -h    \t show help."
 }
@@ -29,7 +30,7 @@ do
         echo "cleaning packed..."
         rm -rf ${PACK_ROOT_DIR}
         rm -rf ${ROOT_DIR}/ccraft-dist.tgz
-    elif []; then
+    elif [ "$p" = "-gen" ]; then
         echo "cleaning codegen..."
         rm -rf ${ROOT_DIR}/src/codegen
     elif [ "$p" = "-all" ]; then

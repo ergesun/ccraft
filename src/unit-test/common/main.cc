@@ -6,12 +6,16 @@
 #include <string>
 
 #include <gtest/gtest.h>
+#include <mutex>
 
+#include "../../ccsys/cctime.h"
 #include "../../common/hash-algorithms.h"
 #include "../../common/common-def.h"
 #include "../../common/common-utils.h"
 #include "../../common/rf-server-configuration.h"
+#include "../../common/thread-pool.h"
 
+using namespace ccraft::ccsys;
 using namespace ccraft::common;
 
 const std::string CommonTestBinName = "common_test";
@@ -43,20 +47,8 @@ TEST(CommonTest, HashTest) {
 }
 
 TEST(CommonTest, ClockTest) {
-    auto curTime = CommonUtils::GetCurrentTime();
+    auto curTime = cctime::GetCurrentTime();
     EXPECT_NE(curTime.sec, -1);
-}
-
-TEST(CommonTest, SpinLockTest) {
-    spin_lock_t l = UNLOCKED;
-    SpinLock sl(&l, false);
-    EXPECT_EQ(sl.TryLock(), true);
-    SpinLock sl2(&l, false);
-    EXPECT_EQ(sl2.TryLock(), false);
-
-    sl.Unlock();
-    SpinLock sl3(&l, false);
-    EXPECT_EQ(sl3.TryLock(), true);
 }
 
 TEST(CommonTest, CommonUtilsTest) {
@@ -84,4 +76,98 @@ TEST(CommonTest, ConfigurationTest) {
     EXPECT_EQ(false, rfc.Initialize(1, path));
     path = g_sConfTestFileRootPath + TestFileErr4;
     EXPECT_EQ(false, rfc.Initialize(1, path));
+}
+
+TEST(CommonTest, MemPoolTest) {
+    using std::cout;
+    using std::endl;
+    std::vector<MemPool::MemObject*> memObjects;
+    MemPool mp;
+    /*******************tiny objs**********************/
+    for (int i = 0; i < 10000; ++i) {
+        auto needSize = rand() % 17;
+        needSize = needSize ? needSize : 1;
+        auto memObject = mp.Get(needSize);
+        memObjects.push_back(memObject);
+        auto buf = memObject->Pointer();
+        auto size = memObject->Size();
+        const char *str = "hello world!";
+        memcpy(buf, str, strlen(str) + 1);
+        cout << "buf = " << buf << ", needSize = " << needSize <<  ", get size = " << size << endl;
+    }
+
+    for (auto p : memObjects) {
+        mp.Put(p);
+    }
+    cout << mp.DumpDebugInfo() << endl;
+
+    /*******************small objs**********************/
+    memObjects.clear();
+    for (int i = 0; i < 100000; ++i) {
+        auto needSize = (32 + i) % 4097;
+        needSize = needSize ? needSize : 32;
+        auto memObject = mp.Get(needSize);
+        memObjects.push_back(memObject);
+        auto buf = memObject->Pointer();
+        auto size = memObject->Size();
+        const char *str = "hello world!";
+        memcpy(buf, str, strlen(str) + 1);
+        cout << "buf = " << buf << ", needSize = " << needSize <<  ", get size = " << size << endl;
+    }
+
+    for (auto p : memObjects) {
+        mp.Put(p);
+    }
+    cout << mp.DumpDebugInfo() << endl;
+
+    /*******************big objs**********************/
+    memObjects.clear();
+    for (int i = 0; i < 1000; ++i) {
+        auto needSize = (4097 + i) % (32 * 4096 + 1);
+        needSize = needSize ? needSize : 4097;
+        auto memObject = mp.Get(needSize);
+        memObjects.push_back(memObject);
+        auto buf = memObject->Pointer();
+        auto size = memObject->Size();
+        const char *str = "hello world!";
+        memcpy(buf, str, strlen(str) + 1);
+        cout << "buf = " << buf << ", needSize = " << needSize <<  ", get size = " << size << endl;
+    }
+
+    for (auto p : memObjects) {
+        mp.Put(p);
+    }
+    cout << mp.DumpDebugInfo() << endl;
+
+    /*******************bulk objs**********************/
+    memObjects.clear();
+    for (int i = 0; i < 5; ++i) {
+        auto needSize = 1024 * 1024 + i * 1024 * 1024;
+        auto memObject = mp.Get(needSize);
+        memObjects.push_back(memObject);
+        auto buf = memObject->Pointer();
+        auto size = memObject->Size();
+        const char *str = "hello world!";
+        memcpy(buf, str, strlen(str) + 1);
+        cout << "buf = " << buf << ", needSize = " << needSize <<  ", get size = " << size << endl;
+    }
+
+    for (auto p : memObjects) {
+        p->Put();
+    }
+    cout << mp.DumpDebugInfo() << endl;
+}
+
+TEST(CommonTest, ThreadPoolTest) {
+    static std::mutex s_mtx;
+    ThreadPool<void*> tp;
+    for (int i = 0; i < 100; ++i) {
+        ThreadPool<void*>::Task t([i](void*){
+            std::unique_lock<std::mutex> l(s_mtx);
+            std::cout << "index = " << i << std::endl;
+        });
+        tp.AddTask(t);
+    }
+
+    tp.WaitAll();
 }

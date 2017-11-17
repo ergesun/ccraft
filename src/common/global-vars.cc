@@ -9,8 +9,11 @@
 #include <stdexcept>
 #include <cstring>
 
-#include "timer.h"
+#include "../ccsys/timer.h"
+
+#include "common-def.h"
 #include "mem-pool.h"
+
 #include "global-vars.h"
 
 namespace ccraft {

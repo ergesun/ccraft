@@ -8,7 +8,7 @@
 #include "../../../common/protobuf-utils.h"
 #include "../../../common/buffer.h"
 #include "../../../common/global-vars.h"
-#include "../../../common/timer.h"
+#include "../../../ccsys/timer.h"
 #include "../../../common/codec-utils.h"
 #include "../../../codegen/node-raft.pb.h"
 #include "../../../rpc/common-def.h"
@@ -78,7 +78,7 @@ void RfSrvInternalRpcClientSync::onRecvMessage(std::shared_ptr<net::NotifyMessag
                 auto id = rm->GetId();
                 RpcCtx *rc = nullptr;
                 {
-                    common::SpinLock l(&m_slRpcCtxs);
+                    ccsys::SpinLock l(&m_slRpcCtxs);
                     if (m_hmapRpcCtxs.end() == m_hmapRpcCtxs.find(id)) {
                         LOGIFUN << "recv is not in Id<->RpcCtx map message for id " << id;
                         break;
@@ -111,7 +111,7 @@ void RfSrvInternalRpcClientSync::onRecvMessage(std::shared_ptr<net::NotifyMessag
                 LOGEFUN << "rc = " << (int)wnm->GetCode() << ", message = " << wnm->What();
                 auto peer = wnm->GetPeer();
                 {
-                    common::SpinLock l(&m_slRpcCtxs);
+                    ccsys::SpinLock l(&m_slRpcCtxs);
                     if (m_hmapPeerRpcs.end() != m_hmapPeerRpcs.find(peer)) {
                         for (auto rc : m_hmapPeerRpcs[peer]) {
                             m_hmapRpcCtxs.erase(rc->msgId);
@@ -141,7 +141,7 @@ void RfSrvInternalRpcClientSync::onRecvMessage(std::shared_ptr<net::NotifyMessag
 std::shared_ptr<net::NotifyMessage> RfSrvInternalRpcClientSync::recv_message(RpcCtx *rc) {
     auto id = rc->msgId;
     {
-        common::SpinLock l(&m_slRpcCtxs);
+        ccsys::SpinLock l(&m_slRpcCtxs);
         m_hmapRpcCtxs[id] = rc;
         if (m_hmapPeerRpcs.end() == m_hmapPeerRpcs.find(rc->peer)) {
             std::set<RpcCtx*> rpcs { rc };
@@ -151,10 +151,10 @@ std::shared_ptr<net::NotifyMessage> RfSrvInternalRpcClientSync::recv_message(Rpc
         }
     }
 
-    static common::Timer::TimerCallback s_cb = [id, this](void*) {
+    static ccsys::Timer::TimerCallback s_cb = [id, this](void*) {
         RpcCtx *ctx = nullptr;
         {
-            common::SpinLock l(&m_slRpcCtxs);
+            ccsys::SpinLock l(&m_slRpcCtxs);
             if (m_hmapRpcCtxs.end() == m_hmapRpcCtxs.find(id)) {
                 LOGIFUN << "recv is not in Id<->RpcCtx map message for id " << id;
                 return;
@@ -178,7 +178,7 @@ std::shared_ptr<net::NotifyMessage> RfSrvInternalRpcClientSync::recv_message(Rpc
 
     {
         std::unique_lock<std::mutex> ll(*(rc->mtx));
-        common::Timer::Event ev(nullptr, &s_cb);
+        ccsys::Timer::Event ev(nullptr, &s_cb);
         auto eventId = common::g_pTimer->SubscribeEventAfter(m_timeout, ev);
         if (0 == eventId.when) {
             throw RpcClientInternalException();

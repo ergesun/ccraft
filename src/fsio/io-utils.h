@@ -3,19 +3,19 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_COMMON_IO_UTILS_H
-#define CCRAFT_COMMON_IO_UTILS_H
+#ifndef CCRAFT_FSIO_IO_UTILS_H
+#define CCRAFT_FSIO_IO_UTILS_H
 
 #include <cstdio>
 
 #define WriteFileFullyWithFatalLOG(fd, buf, size, filePath)                                         \
-        if (-1 == common::IOUtils::WriteFully((fd), (buf), (size))) {                               \
+        if (-1 == fsio::IOUtils::WriteFully((fd), (buf), (size))) {                                 \
             auto err = errno;                                                                       \
             LOGFFUN << "write file " << (filePath) << " failed with errmsg " << strerror(err);      \
         }
 
 #define ReadFileFullyWithFatalLOG(fd, buf, size, filePath)                                          \
-        if (-1 == common::IOUtils::ReadFully_V2((fd), (buf), (size))) {                             \
+        if (-1 == fsio::IOUtils::ReadFully_V2((fd), (buf), (size))) {                               \
             auto err = errno;                                                                       \
             LOGFFUN << "read file " << (filePath) << " failed with errmsg " << strerror(err);       \
         }
@@ -33,7 +33,7 @@
         }
 
 namespace ccraft {
-namespace common {
+namespace fsio {
 class IOUtils {
 public:
     /**
@@ -68,4 +68,4 @@ public:
 }
 }
 
-#endif //CCRAFT_COMMON_IO_UTILS_H
+#endif //CCRAFT_FSIO_IO_UTILS_H

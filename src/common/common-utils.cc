@@ -8,19 +8,13 @@
 #include <iostream>
 #include <netdb.h>
 
+#include "../ccsys/random.h"
+
 #include "buffer.h"
 #include "common-utils.h"
-#include "random.h"
 
 namespace ccraft {
 namespace common {
-cctime_t CommonUtils::GetCurrentTime() {
-    struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-
-    return cctime_t(ts);
-}
-
 int CommonUtils::SetNonBlocking(int fd) {
     int opts;
     int err;

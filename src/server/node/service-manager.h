@@ -10,7 +10,7 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "../../common/spin-lock.h"
+#include "../../ccsys/spin-lock.h"
 #include "common-def.h"
 
 namespace ccraft {
@@ -34,7 +34,7 @@ public:
         static bool start_services();
 
     private:
-        static common::spin_lock_t s_boot_mtx;
+        static ccsys::spin_lock_t s_boot_mtx;
         static bool s_bServsBooted;
     };
 

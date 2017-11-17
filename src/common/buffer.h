@@ -6,6 +6,8 @@
 #ifndef CCRAFT_COMMON_BUFFER_H
 #define CCRAFT_COMMON_BUFFER_H
 
+#include "../ccsys/gcc-buildin.h"
+
 #include "common-def.h"
 #include "mem-pool.h"
 

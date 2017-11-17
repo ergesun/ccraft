@@ -12,10 +12,11 @@
 #include <atomic>
 
 #include "global-vars.h"
-#include "blocking-queue.h"
-#include "common-def.h"
-#include "spin-lock.h"
-#include "common-utils.h"
+#include "../common/blocking-queue.h"
+#include "../common/common-def.h"
+#include "../common/common-utils.h"
+
+#include "../ccsys/spin-lock.h"
 
 namespace ccraft {
 namespace common {
@@ -113,7 +114,7 @@ public:
      * 等待所有都完成或者指定的时间到了。
      * @param duration_since_epoch epoch开始到现在的duration。
      */
-    void WaitAllUntilTimeAt(cctime_s duration_since_epoch) {
+    void WaitAllUntilTimeAt(cctime duration_since_epoch) {
         std::unique_lock<std::mutex> l(m_mtxActiveWorkerCnt);
         using namespace std::chrono;
         time_point<system_clock, nanoseconds> tp(nanoseconds(duration_since_epoch.get_total_nsecs()));
@@ -128,8 +129,8 @@ public:
      * 等待所有都完成或者指定的时间到了。
      * @param duration 从现在开始最多等待的持续时间。
      */
-    void WaitAllUntilAfter(cctime_s duration) {
-        auto now = common::CommonUtils::GetCurrentTime();
+    void WaitAllUntilAfter(cctime duration) {
+        auto now = ccsys::cctime::GetCurrentTime();
         now += duration;
 
         WaitAllUntilTimeAt(now);

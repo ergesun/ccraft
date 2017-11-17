@@ -13,7 +13,7 @@
 #include "../abstract-event-manager.h"
 #include "../../event-drivers/ievent-driver.h"
 #include "../../event-drivers/event-worker.h"
-#include "../../../../../../common/spin-lock.h"
+#include "../../../../../../ccsys/spin-lock.h"
 
 namespace ccraft {
 namespace net {
@@ -48,7 +48,7 @@ private:
     AFileEventHandler                                       *m_pServerEventHandler = nullptr;
     std::pair<std::thread*, EventWorker*>                    m_pListenWorkerEventLoopCtx;
     std::vector<std::pair<std::thread*, EventWorker*>>       m_vConnsWorkerEventLoopCtxs;
-    common::spin_lock_t                                      m_slSelectEvents = UNLOCKED;
+    ccsys::spin_lock_t                                       m_slSelectEvents = UNLOCKED;
     ConnectHandler                                           m_onStackConnect;
     ConnectFunc                                              m_onLogicConnect;
     FinishHandler                                            m_onFinish;

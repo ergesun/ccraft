@@ -5,11 +5,10 @@
 
 #include <cassert>
 
-#include "common-utils.h"
 #include "timer.h"
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 Timer::~Timer() {
     if (!m_stop) {
         Stop();
@@ -38,7 +37,7 @@ void Timer::Stop() {
     m_cv.notify_one();
 }
 
-Timer::EventId Timer::SubscribeEventAt(cctime_t when, Event &ev) {
+Timer::EventId Timer::SubscribeEventAt(cctime when, Event &ev) {
     assert(ev.callback);
     auto evId = EventId(when, ev.callback);
     SpinLock l(&m_thread_safe_sl);
@@ -63,9 +62,9 @@ Timer::EventId Timer::SubscribeEventAt(cctime_t when, Event &ev) {
     return EventId(when, ev.callback);
 }
 
-Timer::EventId Timer::SubscribeEventAfter(cctime_t duration, Event &ev) {
+Timer::EventId Timer::SubscribeEventAfter(cctime duration, Event &ev) {
     assert(ev.callback);
-    auto now = CommonUtils::GetCurrentTime();
+    auto now = cctime::GetCurrentTime();
     now += duration;
 
     return SubscribeEventAt(now, ev);
@@ -99,7 +98,7 @@ void Timer::process() {
         SpinLock sl(&m_thread_safe_sl);
         while (!m_mapSubscribedEvents.empty()) {
             auto min = m_mapSubscribedEvents.begin();
-            if (min->first > CommonUtils::GetCurrentTime()) {
+            if (min->first > cctime::GetCurrentTime()) {
                 break;
             }
 

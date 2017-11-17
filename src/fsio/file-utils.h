@@ -3,8 +3,8 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_FILE_UTILS_H
-#define CCRAFT_FILE_UTILS_H
+#ifndef CCRAFT_FSIO_FILE_UTILS_H
+#define CCRAFT_FSIO_FILE_UTILS_H
 
 #include <unistd.h>
 #include <sys/stat.h>
@@ -15,7 +15,7 @@
 using std::string;
 
 namespace ccraft {
-namespace common {
+namespace fsio {
 class FileUtils {
 public:
     /**
@@ -116,4 +116,4 @@ public:
 }
 }
 
-#endif //CCRAFT_FILE_UTILS_H
+#endif //CCRAFT_FSIO_FILE_UTILS_H

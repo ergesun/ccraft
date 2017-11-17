@@ -15,7 +15,8 @@
 #include <sstream>
 
 #include "global-vars.h"
-#include "spin-lock.h"
+
+#include "../ccsys/spin-lock.h"
 
 // TODO(sunchao): 添加一个和时间相关的统计机制，动态的对常驻对象数量、扩张系数等进行调整。
 
@@ -65,6 +66,7 @@
 #define DEFAULT_EXPAND_BULK_OBJ_CNT_FACTOR    4
 
 namespace ccraft {
+using namespace ccsys;
 namespace common {
 /**
  * Thread-safe. !注意：本类的析构函数与其他函数的并发使用不是thread-safe的。

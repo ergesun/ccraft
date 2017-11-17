@@ -49,8 +49,11 @@ bool NBSocketService::Stop() {
     }
     m_bStopped = true;
     hw_rw_memory_barrier();
+    if (!m_pEventManager->Stop()) {
+        return false;
+    }
     m_sspMgr.reset();
-    return m_pEventManager->Stop();
+    return true;
 }
 
 bool NBSocketService::SendMessage(SndMessage *m) {

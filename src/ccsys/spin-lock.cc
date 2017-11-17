@@ -7,11 +7,12 @@
 #include <cstdint>
 #include <stdexcept>
 
-#include "common-def.h"
+#include "gcc-buildin.h"
+
 #include "spin-lock.h"
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 SpinLock::SpinLock(spin_lock_t *const sl) : m_psl(sl) {
     assert(sl);
     Lock();

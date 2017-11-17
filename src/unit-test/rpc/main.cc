@@ -29,7 +29,7 @@ ccraft::net::ISocketService                 *g_pSS     = nullptr;
 ccraft::common::MemPool                     *g_mp      = nullptr;
 ccraft::test::TestRpcServer                 *g_pServer = nullptr;
 ccraft::server::RfSrvInternalRpcClientSync  *g_pClient = nullptr;
-bool                                         g_bStopped = false;
+volatile bool                                g_bStopped = false;
 
 void dispatch_msg(std::shared_ptr<ccraft::net::NotifyMessage> sspNM);
 
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
     EXPECT_EQ(g_pServer->Start(), true);
 
     auto res = RUN_ALL_TESTS();
-    getchar();
+    sleep(1);
     g_bStopped = true;
     EXPECT_EQ(g_pServer->Stop(), true);
     DELETE_PTR(g_pServer);
@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
 }
 
 TEST(RpcTest, ClientServerTest) {
-    ccraft::common::cctime_t timeout(100, 1000000 * 200);
+    ccraft::ccsys::cctime timeout(100, 1000000 * 200);
     // test sync rpc client
     g_pClient = new ccraft::server::RfSrvInternalRpcClientSync(g_pSS, timeout, 1, g_mp);
 

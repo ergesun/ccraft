@@ -73,7 +73,7 @@ private:
     static Id get_new_id();
 
 private:
-    static common::spin_lock_t              s_idLock;
+    static ccsys::spin_lock_t              s_idLock;
     static Id                               s_lastId;
 #endif
 };

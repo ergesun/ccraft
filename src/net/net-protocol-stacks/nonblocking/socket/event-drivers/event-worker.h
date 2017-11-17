@@ -12,7 +12,7 @@
 
 #include "ievent-driver.h"
 #include "../../../../common-def.h"
-#include "../../../../../common/spin-lock.h"
+#include "../../../../../ccsys/spin-lock.h"
 
 namespace ccraft {
 namespace net {
@@ -43,12 +43,12 @@ public:
     }
 
     void AddExternalRWOpEvent(NetEvent ne) {
-        common::SpinLock l(&m_slEERWOp);
+        ccsys::SpinLock l(&m_slEERWOp);
         m_lRwOpExtEvents.push_back(ne);
     }
 
     std::list<NetEvent> GetExternalRWOpEvents() {
-        common::SpinLock l(&m_slEERWOp);
+        ccsys::SpinLock l(&m_slEERWOp);
         std::list<NetEvent> tmp;
         tmp.swap(m_lRwOpExtEvents);
 
@@ -56,7 +56,7 @@ public:
     }
 
     void AddExternalEpAddEvent(AFileEventHandler *socketEventHandler, int32_t cur_mask, int32_t mask) {
-        common::SpinLock l(&m_slEEAddEpEv);
+        ccsys::SpinLock l(&m_slEEAddEpEv);
         EpollAddEvent eae = {
             .socketEventHandler = socketEventHandler,
             .cur_mask = cur_mask,
@@ -66,7 +66,7 @@ public:
     }
 
     std::list<EventWorker::EpollAddEvent> GetExternalEpAddEvents() {
-        common::SpinLock l(&m_slEEAddEpEv);
+        ccsys::SpinLock l(&m_slEEAddEpEv);
         std::list<EpollAddEvent> tmp;
         tmp.swap(m_lAddEpExtEvents);
 
@@ -78,12 +78,12 @@ public:
      * @param h 该方法会释放h
      */
     void AddExternalEpDelEvent(AFileEventHandler* h) {
-        common::SpinLock l(&m_slEEDelEpEv);
+        ccsys::SpinLock l(&m_slEEDelEpEv);
         m_lDelEpExtEvents.insert(h);
     }
 
     std::set<AFileEventHandler*> GetExternalEpDelEvents() {
-        common::SpinLock l(&m_slEEDelEpEv);
+        ccsys::SpinLock l(&m_slEEDelEpEv);
         std::set<AFileEventHandler*> tmp;
         tmp.swap(m_lDelEpExtEvents);
 
@@ -109,11 +109,11 @@ private:
     std::vector<NetEvent>            m_vDriverInternalEvents;
     IEventDriver                    *m_pEventDriver;
 
-    common::spin_lock_t              m_slEERWOp = UNLOCKED;
+    ccsys::spin_lock_t              m_slEERWOp = UNLOCKED;
     std::list<NetEvent>              m_lRwOpExtEvents;
-    common::spin_lock_t              m_slEEAddEpEv = UNLOCKED;
+    ccsys::spin_lock_t              m_slEEAddEpEv = UNLOCKED;
     std::list<EpollAddEvent>         m_lAddEpExtEvents;
-    common::spin_lock_t              m_slEEDelEpEv = UNLOCKED;
+    ccsys::spin_lock_t              m_slEEDelEpEv = UNLOCKED;
     std::set<AFileEventHandler*>     m_lDelEpExtEvents;
     int                              m_notifySendFd;
     int                              m_notifyRecvFd;

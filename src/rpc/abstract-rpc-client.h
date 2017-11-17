@@ -13,7 +13,6 @@
 #include <condition_variable>
 #include <set>
 
-#include "../common/timer.h"
 #include "../common/blocking-queue.h"
 #include "../net/common-def.h"
 #include "../server/node/iservice.h"

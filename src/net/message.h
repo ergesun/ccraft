@@ -11,7 +11,7 @@
 
 #include "iencoder.h"
 #include "../common/mem-pool.h"
-#include "../common/spin-lock.h"
+#include "../ccsys/spin-lock.h"
 #include "common-def.h"
 #include "../common/resource-pool.h"
 
@@ -140,7 +140,7 @@ protected:
     net_peer_info_t     m_peerInfo;
 
 private:
-    static common::spin_lock_t              s_freeBufferLock;
+    static ccsys::spin_lock_t              s_freeBufferLock;
     // TODO(sunchao): 做一个个数限制？
     static std::list<common::Buffer*>       s_freeBuffers;
 }; // interface Message

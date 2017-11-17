@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 #include "../inet-stack-worker-manager.h"
-#include "../../../common/spin-lock.h"
+#include "../../../ccsys/spin-lock.h"
 
 namespace ccraft {
 namespace net {
@@ -60,7 +60,7 @@ private:
     inline AFileEventHandler *lookup_worker(const net_peer_info_t &logicNpt);
 
 private:
-    common::spin_lock_t                                              m_sl = UNLOCKED;
+    ccsys::spin_lock_t                                               m_sl = UNLOCKED;
     /**
      * logic peer -> handler
      */

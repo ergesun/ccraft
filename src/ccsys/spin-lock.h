@@ -3,14 +3,14 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_COMMON_SPIN_LOCK_H
-#define CCRAFT_COMMON_SPIN_LOCK_H
+#ifndef CCRAFT_CCSYS_SPIN_LOCK_H
+#define CCRAFT_CCSYS_SPIN_LOCK_H
 
 #define UNLOCKED                       0
 #define LOCKED                         1
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 /**
  * 使用时注意先初始化为UNLOCKED，或者你能保证编译器会初始化为0.
  */
@@ -73,6 +73,6 @@ private:
     int m_iSpin = 1 << 11;
     volatile bool m_bOwnLock = false;
 }; // class SpinLock
-}  // namespace common
+}  // namespace ccsys
 }  // namespace ccraft
-#endif //CCRAFT_COMMON_SPIN_LOCK_H
+#endif //CCRAFT_CCSYS_SPIN_LOCK_H

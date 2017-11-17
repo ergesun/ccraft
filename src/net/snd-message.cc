@@ -12,7 +12,7 @@
 namespace ccraft {
 namespace net {
 #if WITH_MSG_ID
-common::spin_lock_t SndMessage::s_idLock = UNLOCKED;
+ccsys::spin_lock_t SndMessage::s_idLock = UNLOCKED;
 #if BULK_MSG_ID
 Message::Id SndMessage::s_lastId = Id(0, 0);
 #else
@@ -87,7 +87,7 @@ void SndMessage::encode_header(common::Buffer *b, Header &h) {
 
 #if WITH_MSG_ID
 Message::Id SndMessage::get_new_id() {
-    common::SpinLock l(&s_idLock);
+    ccsys::SpinLock l(&s_idLock);
 #if BULK_MSG_ID
     ++s_lastId.seq;
     if (UNLIKELY(s_lastId.seq == UINT32_MAX)) {

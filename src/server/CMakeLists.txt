@@ -10,7 +10,9 @@ set(LINK_LIBS
         protobuf
         rpc
         net
+        fsio
         common
+        ccsys
         glog
         gflags
         pthread

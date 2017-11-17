@@ -3,20 +3,20 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_COMMON_TIMER_H
-#define CCRAFT_COMMON_TIMER_H
+#ifndef CCRAFT_CCSYS_TIMER_H
+#define CCRAFT_CCSYS_TIMER_H
 
 #include <functional>
 #include <map>
 #include <condition_variable>
 #include <thread>
 
-#include "spin-lock.h"
-#include "common-def.h"
 #include "cctime.h"
 
+#include "spin-lock.h"
+
 namespace ccraft {
-namespace common {
+namespace ccsys {
 /**
  * 一个拥有一个检测、触发线程的操作安全的定时器。
  * 使用此定时器回调函数一定要是瞬时的。
@@ -28,8 +28,8 @@ public:
     // TODO(sunchao): 优化EventId。
     struct EventId {
         EventId() = default;
-        EventId(cctime_t w, TimerCallbackPointer h) : when(w), how(h) {}
-        cctime_t             when;
+        EventId(cctime w, TimerCallbackPointer h) : when(w), how(h) {}
+        cctime             when;
         TimerCallbackPointer how = nullptr;
 
         bool operator<(const EventId &another) const {
@@ -63,7 +63,7 @@ public:
         }
     };
 
-    typedef std::multimap<cctime_t, Event> TimerEvents;
+    typedef std::multimap<cctime, Event> TimerEvents;
     typedef std::map<EventId, TimerEvents::iterator> EventsTable;
 
     Timer() = default;
@@ -85,14 +85,14 @@ public:
      * @param when 从epoch到触发的时间。
      * @return 返回订阅事件的id，可用于取消。如果id的when为0,则表示订阅失败。
      */
-    EventId SubscribeEventAt(cctime_t when, Event &ev);
+    EventId SubscribeEventAt(cctime when, Event &ev);
 
     /**
      * 订阅事件：从现在开始指定的时间后触发。同一时间点同一handler不可以重复订阅。
      * @param duration 等待触发的时间。
      * @return 返回订阅事件的id，可用于取消。如果id的when为0,则表示订阅失败。
      */
-    EventId SubscribeEventAfter(cctime_t duration, Event &ev);
+    EventId SubscribeEventAfter(cctime duration, Event &ev);
 
     /**
      * 取消指定事件的订阅。
@@ -120,6 +120,6 @@ private:
     std::thread *m_pWorkThread = nullptr;
     spin_lock_t m_thread_safe_sl = UNLOCKED;
 }; // class Timer
-}  // namespace common
+}  // namespace ccsys
 }  // namespace ccraft
-#endif //CCRAFT_COMMON_TIMER_H
+#endif //CCRAFT_CCSYS_TIMER_H
