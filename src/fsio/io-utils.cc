@@ -82,5 +82,5 @@ ssize_t IOUtils::ReadFully_V2(int fd, char **buf, size_t size) {
 
     return nread;
 }
-}
-}
+} // namespace fsio
+} // namespace ccraft

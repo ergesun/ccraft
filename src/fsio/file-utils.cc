@@ -24,7 +24,7 @@ int FileUtils::CreateDir(const char *dir, __mode_t mode) {
     // 检查生成文件夹
     if (0 == stat(dir, &dir_stat)) { // 如果dir文件(夹)存在
         if (!S_ISDIR(dir_stat.st_mode)) { // 如果不是文件夹
-            LOGEFUN << "CreateDir " << dir << " failed because there is a file namfsioed it.";
+            LOGEFUN << "CreateDir " << dir << " failed because there is a file named it.";
             return -1;
         }
     } else { // 如果dir文件(夹)不存在，则创建文件夹
@@ -160,5 +160,5 @@ string FileUtils::ReadAllString(const string &file_path) {
     ss << fs.rdbuf();
     return ss.str();
 }
-}
-}
+} // namespace fsio
+} // namespace ccraft
