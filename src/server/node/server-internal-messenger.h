@@ -9,13 +9,13 @@
 #include "iservice.h"
 #include "../../ccsys/cctime.h"
 #include "../../common/blocking-queue.h"
-#include "../../common/thread-pool.h"
+#include "../../ccsys/thread-pool.h"
 #include "../../rpc/abstract-rpc-client.h"
 
 #include "iserver-internal-rpc-handler.h"
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 class MemPool;
 }
 namespace net {
@@ -48,7 +48,7 @@ struct CreateServerInternalMessengerParam {
      */
     CreateServerInternalMessengerParam(INodeInternalRpcHandler *handler, uint16_t cliRpcWorkThreadsCnt, const ccsys::cctime &cliWaitRespTimeout,
                                     uint16_t srvRpcWorkThreadsCnt, uint16_t mngerWorkThreadsCnt, uint16_t inetIOThreadsCnt,
-                                    uint16_t iport, common::MemPool *pMp, int32_t connTimeout) :
+                                    uint16_t iport, ccsys::MemPool *pMp, int32_t connTimeout) :
         nodeInternalRpcHandler(handler), clientRpcWorkThreadsCnt(cliRpcWorkThreadsCnt), clientWaitResponseTimeout(cliWaitRespTimeout),
         serverRpcWorkThreadsCnt(srvRpcWorkThreadsCnt), mngerDispatchWorkThreadsCnt(mngerWorkThreadsCnt), netIOThreadsCnt(inetIOThreadsCnt),
         port(iport), memPool(pMp), connectTimeout(connTimeout) {}
@@ -60,7 +60,7 @@ struct CreateServerInternalMessengerParam {
     uint16_t                   mngerDispatchWorkThreadsCnt;
     uint16_t                   netIOThreadsCnt;
     uint16_t                   port;
-    common::MemPool           *memPool;
+    ccsys::MemPool            *memPool;
     int32_t                    connectTimeout;
 };
 
@@ -108,9 +108,9 @@ private:
     RfSrvInternalRpcClientAsync                                *m_pAsyncClient       = nullptr;
     RfSrvInternalRpcServerSync                                 *m_pServer            = nullptr;
     bool                                                        m_bOwnMemPool        = false;
-    common::MemPool                                            *m_pMemPool           = nullptr;
+    ccsys::MemPool                                             *m_pMemPool           = nullptr;
     uint16_t                                                    m_iDispatchTpCnt     = 0;
-    common::ThreadPool<std::shared_ptr<net::NotifyMessage>>    *m_pDispatchTp        = nullptr;
+    ccsys::ThreadPool<std::shared_ptr<net::NotifyMessage>>     *m_pDispatchTp        = nullptr;
 };
 } // namespace server
 } // namespace ccraft

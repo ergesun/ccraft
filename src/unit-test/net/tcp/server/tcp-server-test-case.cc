@@ -6,23 +6,23 @@
 #include <iostream>
 #include "../test-snd-message.h"
 
+#include "../../../../ccsys/mem-pool.h"
+#include "../../../../common/buffer.h"
 #include "../../../../net/socket-service-factory.h"
 #include "../../../../net/rcv-message.h"
-#include "../../../../common/buffer.h"
-#include "../../../../common/mem-pool.h"
+#include "../../../../net/net-protocol-stacks/msg-worker-managers/unique-worker-manager.h"
 
 #include "tcp-server-test-case.h"
-#include "../../../../net/net-protocol-stacks/msg-worker-managers/unique-worker-manager.h"
 
 namespace ccraft {
 namespace test {
 net::ISocketService     *TcpServerTest::s_ss = nullptr;
-common::MemPool         *TcpServerTest::m_mp = nullptr;
+ccsys::MemPool          *TcpServerTest::m_mp = nullptr;
 
 void TcpServerTest::Run() {
     auto nat = new ccraft::net::net_addr_t("0.0.0.0", 2210);
     std::shared_ptr<ccraft::net::net_addr_t> ssp_npt(nat);
-    m_mp = new ccraft::common::MemPool();
+    m_mp = new ccraft::ccsys::MemPool();
     timeval connTimeout = {
         .tv_sec = 0,
         .tv_usec = 100 * 1000

@@ -20,7 +20,7 @@ public:
     };
 
 public:
-    ConnectResponseMessage(common::MemPool *mp, Status stat, std::string &&what) :
+    ConnectResponseMessage(ccsys::MemPool *mp, Status stat, std::string &&what) :
         SndMessage(mp, net_peer_info_s()), m_stat(stat), m_sWhat(std::move(what)) {}
 
 protected:

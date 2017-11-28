@@ -5,15 +5,17 @@
 
 #include <gtest/gtest.h>
 
+#include "../../ccsys/mem-pool.h"
 #include "../../common/common-def.h"
-#include "./tcp/server/tcp-server-test-case.h"
+#include "../../common/buffer.h"
+#include "../../common/global-vars.h"
 #include "../../net/common-def.h"
-#include "../../common/mem-pool.h"
 #include "../../net/net-protocol-stacks/inet-stack-worker-manager.h"
 #include "../../net/net-protocol-stacks/msg-worker-managers/unique-worker-manager.h"
 #include "../../net/socket-service-factory.h"
 #include "../../net/rcv-message.h"
-#include "../../common/buffer.h"
+
+#include "./tcp/server/tcp-server-test-case.h"
 #include "tcp/test-snd-message.h"
 
 void recv_msg(std::shared_ptr<ccraft::net::NotifyMessage> sspNM);

@@ -7,9 +7,9 @@
 #define CCRAFT_COMMON_BUFFER_H
 
 #include "../ccsys/gcc-buildin.h"
+#include "../ccsys/mem-pool.h"
 
 #include "common-def.h"
-#include "mem-pool.h"
 
 namespace ccraft {
 namespace common {
@@ -23,7 +23,7 @@ namespace common {
 class Buffer {
 public:
     Buffer() = default;
-    Buffer(uchar *pos, uchar *last, uchar *start, uchar *end, MemPoolObject *mpo) :
+    Buffer(uchar *pos, uchar *last, uchar *start, uchar *end, ccsys::MemPool::MemObject *mpo) :
         m_pPos(pos), m_pLast(last), m_pStart(start), m_pEnd(end), m_pMpObject(mpo) {
         check_available();
     }
@@ -39,20 +39,7 @@ public:
         Refresh(nullptr, nullptr, nullptr, nullptr, nullptr);
     }
 
-    inline void Refresh(uchar *pos, uchar *last, uchar *start, uchar *end, MemPoolObject *mpo) {
-        if (m_pMpObject) {
-            m_pMpObject->Put();
-        } else {
-            DELETE_ARR_PTR(m_pStart);
-        }
-
-        m_pMpObject = mpo;
-        m_pPos = pos;
-        m_pLast = last;
-        m_pStart = start;
-        m_pEnd = end;
-        check_available();
-    }
+    void Refresh(uchar *pos, uchar *last, uchar *start, uchar *end, ccsys::MemPool::MemObject *mpo);
 
     inline bool Valid() {
         return m_bAvailable;
@@ -171,12 +158,12 @@ private:
     }
 
 private:
-    uchar             *m_pPos              = nullptr;
-    uchar             *m_pLast             = nullptr;
-    uchar             *m_pStart            = nullptr;
-    uchar             *m_pEnd              = nullptr;
-    MemPoolObject     *m_pMpObject         = nullptr;
-    bool               m_bAvailable        = false;
+    uchar                     *m_pPos              = nullptr;
+    uchar                     *m_pLast             = nullptr;
+    uchar                     *m_pStart            = nullptr;
+    uchar                     *m_pEnd              = nullptr;
+    ccsys::MemPool::MemObject *m_pMpObject         = nullptr;
+    bool                       m_bAvailable        = false;
 };
 }  // namespace common
 }  // namespace ccraft

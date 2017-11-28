@@ -5,13 +5,17 @@
 
 #include <cassert>
 #include <cmath>
-
-#include "common-utils.h"
+#include <sys/sysinfo.h>
+#include <unistd.h>
+#include <iostream>
 
 #include "mem-pool.h"
+#include "utils.h"
+
+#define SYS_MEM_PAGE_SIZE     sysconf(_SC_PAGESIZE)
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 char* MemPool::MemObject::Pointer() const {
     return reinterpret_cast<char*>(m_obj_pv);
 }
@@ -42,14 +46,14 @@ uintptr_t MemPool::MemObject::ObjectPagePointerValue() const {
 
 MemPool::MemPool() :
     MemPool(TINY_OBJECT_RESIDENT_CNT, ONE_SLOT_SMALL_OBJECT_RESIDENT_CNT, ONE_SLOT_BIG_OBJECT_RESIDENT_CNT,
-            TINY_OBJECT_SIZE_THRESHOLD, (uint32_t)(BIG_PAGE_SIZE_THRESHOLD), BULK_PAGE_SIZE_THRESHOLD) {}
+            TINY_OBJECT_SIZE_THRESHOLD, (uint32_t)(SYS_MEM_PAGE_SIZE), BULK_PAGE_SIZE_THRESHOLD) {}
 
 MemPool::MemPool(uint32_t torc, uint32_t sorc, uint32_t borc) :
-    MemPool(torc, sorc, borc, TINY_OBJECT_SIZE_THRESHOLD, (uint32_t)(BIG_PAGE_SIZE_THRESHOLD), BULK_PAGE_SIZE_THRESHOLD) {}
+    MemPool(torc, sorc, borc, TINY_OBJECT_SIZE_THRESHOLD, (uint32_t)(SYS_MEM_PAGE_SIZE), BULK_PAGE_SIZE_THRESHOLD) {}
 
 MemPool::MemPool(uint32_t torc, uint32_t sorc, uint32_t borc,
                  uint32_t tpt, uint32_t bipt, uint32_t bupt) {
-    m_sys_page_size = (uint32_t)(common::PAGE_SIZE);
+    m_sys_page_size = (uint32_t)(SYS_MEM_PAGE_SIZE);
     m_available_reserve_bulk_obj_max_size = RESIDENT_BULK_OBJ_MAX_SIZE;
 
     m_one_slot_tiny_obj_resident_cnts = torc;
@@ -59,7 +63,7 @@ MemPool::MemPool(uint32_t torc, uint32_t sorc, uint32_t borc,
     m_big_obj_slot_footstep_exponent = (uint32_t)log2(m_sys_page_size);
     m_bulk_obj_slot_footstep_exponent = (uint32_t)log2(m_sys_page_size);
     m_one_slot_big_obj_resident_cnts = borc;
-    m_one_slot_bulk_obj_resident_cnts = (uint32_t)(ONE_SLOT_BULK_OBJECT_RESIDENT_CNT);
+    m_one_slot_bulk_obj_resident_cnts = (uint32_t)(get_nprocs());
     m_tiny_obj_threshold = tpt;
     m_big_obj_threshold = bipt;
     m_bulk_obj_threshold = bupt;
@@ -224,7 +228,7 @@ MemPool::MemObject* MemPool::Get(uint32_t size) {
 
     // 组装到MemObjectRef中
     if (!memObject) {
-        LOGEFUN << "fail to alloc mem object.";
+        std::cerr << "fail to alloc mem object." << std::endl;
     }
     return memObject;
 }
@@ -411,7 +415,7 @@ void MemPool::MemObject::refresh(MemObjectType type, uint32_t slotSize, uintptr_
 
 bool MemPool::alloc_page_objs(uint32_t size, uint32_t slotSize, std::unordered_set<uintptr_t> &pages,
                               std::unordered_map<uintptr_t, std::list<uintptr_t>> &freeObjs) {
-    auto objP = CommonUtils::PosixMemAlign(m_sys_page_size, size);
+    auto objP = Utils::PosixMemAlign(m_sys_page_size, size);
     if (objP) {
         auto page_pv = reinterpret_cast<uintptr_t>(objP);
         pages.insert(page_pv);
@@ -712,5 +716,5 @@ std::string MemPool::DumpDebugInfo() {
 #undef ALIGN6
 #undef ALIGN8
 }
-}  // namespace common
+}  // namespace ccsys
 }  // namespace ccraft

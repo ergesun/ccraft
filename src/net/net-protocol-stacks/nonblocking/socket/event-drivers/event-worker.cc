@@ -4,10 +4,12 @@
  */
 
 #include <iostream>
-#include "event-worker.h"
+
 #include "factory.h"
-#include "../../../../../common/common-utils.h"
 #include "../network-api/posix/local/simple-read-event-handler.h"
+#include "../../../../../ccsys/utils.h"
+
+#include "event-worker.h"
 
 namespace ccraft {
 namespace net {
@@ -24,14 +26,14 @@ EventWorker::EventWorker(uint32_t maxEvents, NonBlockingEventModel m) {
 
     m_notifyRecvFd = fds[0];
     m_notifySendFd = fds[1];
-    auto r = common::CommonUtils::SetNonBlocking(m_notifyRecvFd);
+    auto r = ccsys::Utils::SetNonBlocking(m_notifyRecvFd);
     if (r < 0) {
         auto err = errno;
         LOGEFUN << " can't set notify pipe non-blocking with errmsg = " << strerror(err);
         throw std::runtime_error("Set notify pipe non-blocking failed!");
     }
 
-    r = common::CommonUtils::SetNonBlocking(m_notifySendFd);
+    r = ccsys::Utils::SetNonBlocking(m_notifySendFd);
     if (r < 0) {
         auto err = errno;
         LOGEFUN << " can't set notify pipe non-blocking with errmsg = " << strerror(err);

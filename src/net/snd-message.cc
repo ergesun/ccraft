@@ -26,7 +26,7 @@ SndMessage::SndMessage() {
 #endif
 }
 
-SndMessage::SndMessage(common::MemPool *mp, net_peer_info_t &&peerInfo) : Message(mp) {
+SndMessage::SndMessage(ccsys::MemPool *mp, net_peer_info_t &&peerInfo) : Message(mp) {
 #ifdef WITH_MSG_ID
     m_header.id = get_new_id();
 #endif
@@ -34,7 +34,7 @@ SndMessage::SndMessage(common::MemPool *mp, net_peer_info_t &&peerInfo) : Messag
 }
 
 #ifdef WITH_MSG_ID
-SndMessage::SndMessage(common::MemPool *mp, net_peer_info_t &&peerInfo, Id id) : Message(mp) {
+SndMessage::SndMessage(ccsys::MemPool *mp, net_peer_info_t &&peerInfo, Id id) : Message(mp) {
     m_header.id = id;
     m_peerInfo = std::move(peerInfo);
 }

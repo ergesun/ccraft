@@ -25,7 +25,7 @@ class Message;
 }
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 class MemPool;
 }
 namespace net {
@@ -65,7 +65,7 @@ public:
      * @param timeout
      * @param memPool 如果为空，则内部自己构造。
      */
-    ARpcClient(net::ISocketService *ss, common::MemPool *memPool);
+    ARpcClient(net::ISocketService *ss, ccsys::MemPool *memPool);
     ~ARpcClient() override;
 
     bool Start() override;
@@ -88,7 +88,7 @@ protected:
     virtual void onRecvMessage(std::shared_ptr<net::NotifyMessage> sspNM) = 0;
 
 protected:
-    common::MemPool                                               *m_pMemPool;
+    ccsys::MemPool                                                *m_pMemPool;
 
 private:
     bool                                                           m_bStopped          = true;

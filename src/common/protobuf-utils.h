@@ -9,13 +9,15 @@
 #include <google/protobuf/message.h>
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 class MemPool;
+}
+namespace common {
 class Buffer;
 class ProtoBufUtils {
 public:
     static bool Deserialize(const common::Buffer *from, google::protobuf::Message *to);
-    static void Serialize(const google::protobuf::Message *from, common::Buffer *to, common::MemPool *mp);
+    static void Serialize(const google::protobuf::Message *from, common::Buffer *to, ccsys::MemPool *mp);
     static void Serialize(const google::protobuf::Message *from, common::Buffer *to);
 };
 }

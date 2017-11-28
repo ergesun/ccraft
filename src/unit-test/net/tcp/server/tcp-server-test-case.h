@@ -11,7 +11,7 @@
 #include "../../../../net/notify-message.h"
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
     class MemPool;
 }
 namespace net {
@@ -26,7 +26,7 @@ public:
 private:
     static void recv_msg(std::shared_ptr<ccraft::net::NotifyMessage> sspNM);
     static ccraft::net::ISocketService     *s_ss;
-    static ccraft::common::MemPool         *m_mp;
+    static ccraft::ccsys::MemPool          *m_mp;
 };
 }
 }

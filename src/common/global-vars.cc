@@ -12,18 +12,18 @@
 #include "../ccsys/timer.h"
 
 #include "common-def.h"
-#include "mem-pool.h"
+#include "../ccsys/mem-pool.h"
 
 #include "global-vars.h"
 
 namespace ccraft {
 namespace common {
-int      LOGIC_CPUS_CNT;
-int      PHYSICAL_CPUS_CNT;
-long     CACHELINE_SIZE;
-long     PAGE_SIZE;
-Timer   *g_pTimer = nullptr;
-MemPool *g_pMemPool;
+int             LOGIC_CPUS_CNT;
+int             PHYSICAL_CPUS_CNT;
+long            CACHELINE_SIZE;
+long            PAGE_SIZE;
+Timer          *g_pTimer = nullptr;
+ccsys::MemPool *g_pMemPool;
 
 #ifdef __linux__
 void initialize() {
@@ -54,7 +54,7 @@ void initialize() {
 
     g_pTimer = new Timer();
     g_pTimer->Start();
-    g_pMemPool = new MemPool();
+    g_pMemPool = new ccsys::MemPool();
 }
 
 void uninitialize() {

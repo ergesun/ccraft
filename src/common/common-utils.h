@@ -13,9 +13,9 @@
 #include <locale>
 
 #include "../ccsys/cctime.h"
+#include "../ccsys/mem-pool.h"
 
 #include "common-def.h"
-#include "mem-pool.h"
 
 namespace ccraft {
 namespace common {
@@ -23,34 +23,12 @@ class Buffer;
 class CommonUtils {
 public:
     /**
-     * 设置fd为非阻塞。
-     * @param fd
-     * @return
-     */
-    static int SetNonBlocking(int fd);
-
-    /**
-     * 设置fd为阻塞。
-     * @param fd
-     * @return
-     */
-    static int SetBlocking(int fd);
-
-    /**
-     * posix_memalign的封装
-     * @param align 对齐大小
-     * @param size 申请的内存大小
-     * @return
-     */
-    static void* PosixMemAlign(size_t align, size_t size);
-
-    /**
      *
      * @param mpo
      * @param size
      * @return
      */
-    static common::Buffer* GetNewBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize);
+    static Buffer* GetNewBuffer(ccsys::MemPoolObject *mpo, uint32_t totalBufferSize);
 
     /**
      * 判断入参是否为2的N次幂。
@@ -60,16 +38,6 @@ public:
     static bool IsPowerOfTwo(int x) {
         return (x > 0) && ((x & (x - 1)) == 0);
     }
-
-    /**
-     * 解析host并随机选择一个候选sockaddr返回。
-     * @param host
-     * @param port
-     * @param ss
-     * @param len
-     * @return 成功true，失败fasle。
-     */
-    static bool GetAddrInfo(const std::string &host, std::string &ip);
 
     // trim from start (in place)
     static inline void ltrim(std::string &s) {

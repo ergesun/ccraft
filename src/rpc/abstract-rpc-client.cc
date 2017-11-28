@@ -20,13 +20,13 @@
 
 namespace ccraft {
 namespace rpc {
-ARpcClient::ARpcClient(net::ISocketService *ss, common::MemPool *memPool) :
+ARpcClient::ARpcClient(net::ISocketService *ss, ccsys::MemPool *memPool) :
     m_pMemPool(memPool), m_pSocketService(ss) {
     CHECK(ss);
 
     if (!memPool) {
         m_bOwnPool = true;
-        m_pMemPool = new common::MemPool();
+        m_pMemPool = new ccsys::MemPool();
     }
 }
 

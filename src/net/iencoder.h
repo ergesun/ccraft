@@ -6,7 +6,7 @@
 #ifndef CCRAFT_NET_CORE_ICODEC_H
 #define CCRAFT_NET_CORE_ICODEC_H
 
-#include "../common/mem-pool.h"
+#include "../ccsys/mem-pool.h"
 
 namespace ccraft {
 namespace common {

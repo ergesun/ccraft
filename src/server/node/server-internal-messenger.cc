@@ -27,7 +27,7 @@ ServerInternalMessenger::ServerInternalMessenger(CreateServerInternalMessengerPa
     if (!createParam.memPool) {
         m_bOwnMemPool = true;
         // TODO(sunchao): 优化此内存池参数。
-        m_pMemPool = new common::MemPool();
+        m_pMemPool = new ccsys::MemPool();
     }
 
     m_iIOThreadsCnt = createParam.netIOThreadsCnt;
@@ -76,7 +76,7 @@ bool ServerInternalMessenger::Start() {
     m_bStopped = false;
     hw_rw_memory_barrier();
     m_pSocketService->Start(m_iIOThreadsCnt, net::NonBlockingEventModel::Posix);
-    m_pDispatchTp = new common::ThreadPool<std::shared_ptr<net::NotifyMessage>>(m_iDispatchTpCnt);
+    m_pDispatchTp = new ccsys::ThreadPool<std::shared_ptr<net::NotifyMessage>>(m_iDispatchTpCnt);
     if (!m_pSyncClient->Start()) {
         return false;
     }

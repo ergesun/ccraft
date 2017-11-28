@@ -9,11 +9,11 @@
 
 namespace ccraft {
 namespace test {
-TestSndMessage::TestSndMessage(common::MemPool *mp, net::net_peer_info_t &&socketInfo, std::string msg)  :
+TestSndMessage::TestSndMessage(ccsys::MemPool *mp, net::net_peer_info_t &&socketInfo, std::string msg)  :
     net::SndMessage(mp, std::move(socketInfo)), m_str(msg) {}
 
 #ifdef WITH_MSG_ID
-TestSndMessage::TestSndMessage(common::MemPool *mp, net::net_peer_info_t &&socketInfo, net::Message::Id id, std::string msg)  :
+TestSndMessage::TestSndMessage(ccsys::MemPool *mp, net::net_peer_info_t &&socketInfo, net::Message::Id id, std::string msg)  :
     net::SndMessage(mp, std::move(socketInfo), id), m_str(msg) {}
 #endif
 

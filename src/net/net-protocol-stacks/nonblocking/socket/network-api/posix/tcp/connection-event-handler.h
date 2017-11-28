@@ -12,17 +12,17 @@
 #include "net-stack-worker.h"
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 class MemPool;
 }
 
 namespace net {
 class PosixTcpConnectionEventHandler : public AFileEventHandler {
 public:
-    PosixTcpConnectionEventHandler(PosixTcpClientSocket *pSocket, common::MemPool *memPool,
+    PosixTcpConnectionEventHandler(PosixTcpClientSocket *pSocket, ccsys::MemPool *memPool,
         NotifyMessageCallbackHandler msgCallbackHandler, uint16_t logicPort,
         ConnectFunc onLogicConnect);
-    PosixTcpConnectionEventHandler(net_addr_t &peerAddr, int sfd, common::MemPool *memPool,
+    PosixTcpConnectionEventHandler(net_addr_t &peerAddr, int sfd, ccsys::MemPool *memPool,
     NotifyMessageCallbackHandler msgCallbackHandler, ConnectFunc onLogicConnect);
     ~PosixTcpConnectionEventHandler() override;
 
@@ -39,7 +39,7 @@ public:
 private:
     PosixTcpClientSocket   *m_pClientSocket = nullptr;
     PosixTcpNetStackWorker *m_pNetStackWorker = nullptr;
-    common::MemPool        *m_pMemPool;
+    ccsys::MemPool         *m_pMemPool;
     uint16_t                m_iLogicPort;
 };
 } // namespace net

@@ -7,24 +7,24 @@
 #include <iostream>
 #include <arpa/inet.h>
 
+#include "../../../../../../../ccsys/utils.h"
 #include "../../../../../../../common/server-gflags-config.h"
 #include "connection-event-handler.h"
 
 #include "server-event-handler.h"
-#include "../../../../../../../common/common-utils.h"
 
 namespace ccraft {
 namespace net {
 PosixTcpServerEventHandler::PosixTcpServerEventHandler(EventWorker *ew, net_addr_t *nat,
                                                        ConnectHandler stackConnectHandler, ConnectFunc onLogicConnect,
-                                                       common::MemPool *memPool,
+                                                       ccsys::MemPool *memPool,
                                                        NotifyMessageCallbackHandler msgCallbackHandler) {
     // TODO(sunchao): backlog改成可配置？
     m_pSrvSocket = new PosixTcpServerSocket(nat, 512);
     if (!m_pSrvSocket->Socket()) {
         throw std::runtime_error("server socket err!");
     }
-    if (0 != common::CommonUtils::SetNonBlocking(m_pSrvSocket->GetFd())) {
+    if (0 != ccsys::Utils::SetNonBlocking(m_pSrvSocket->GetFd())) {
         close(m_pSrvSocket->GetFd());
         throw std::runtime_error("set server socket fd non-blocking err!");
     }
@@ -43,7 +43,7 @@ PosixTcpServerEventHandler::PosixTcpServerEventHandler(EventWorker *ew, net_addr
     m_onLogicConnect = std::move(onLogicConnect);
     m_pMemPool = memPool;
     m_msgCallbackHandler = std::move(msgCallbackHandler);
-    m_tp = new common::ThreadPool<void*>(FLAGS_net_server_handshake_threads_cnt);
+    m_tp = new ccsys::ThreadPool<void*>(FLAGS_net_server_handshake_threads_cnt);
 }
 
 PosixTcpServerEventHandler::~PosixTcpServerEventHandler() {
@@ -89,7 +89,7 @@ bool PosixTcpServerEventHandler::HandleReadEvent() {
             // 连接失效的时候再释放。
             PosixTcpConnectionEventHandler *connEventHandler =
                 new PosixTcpConnectionEventHandler(peerAddr, conn_fd, m_pMemPool, m_msgCallbackHandler, m_onLogicConnect);
-            common::ThreadPool<void*>::Task t([=](void*){
+            ccsys::ThreadPool<void*>::Task t([=](void*){
                 //m_onStackConnect(connEventHandler);
                 if (connEventHandler->Initialize() && connEventHandler->GetSocket()->SetNonBlocking(true)) {
                     m_onStackConnect(connEventHandler);

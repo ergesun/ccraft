@@ -20,7 +20,7 @@ namespace ccraft {
 namespace rpc {
 class RpcRequest : public net::SndMessage {
 public:
-    RpcRequest(common::MemPool *mp, net::net_peer_info_t &&peerInfo,
+    RpcRequest(ccsys::MemPool *mp, net::net_peer_info_t &&peerInfo,
                uint16_t handlerId, std::shared_ptr<google::protobuf::Message> &&msg) :
         net::SndMessage(mp, std::move(peerInfo)), m_iHandlerId(handlerId), m_sspMsg(std::move(msg)) {}
 

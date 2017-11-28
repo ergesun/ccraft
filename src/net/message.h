@@ -10,7 +10,7 @@
 #include <time.h>
 
 #include "iencoder.h"
-#include "../common/mem-pool.h"
+#include "../ccsys/mem-pool.h"
 #include "../ccsys/spin-lock.h"
 #include "common-def.h"
 #include "../common/resource-pool.h"
@@ -102,7 +102,7 @@ public:
      *
      * @param mp 内存池，以供缓冲buffer。
      */
-    Message(common::MemPool *mp);
+    Message(ccsys::MemPool *mp);
     virtual ~Message() = default;
 
 #ifdef WITH_MSG_ID
@@ -129,14 +129,14 @@ public:
 
     static common::Buffer* GetNewBuffer();
     static common::Buffer* GetNewBuffer(uchar *pos, uchar *last, uchar *start, uchar *end,
-                                        common::MemPoolObject *mpo);
-    static common::Buffer* GetNewBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize);
-    static common::Buffer* GetNewAvailableBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize);
+                                        ccsys::MemPoolObject *mpo);
+    static common::Buffer* GetNewBuffer(ccsys::MemPoolObject *mpo, uint32_t totalBufferSize);
+    static common::Buffer* GetNewAvailableBuffer(ccsys::MemPoolObject *mpo, uint32_t totalBufferSize);
     static void            PutBuffer(common::Buffer *buffer);
 
 protected:
     Header              m_header;
-    common::MemPool    *m_pMemPool;
+    ccsys::MemPool     *m_pMemPool;
     net_peer_info_t     m_peerInfo;
 
 private:

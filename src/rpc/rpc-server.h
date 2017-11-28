@@ -13,13 +13,13 @@
 
 #include "../net/notify-message.h"
 #include "../common/blocking-queue.h"
-#include "../common/thread-pool.h"
+#include "../ccsys/thread-pool.h"
 
 #include "imessage-handler.h"
 
 // TODO(sunchao): fix rpc to use protobuf service. Now we just use protobuf data serialize feature.
 namespace ccraft {
-namespace common {
+namespace ccsys {
 class MemPool;
 }
 namespace net {
@@ -40,7 +40,7 @@ public:
      * @param ss
      * @param memPool 如果为空，则内部自己构造。
      */
-    RpcServer(uint16_t workThreadsCnt, net::ISocketService *ss, common::MemPool *memPool = nullptr);
+    RpcServer(uint16_t workThreadsCnt, net::ISocketService *ss, ccsys::MemPool *memPool = nullptr);
     ~RpcServer() override;
 
     bool Start() override;
@@ -60,8 +60,8 @@ private:
     // 关联指针，无需本类释放。
     net::ISocketService                                        *m_pSocketService        = nullptr;
     bool                                                        m_bOwnMemPool           = false;
-    common::MemPool                                            *m_pRpcMemPool           = nullptr;
-    common::ThreadPool<std::shared_ptr<net::NotifyMessage>>    *m_pWorkThreadPool       = nullptr;
+    ccsys::MemPool                                             *m_pRpcMemPool           = nullptr;
+    ccsys::ThreadPool<std::shared_ptr<net::NotifyMessage>>     *m_pWorkThreadPool       = nullptr;
     std::unordered_map<uint16_t, IRpcHandler*>                  m_hmHandlers;
     uint16_t                                                    m_iPort;
     bool                                                        m_bRegistered           = false;

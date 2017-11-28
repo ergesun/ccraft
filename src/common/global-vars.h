@@ -8,18 +8,19 @@
 
 namespace ccraft {
 namespace ccsys {
-    class Timer;
+class Timer;
+class MemPool;
 }
+
 namespace common {
 using ccsys::Timer;
-class MemPool;
 
 extern int      LOGIC_CPUS_CNT;
 extern int      PHYSICAL_CPUS_CNT;
 extern long     CACHELINE_SIZE;
 extern long     PAGE_SIZE;
 extern Timer   *g_pTimer;
-extern MemPool *g_pMemPool;
+extern ccsys::MemPool *g_pMemPool;
 
 /**
  * 本文件内容的初始化。

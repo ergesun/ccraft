@@ -11,7 +11,7 @@
 #include "net-protocol-stacks/nonblocking/nss-config.h"
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 class MemPool;
 }
 

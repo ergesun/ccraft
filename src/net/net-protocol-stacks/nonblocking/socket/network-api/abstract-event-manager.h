@@ -12,7 +12,7 @@
 #include "../../../../common-def.h"
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 class MemPool;
 }
 
@@ -23,7 +23,7 @@ typedef std::function<bool(AFileEventHandler*)> ConnectFunc;
 typedef std::function<void(AFileEventHandler*)> ConnectHandler, FinishHandler;
 class AEventManager {
 public:
-    AEventManager(common::MemPool *memPool, uint32_t maxEvents) :
+    AEventManager(ccsys::MemPool *memPool, uint32_t maxEvents) :
         m_pMemPool(memPool), m_iMaxEvents(maxEvents) {}
     virtual ~AEventManager() = default;
     virtual bool Start(NonBlockingEventModel m) = 0;
@@ -31,7 +31,7 @@ public:
     virtual void AddEvent(AFileEventHandler *socketEventHandler, int cur_mask, int mask) = 0;
 
 protected:
-    common::MemPool   *m_pMemPool;
+    ccsys::MemPool    *m_pMemPool;
     uint32_t           m_iMaxEvents;
 };
 } // namespace net

@@ -15,7 +15,7 @@ class INodeInternalRpcHandler;
 class RfSrvInternalRpcServerSync : public IService, public rpc::IMessageHandler {
 public:
     RfSrvInternalRpcServerSync(INodeInternalRpcHandler *handler, uint16_t workThreadsCnt,
-                                net::ISocketService *ss, common::MemPool *memPool = nullptr);
+                                net::ISocketService *ss, ccsys::MemPool *memPool = nullptr);
     ~RfSrvInternalRpcServerSync() override;
 
     bool Start() override;

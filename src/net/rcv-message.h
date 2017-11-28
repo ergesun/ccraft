@@ -16,7 +16,7 @@ namespace net {
 */
 class RcvMessage : public Message {
 public:
-    RcvMessage(common::MemPoolObject *refMpo, common::MemPool *mp, net_peer_info_t &&peerInfo,
+    RcvMessage(ccsys::MemPoolObject *refMpo, ccsys::MemPool *mp, net_peer_info_t &&peerInfo,
                Message::Header h, common::Buffer *buffer) : Message(mp) {
         m_header = h;
         m_pBuffer = buffer;
@@ -49,7 +49,7 @@ public:
 
 private:
     common::Buffer             *m_pBuffer;
-    common::MemPoolObject      *m_refMpo;
+    ccsys::MemPoolObject       *m_refMpo;
 };
 } // namespace net
 } // namespace ccraft

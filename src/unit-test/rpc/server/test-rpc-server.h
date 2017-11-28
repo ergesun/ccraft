@@ -13,7 +13,7 @@ namespace ccraft {
 namespace test {
 class TestRpcServer : public IService, public rpc::IMessageHandler {
 public:
-    TestRpcServer(uint16_t workThreadsCnt, net::ISocketService *ss, common::MemPool *memPool = nullptr);
+    TestRpcServer(uint16_t workThreadsCnt, net::ISocketService *ss, ccsys::MemPool *memPool = nullptr);
     ~TestRpcServer() override;
 
     bool Start() override;

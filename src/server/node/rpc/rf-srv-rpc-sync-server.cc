@@ -15,7 +15,7 @@
 namespace ccraft {
 namespace server {
 RfSrvInternalRpcServerSync::RfSrvInternalRpcServerSync(INodeInternalRpcHandler *handler, uint16_t workThreadsCnt,
-                                                         net::ISocketService *ss, common::MemPool *memPool) :
+                                                         net::ISocketService *ss, ccsys::MemPool *memPool) :
             m_pHandler(handler) {
     CHECK(handler);
     m_pRpcServer = new rpc::RpcServer(workThreadsCnt, ss, memPool);

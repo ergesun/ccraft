@@ -19,7 +19,7 @@ bool ProtoBufUtils::Deserialize(const Buffer *from, google::protobuf::Message *t
     return true;
 }
 
-void ProtoBufUtils::Serialize(const google::protobuf::Message *from, Buffer *to, MemPool *mp) {
+void ProtoBufUtils::Serialize(const google::protobuf::Message *from, Buffer *to, ccsys::MemPool *mp) {
     auto len = static_cast<uint32_t>(from->ByteSize());
 
     auto mo = mp->Get(len);

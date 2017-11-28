@@ -3,8 +3,8 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_COMMON_MEM_POOL_H
-#define CCRAFT_COMMON_MEM_POOL_H
+#ifndef CCRAFT_CCSYS_MEM_POOL_H
+#define CCRAFT_CCSYS_MEM_POOL_H
 
 #include <cstdint>
 #include <unordered_map>
@@ -14,16 +14,9 @@
 #include <map>
 #include <sstream>
 
-#include "global-vars.h"
-
-#include "../ccsys/spin-lock.h"
+#include "spin-lock.h"
 
 // TODO(sunchao): 添加一个和时间相关的统计机制，动态的对常驻对象数量、扩张系数等进行调整。
-
-/**
- * 大对象的界定阈值
- */
-#define BIG_PAGE_SIZE_THRESHOLD               common::PAGE_SIZE
 /**
  * 超大对象的界定阈值
  */
@@ -48,10 +41,7 @@
  * 每个大对象槽保留的个数上限
  */
 #define ONE_SLOT_BIG_OBJECT_RESIDENT_CNT      128
-/**
- * 每个超大对象槽保留的个数上限
- */
-#define ONE_SLOT_BULK_OBJECT_RESIDENT_CNT     (common::PHYSICAL_CPUS_CNT * 4)
+
 /**
  * 可留用保存的超大对象的大小上限
  */
@@ -66,8 +56,7 @@
 #define DEFAULT_EXPAND_BULK_OBJ_CNT_FACTOR    4
 
 namespace ccraft {
-using namespace ccsys;
-namespace common {
+namespace ccsys {
 /**
  * Thread-safe. !注意：本类的析构函数与其他函数的并发使用不是thread-safe的。
  * 将内存按大小分成4种类别来管理。
@@ -306,7 +295,7 @@ private: // 有了槽位的思想，便对齐了。
 };
 
 typedef MemPool::MemObject MemPoolObject;
-}  // namespace common
+}  // namespace ccsys
 }  // namespace ccraft
 
-#endif //CCRAFT_COMMON_MEM_POOL_H
+#endif //CCRAFT_CCSYS_MEM_POOL_H

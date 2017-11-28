@@ -27,7 +27,7 @@ namespace server {
 class RfSrvInternalRpcClientAsync : public rpc::ARpcClient {
 public:
     RfSrvInternalRpcClientAsync(net::ISocketService *ss, net::NotifyMessageCallbackHandler cb,
-                                common::MemPool *memPool = nullptr) : rpc::ARpcClient(ss, memPool) {
+                                ccsys::MemPool *memPool = nullptr) : rpc::ARpcClient(ss, memPool) {
         m_fCallback = cb;
     }
 

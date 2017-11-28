@@ -26,7 +26,7 @@ public:
      * @param mp
      * @param peerInfo 标识所走的协议以及本地socket信息
      */
-    SndMessage(common::MemPool *mp, net_peer_info_t &&peerInfo);
+    SndMessage(ccsys::MemPool *mp, net_peer_info_t &&peerInfo);
 
 #if WITH_MSG_ID // 如果开启了这个，可能你回复消息的时候需要保持id不变，就需要用到此构造函数。
     /**
@@ -36,12 +36,12 @@ public:
      * @param peerInfo 标识所走的协议以及本地socket信息
      * @param id 作为响应时赋予的接收到的消息的id，以便接受者用其分发。
      */
-    SndMessage(common::MemPool *mp, net_peer_info_t &&peerInfo, Id id);
+    SndMessage(ccsys::MemPool *mp, net_peer_info_t &&peerInfo, Id id);
 #endif
 
 public:
     common::Buffer* Encode() override final;
-    inline void SetMemPool(common::MemPool *mp) {
+    inline void SetMemPool(ccsys::MemPool *mp) {
         m_pMemPool = mp;
     }
 

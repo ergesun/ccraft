@@ -15,8 +15,10 @@
 #include "../../../../notify-message.h"
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 class MemPool;
+}
+namespace common {
 class Buffer;
 }
 
@@ -39,7 +41,7 @@ public:
      *
      * @param maxCacheMessageCnt 消息缓冲队列的最大消息个数。0为无限制。
      */
-    ANetStackMessageWorker(AFileEventHandler *eventHandler, common::MemPool *memPool,
+    ANetStackMessageWorker(AFileEventHandler *eventHandler, ccsys::MemPool *memPool,
                            NotifyMessageCallbackHandler msgCallbackHandler, uint32_t maxCacheMessageCnt = 0);
     virtual ~ANetStackMessageWorker();
 
@@ -85,12 +87,12 @@ public:
 
 protected:
     static std::function<void(RcvMessage*)> s_release_rm_handle;
-    static RcvMessage* getNewRcvMessage(common::MemPool *mp, net_peer_info_t peerInfo, Message::Header h,
+    static RcvMessage* getNewRcvMessage(ccsys::MemPool *mp, net_peer_info_t peerInfo, Message::Header h,
                                         common::Buffer *buffer);
     static void releaseRcvMessage(RcvMessage *rm);
 
 protected:
-    common::MemPool                    *m_pMemPool;
+    ccsys::MemPool                     *m_pMemPool;
     common::Buffer                     *m_pHeaderBuffer;
     common::BlockingQueue<SndMessage*> *m_bqMessages;
     AFileEventHandler                  *m_pEventHandler;

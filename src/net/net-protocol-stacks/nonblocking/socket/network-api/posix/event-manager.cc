@@ -11,7 +11,7 @@ using namespace std::placeholders;
 
 namespace ccraft {
 namespace net {
-PosixEventManager::PosixEventManager(SocketProtocol sp, std::shared_ptr<net_addr_t> sspNat, common::MemPool *memPool, uint32_t maxEvents,
+PosixEventManager::PosixEventManager(SocketProtocol sp, std::shared_ptr<net_addr_t> sspNat, ccsys::MemPool *memPool, uint32_t maxEvents,
                                      uint32_t connWorkersCnt, ConnectHandler stackConnectHandler, ConnectFunc logicConnectHandler,
                                      FinishHandler finishHandler, NotifyMessageCallbackHandler msgCallbackHandler)  :
     AEventManager(memPool, maxEvents), m_sp(sp), m_sspNat(std::move(sspNat)), m_iConnWorkersCnt(connWorkersCnt) {

@@ -3,7 +3,7 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#include "../../../../../common/mem-pool.h"
+#include "../../../../../ccsys/mem-pool.h"
 #include "../../../../../common/buffer.h"
 #include "../../../../../common/common-utils.h"
 #include "../../../../rcv-message.h"
@@ -17,7 +17,7 @@ namespace ccraft {
 namespace net {
 std::function<void(RcvMessage*)> ANetStackMessageWorker::s_release_rm_handle = std::bind(
                                                     &ANetStackMessageWorker::releaseRcvMessage, std::placeholders::_1);
-ANetStackMessageWorker::ANetStackMessageWorker(AFileEventHandler *eventHandler, common::MemPool *memPool,
+ANetStackMessageWorker::ANetStackMessageWorker(AFileEventHandler *eventHandler, ccsys::MemPool *memPool,
                                                NotifyMessageCallbackHandler msgCallbackHandler, uint32_t maxCacheMessageCnt) {
     m_pEventHandler = eventHandler;
     m_pMemPool = memPool;
@@ -72,7 +72,7 @@ void ANetStackMessageWorker::ClearMessage() {
     m_bqMessages->Clear();
 }
 
-RcvMessage* ANetStackMessageWorker::getNewRcvMessage(common::MemPool *mp, net_peer_info_t peerInfo,
+RcvMessage* ANetStackMessageWorker::getNewRcvMessage(ccsys::MemPool *mp, net_peer_info_t peerInfo,
                                                      Message::Header h, common::Buffer *buffer) {
     auto rmMpo = mp->Get(sizeof(RcvMessage));
     auto rcvMessage = new(rmMpo->Pointer()) RcvMessage(rmMpo, mp, std::move(peerInfo), h, buffer);

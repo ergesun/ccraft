@@ -66,7 +66,7 @@ private:
 
 public:
     RfSrvInternalRpcClientSync(net::ISocketService *ss, const ccsys::cctime &timeout,
-                                uint16_t workThreadsCnt, common::MemPool *memPool = nullptr) :
+                                uint16_t workThreadsCnt, ccsys::MemPool *memPool = nullptr) :
         rpc::ARpcClient(ss, memPool), m_timeout(timeout) {}
 
     // Define Rpc start

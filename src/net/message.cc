@@ -12,7 +12,7 @@ namespace net {
 ccsys::spin_lock_t Message::s_freeBufferLock = UNLOCKED;
 std::list<common::Buffer*> Message::s_freeBuffers = std::list<common::Buffer*>();
 
-Message::Message(common::MemPool *mp) :
+Message::Message(ccsys::MemPool *mp) :
     m_pMemPool(mp) {
 }
 
@@ -30,19 +30,19 @@ common::Buffer* Message::GetNewBuffer() {
 }
 
 common::Buffer* Message::GetNewBuffer(uchar *pos, uchar *last, uchar *start, uchar *end,
-                                      common::MemPoolObject *mpo) {
+                                      ccsys::MemPoolObject *mpo) {
     auto buf = Message::GetNewBuffer();
     buf->Refresh(pos, last, start, end, mpo);
     return buf;
 }
 
-common::Buffer* Message::GetNewBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize) {
+common::Buffer* Message::GetNewBuffer(ccsys::MemPoolObject *mpo, uint32_t totalBufferSize) {
     auto bufferStart = (uchar*)(mpo->Pointer());
     auto bufferEnd = bufferStart + totalBufferSize - 1;
     return Message::GetNewBuffer(nullptr, nullptr, bufferStart, bufferEnd, mpo);
 }
 
-common::Buffer* Message::GetNewAvailableBuffer(common::MemPoolObject *mpo, uint32_t totalBufferSize) {
+common::Buffer* Message::GetNewAvailableBuffer(ccsys::MemPoolObject *mpo, uint32_t totalBufferSize) {
     auto bufferStart = (uchar*)(mpo->Pointer());
     auto bufferEnd = bufferStart + totalBufferSize - 1;
     return Message::GetNewBuffer(bufferStart, bufferEnd, bufferStart, bufferEnd, mpo);

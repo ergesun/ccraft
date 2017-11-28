@@ -15,10 +15,10 @@ namespace ccraft {
 namespace test {
 class TestSndMessage : public net::SndMessage {
 public:
-    TestSndMessage(common::MemPool *mp, net::net_peer_info_t &&socketInfo, std::string msg);
+    TestSndMessage(ccsys::MemPool *mp, net::net_peer_info_t &&socketInfo, std::string msg);
 
 #ifdef WITH_MSG_ID
-    TestSndMessage(common::MemPool *mp, net::net_peer_info_t &&socketInfo, net::Message::Id id, std::string msg);
+    TestSndMessage(ccsys::MemPool *mp, net::net_peer_info_t &&socketInfo, net::Message::Id id, std::string msg);
 #endif
 
 protected:

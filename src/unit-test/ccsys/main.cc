@@ -8,10 +8,14 @@
 #include <gtest/gtest.h>
 #include <atomic>
 
+#include "../../ccsys/cctime.h"
+#include "../../ccsys/thread-pool.h"
+#include "../../ccsys/mem-pool.h"
 #include "../../ccsys/spin-lock.h"
 #include "../../ccsys/cctime.h"
 #include "../../ccsys/timer.h"
 #include "../../ccsys/random.h"
+#include "../../ccsys/utils.h"
 
 using namespace ccraft::ccsys;
 
@@ -69,4 +73,106 @@ TEST(CCSysTest, RandomTest) {
     Random r3(Random::Range(1, 5));
     EXPECT_LE(r3.GetNew(), 5);
     EXPECT_GE(r3.GetNew(), 1);
+}
+
+TEST(CCSysTest, CommonUtilsTest) {
+    std::string localIp = "127.0.0.1";
+    std::string host = "localhost";
+    std::string ip;
+    ccraft::ccsys::Utils::GetAddrInfo(host, ip);
+    EXPECT_STREQ(localIp.c_str(), ip.c_str());
+}
+
+TEST(CCSysTest, MemPoolTest) {
+    using std::cout;
+    using std::endl;
+    std::vector<MemPool::MemObject*> memObjects;
+    MemPool mp;
+    /*******************tiny objs**********************/
+    for (int i = 0; i < 10000; ++i) {
+        auto needSize = rand() % 17;
+        needSize = needSize ? needSize : 1;
+        auto memObject = mp.Get(needSize);
+        memObjects.push_back(memObject);
+        auto buf = memObject->Pointer();
+        auto size = memObject->Size();
+        const char *str = "hello world!";
+        memcpy(buf, str, strlen(str) + 1);
+        cout << "buf = " << buf << ", needSize = " << needSize <<  ", get size = " << size << endl;
+    }
+
+    for (auto p : memObjects) {
+        mp.Put(p);
+    }
+    cout << mp.DumpDebugInfo() << endl;
+
+    /*******************small objs**********************/
+    memObjects.clear();
+    for (int i = 0; i < 100000; ++i) {
+        auto needSize = (32 + i) % 4097;
+        needSize = needSize ? needSize : 32;
+        auto memObject = mp.Get(needSize);
+        memObjects.push_back(memObject);
+        auto buf = memObject->Pointer();
+        auto size = memObject->Size();
+        const char *str = "hello world!";
+        memcpy(buf, str, strlen(str) + 1);
+        cout << "buf = " << buf << ", needSize = " << needSize <<  ", get size = " << size << endl;
+    }
+
+    for (auto p : memObjects) {
+        mp.Put(p);
+    }
+    cout << mp.DumpDebugInfo() << endl;
+
+    /*******************big objs**********************/
+    memObjects.clear();
+    for (int i = 0; i < 1000; ++i) {
+        auto needSize = (4097 + i) % (32 * 4096 + 1);
+        needSize = needSize ? needSize : 4097;
+        auto memObject = mp.Get(needSize);
+        memObjects.push_back(memObject);
+        auto buf = memObject->Pointer();
+        auto size = memObject->Size();
+        const char *str = "hello world!";
+        memcpy(buf, str, strlen(str) + 1);
+        cout << "buf = " << buf << ", needSize = " << needSize <<  ", get size = " << size << endl;
+    }
+
+    for (auto p : memObjects) {
+        mp.Put(p);
+    }
+    cout << mp.DumpDebugInfo() << endl;
+
+    /*******************bulk objs**********************/
+    memObjects.clear();
+    for (int i = 0; i < 5; ++i) {
+        auto needSize = 1024 * 1024 + i * 1024 * 1024;
+        auto memObject = mp.Get(needSize);
+        memObjects.push_back(memObject);
+        auto buf = memObject->Pointer();
+        auto size = memObject->Size();
+        const char *str = "hello world!";
+        memcpy(buf, str, strlen(str) + 1);
+        cout << "buf = " << buf << ", needSize = " << needSize <<  ", get size = " << size << endl;
+    }
+
+    for (auto p : memObjects) {
+        p->Put();
+    }
+    cout << mp.DumpDebugInfo() << endl;
+}
+
+TEST(CCSysTest, ThreadPoolTest) {
+    static std::mutex s_mtx;
+    ThreadPool<void*> tp;
+    for (int i = 0; i < 100; ++i) {
+        ThreadPool<void*>::Task t([i](void*){
+            std::unique_lock<std::mutex> l(s_mtx);
+            std::cout << "index = " << i << std::endl;
+        });
+        tp.AddTask(t);
+    }
+
+    tp.WaitAll();
 }

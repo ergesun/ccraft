@@ -12,6 +12,7 @@
 #include "../../common/codec-utils.h"
 #include "../../common/buffer.h"
 #include "../../common/protobuf-utils.h"
+#include "../../common/global-vars.h"
 #include "../../codegen/node-raft.pb.h"
 
 #include "realtime-disk-rflogger.h"

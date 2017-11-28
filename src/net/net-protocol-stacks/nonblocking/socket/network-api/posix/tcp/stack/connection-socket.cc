@@ -13,6 +13,7 @@
 
 #include "../../../../../../../../common/common-utils.h"
 #include "connection-socket.h"
+#include "../../../../../../../../ccsys/utils.h"
 
 #define SET_OPT_CHECK()                                                                      \
         if (m_connected) {                                                                   \
@@ -166,9 +167,9 @@ int PosixTcpConnectionSocket::Close() {
 
 bool PosixTcpConnectionSocket::SetNonBlocking(bool val) {
     if (val) {
-        return 0 == common::CommonUtils::SetNonBlocking(m_fd);
+        return 0 == ccsys::Utils::SetNonBlocking(m_fd);
     } else {
-        return 0 == common::CommonUtils::SetBlocking(m_fd);
+        return 0 == ccsys::Utils::SetBlocking(m_fd);
     }
 }
 } // namespace net

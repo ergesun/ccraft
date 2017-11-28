@@ -99,14 +99,14 @@
 namespace ccraft {
 namespace net {
 PosixTcpNetStackWorker::PosixTcpNetStackWorker(CreatorType ct, AFileEventHandler *eventHandler,
-                                               common::MemPool *memPool, PosixTcpClientSocket *socket,
+                                               ccsys::MemPool *memPool, PosixTcpClientSocket *socket,
                                                NotifyMessageCallbackHandler msgCallbackHandler, uint16_t logicPort,
                                                ConnectFunc logicConnect)
     : ANetStackMessageWorker(eventHandler, memPool, std::move(msgCallbackHandler)), m_ct(ct),
       m_pSocket(socket), m_iLogicPort(logicPort), m_onLogicConnect(std::move(logicConnect)) {}
 
 PosixTcpNetStackWorker::PosixTcpNetStackWorker(CreatorType ct, AFileEventHandler *eventHandler,
-                                               common::MemPool *memPool, PosixTcpClientSocket *socket,
+                                               ccsys::MemPool *memPool, PosixTcpClientSocket *socket,
                                                NotifyMessageCallbackHandler msgCallbackHandler,
                                                ConnectFunc logicConnect)
     : ANetStackMessageWorker(eventHandler, memPool, std::move(msgCallbackHandler)),

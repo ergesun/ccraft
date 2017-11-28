@@ -10,7 +10,7 @@
 #include "../inet-stack-worker-manager.h"
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
     class MemPool;
 }
 
@@ -20,7 +20,7 @@ namespace net {
      */
     struct NssConfig {
         NssConfig(SocketProtocol sp, std::shared_ptr<net_addr_t> sspNat, uint16_t logicPort,
-                  NetStackWorkerMgrType mgrType, common::MemPool *memPool,
+                  NetStackWorkerMgrType mgrType, ccsys::MemPool *memPool,
                     NotifyMessageCallbackHandler msgCallbackHandler, timeval connectTimeout) {
             this->sp                 = sp;
             this->sspNat             = sspNat;
@@ -38,7 +38,7 @@ namespace net {
         /**
          * 关联关系，无需本类释放。
          */
-        common::MemPool                        *memPool;
+        ccsys::MemPool                         *memPool;
         NotifyMessageCallbackHandler            msgCallbackHandler;
         timeval                                 connectTimeout;
     };

@@ -11,15 +11,15 @@
 #include "../common/buffer.h"
 #include "../common/protobuf-utils.h"
 #include "../common/codec-utils.h"
+#include "../common/global-vars.h"
 
 #include "response.h"
 #include "rpc-handler.h"
-
 #include "rpc-server.h"
 
 namespace ccraft {
 namespace rpc {
-RpcServer::RpcServer(uint16_t workThreadsCnt, net::ISocketService *ss, common::MemPool *memPool) :
+RpcServer::RpcServer(uint16_t workThreadsCnt, net::ISocketService *ss, ccsys::MemPool *memPool) :
     m_pSocketService(ss), m_pRpcMemPool(memPool) {
     CHECK(ss);
     if (0 == workThreadsCnt) {
@@ -28,7 +28,7 @@ RpcServer::RpcServer(uint16_t workThreadsCnt, net::ISocketService *ss, common::M
 
     if (!memPool) {
         m_bOwnMemPool = true;
-        m_pRpcMemPool = new common::MemPool();
+        m_pRpcMemPool = new ccsys::MemPool();
     }
 
     m_hmHandlers.reserve(100);
@@ -52,7 +52,7 @@ bool RpcServer::Start() {
 
     m_bStopped = false;
     hw_rw_memory_barrier();
-    m_pWorkThreadPool = new common::ThreadPool<std::shared_ptr<net::NotifyMessage>>(m_iWorkThreadsCnt);
+    m_pWorkThreadPool = new ccsys::ThreadPool<std::shared_ptr<net::NotifyMessage>>(m_iWorkThreadsCnt);
 
     return true;
 }

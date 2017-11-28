@@ -3,15 +3,16 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_COMMON_THREAD_POOL_H
-#define CCRAFT_COMMON_THREAD_POOL_H
+#ifndef CCRAFT_CCSYS_THREAD_POOL_H
+#define CCRAFT_CCSYS_THREAD_POOL_H
 
 #include <thread>
 #include <vector>
 #include <unordered_set>
 #include <atomic>
 
-#include "global-vars.h"
+#include <sys/sysinfo.h>
+
 #include "../common/blocking-queue.h"
 #include "../common/common-def.h"
 #include "../common/common-utils.h"
@@ -19,7 +20,7 @@
 #include "../ccsys/spin-lock.h"
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 /**
  * 当前仅支持FIFO调度的线程池。
  * TODO(sunchao): 1、添加调度策略 2、考虑task相关联性，关联task分配到不同的线程 3、cpu亲缘性绑定？再思考，感觉没必要。
@@ -58,7 +59,7 @@ public:
      */
     explicit ThreadPool(uint32_t threads_cnt = 0) {
         m_iActiveWorkersCnt.store(0);
-        threads_cnt = threads_cnt > 0 ? threads_cnt : (uint32_t)common::LOGIC_CPUS_CNT * 2;
+        threads_cnt = threads_cnt > 0 ? threads_cnt : (uint32_t)get_nprocs() * 2;
         m_vThreadps.reserve(threads_cnt);
         for (uint32_t i = 0; i < threads_cnt; ++i) {
             m_vThreadps.push_back(new std::thread(std::bind(&ThreadPool::proc, this)));
@@ -164,6 +165,6 @@ private:
     std::mutex                     m_mtxActiveWorkerCnt;
     std::condition_variable        m_cvActiveWorkerCnt;
 }; // class ThreadPool
-}  // namespace common
+}  // namespace ccsys
 }  // namespace ccraft
-#endif //CCRAFT_COMMON_THREAD_POOL_H
+#endif //CCRAFT_CCSYS_THREAD_POOL_H

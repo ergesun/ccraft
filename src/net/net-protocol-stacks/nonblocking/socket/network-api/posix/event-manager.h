@@ -24,7 +24,7 @@ typedef std::function<bool(AFileEventHandler*)> ValidHandlerFunc;
  */
 class PosixEventManager : public AEventManager {
 public:
-    PosixEventManager(SocketProtocol sp, std::shared_ptr<net_addr_t> sspNat, common::MemPool *memPool, uint32_t maxEvents,
+    PosixEventManager(SocketProtocol sp, std::shared_ptr<net_addr_t> sspNat, ccsys::MemPool *memPool, uint32_t maxEvents,
         uint32_t connWorkersCnt, ConnectHandler stackConnectHandler, ConnectFunc logicConnectHandler,
     FinishHandler finishHandler, NotifyMessageCallbackHandler msgCallbackHandler);
 

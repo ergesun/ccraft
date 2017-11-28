@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 #include "iservice.h"
-#include "../../common/thread-pool.h"
+#include "../../ccsys/thread-pool.h"
 #include "../../net/common-def.h"
 #include "../../net/notify-message.h"
 #include "../../rpc/common-def.h"
@@ -60,7 +60,7 @@ public:
 private:
     RaftConsensus                    *m_pRaftConsensus          = nullptr;
     ServerInternalMessenger          *m_pNodeInternalMessenger  = nullptr;
-    common::ThreadPool<RpcTask>      *m_pExecRpcTp              = nullptr;
+    ccsys::ThreadPool<RpcTask>       *m_pExecRpcTp              = nullptr;
 };
 } // namespace server
 } // namespace ccraft

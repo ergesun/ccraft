@@ -14,12 +14,13 @@
 #include "../../common/protobuf-utils.h"
 #include "../../codegen/raft-state.pb.h"
 #include "../rflog/realtime-disk-rflogger.h"
+#include "../../codegen/node-raft.pb.h"
+#include "../../common/global-vars.h"
+
+#include "service-manager.h"
 #include "elector-manager-service.h"
 #include "server-rpc-service.h"
-#include "../../codegen/node-raft.pb.h"
-
 #include "raft-consensus.h"
-#include "service-manager.h"
 
 namespace ccraft {
 namespace server {

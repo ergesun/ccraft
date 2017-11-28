@@ -14,7 +14,7 @@ namespace ccraft {
 namespace net {
 class ConnectRequestMessage : public SndMessage {
 public:
-    ConnectRequestMessage(common::MemPool *mp, int16_t logicPort) :
+    ConnectRequestMessage(ccsys::MemPool *mp, int16_t logicPort) :
         SndMessage(mp, net_peer_info_s()), m_logicPort(std::move(logicPort)) {}
 
 protected:

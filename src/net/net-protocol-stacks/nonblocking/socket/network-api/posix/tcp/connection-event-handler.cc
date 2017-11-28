@@ -8,7 +8,7 @@
 namespace ccraft {
 namespace net {
 PosixTcpConnectionEventHandler::PosixTcpConnectionEventHandler(PosixTcpClientSocket *pSocket,
-                                                               common::MemPool *memPool,
+                                                               ccsys::MemPool *memPool,
                                                                NotifyMessageCallbackHandler msgCallbackHandler,
                                                                uint16_t logicPort, ConnectFunc onLogicConnect) :
     m_iLogicPort(logicPort) {
@@ -20,7 +20,7 @@ PosixTcpConnectionEventHandler::PosixTcpConnectionEventHandler(PosixTcpClientSoc
     m_pMemPool = memPool;
 }
 
-PosixTcpConnectionEventHandler::PosixTcpConnectionEventHandler(net_addr_t &peerAddr, int sfd, common::MemPool *memPool,
+PosixTcpConnectionEventHandler::PosixTcpConnectionEventHandler(net_addr_t &peerAddr, int sfd, ccsys::MemPool *memPool,
                                                                NotifyMessageCallbackHandler msgCallbackHandler,
                                                                ConnectFunc onLogicConnect) {
     m_pClientSocket = new PosixTcpClientSocket(peerAddr, sfd);

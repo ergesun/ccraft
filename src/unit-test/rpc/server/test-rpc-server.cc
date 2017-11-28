@@ -14,7 +14,7 @@
 
 namespace ccraft {
 namespace test {
-TestRpcServer::TestRpcServer(uint16_t workThreadsCnt, net::ISocketService *ss, common::MemPool *memPool) {
+TestRpcServer::TestRpcServer(uint16_t workThreadsCnt, net::ISocketService *ss, ccsys::MemPool *memPool) {
     m_pRpcServer = new rpc::RpcServer(workThreadsCnt, ss, memPool);
 }
 

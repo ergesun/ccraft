@@ -12,7 +12,7 @@
 #include "../../abstract-event-manager.h"
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 class MemPool;
 }
 
@@ -27,10 +27,10 @@ public:
         Server
     };
 public:
-    PosixTcpNetStackWorker(CreatorType ct, AFileEventHandler *eventHandler, common::MemPool *memPool,
+    PosixTcpNetStackWorker(CreatorType ct, AFileEventHandler *eventHandler, ccsys::MemPool *memPool,
     PosixTcpClientSocket *socket, NotifyMessageCallbackHandler msgCallbackHandler,
     uint16_t logicPort, ConnectFunc logicConnect);
-    PosixTcpNetStackWorker(CreatorType ct, AFileEventHandler *eventHandler, common::MemPool *memPool,
+    PosixTcpNetStackWorker(CreatorType ct, AFileEventHandler *eventHandler, ccsys::MemPool *memPool,
     PosixTcpClientSocket *socket, NotifyMessageCallbackHandler msgCallbackHandler,
     ConnectFunc logicConnect);
     ~PosixTcpNetStackWorker() override;

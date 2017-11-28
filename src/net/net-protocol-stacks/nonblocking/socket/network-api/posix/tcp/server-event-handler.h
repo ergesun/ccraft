@@ -13,10 +13,10 @@
 #include "../../../event-drivers/ievent-driver.h"
 #include "../../abstract-event-manager.h"
 #include "../../../../../../notify-message.h"
-#include "../../../../../../../common/thread-pool.h"
+#include "../../../../../../../ccsys/thread-pool.h"
 
 namespace ccraft {
-namespace common {
+namespace ccsys {
 class MemPool;
 }
 
@@ -25,7 +25,7 @@ class PosixTcpServerEventHandler : public AFileEventHandler {
 public:
     PosixTcpServerEventHandler(EventWorker *ew, net_addr_t *nat,
         ConnectHandler stackConnectHandler, ConnectFunc onLogicConnect,
-        common::MemPool *memPool, NotifyMessageCallbackHandler msgCallbackHandler);
+        ccsys::MemPool *memPool, NotifyMessageCallbackHandler msgCallbackHandler);
     ~PosixTcpServerEventHandler() override;
 
     bool Initialize() override;
@@ -44,9 +44,9 @@ private:
     /**
      * 关联关系，外部创建者会释放，本类无需释放。
      */
-    common::MemPool                  *m_pMemPool;
+    ccsys::MemPool                  *m_pMemPool;
     NotifyMessageCallbackHandler      m_msgCallbackHandler;
-    common::ThreadPool<void*>        *m_tp;
+    ccsys::ThreadPool<void*>        *m_tp;
 };
 } // namespace net
 } // namespace ccraft

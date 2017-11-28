@@ -34,7 +34,7 @@ ServerRpcService::ServerRpcService(uint16_t port, uint16_t rpcThreadsCnt, RaftCo
     };
 
     m_pNodeInternalMessenger = new ServerInternalMessenger(cnimp);
-    m_pExecRpcTp = new common::ThreadPool<RpcTask>(rpcThreadsCnt);
+    m_pExecRpcTp = new ccsys::ThreadPool<RpcTask>(rpcThreadsCnt);
 }
 
 ServerRpcService::~ServerRpcService() {

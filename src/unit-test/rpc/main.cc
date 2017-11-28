@@ -26,7 +26,7 @@ using namespace std;
 #define TEST_PORT            43225
 
 ccraft::net::ISocketService                 *g_pSS     = nullptr;
-ccraft::common::MemPool                     *g_mp      = nullptr;
+ccraft::ccsys::MemPool                      *g_mp      = nullptr;
 ccraft::test::TestRpcServer                 *g_pServer = nullptr;
 ccraft::server::RfSrvInternalRpcClientSync  *g_pClient = nullptr;
 volatile bool                                g_bStopped = false;
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     ccraft::common::initialize();
 
-    g_mp = new ccraft::common::MemPool();
+    g_mp = new ccraft::ccsys::MemPool();
     auto nat = new ccraft::net::net_addr_t("0.0.0.0", TEST_PORT);
     std::shared_ptr<ccraft::net::net_addr_t> sspNat(nat);
     timeval connTimeout = {
