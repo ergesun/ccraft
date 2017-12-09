@@ -33,7 +33,7 @@ public:
      * 收到了rpc的响应。
      * @param sspNM
      */
-    virtual void OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) = 0;
+    virtual void OnRecvRpcResult(std::shared_ptr<net::NotifyMessage> sspNM) = 0;
 }; // class IMessageHandler
 } // namespace rpc
 } // namespace ccraft

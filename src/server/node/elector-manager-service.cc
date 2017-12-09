@@ -20,7 +20,7 @@ ElectorManagerService::~ElectorManagerService() {
 }
 
 bool ElectorManagerService::Start() {
-    if (!initialize(m_iMyId, FLAGS_servers_conf_path.c_str())) {
+    if (!initialize(uint32_t(FLAGS_server_id), FLAGS_servers_conf_path.c_str())) {
         LOGFFUN << "ElectorManagerService initialize failed!";
     }
 
@@ -35,8 +35,6 @@ bool ElectorManagerService::initialize(uint32_t myId, std::string &&serversConfP
     if (0 == myId) {
         LOGFFUN << "server id must be larger than 0.";
     }
-
-    m_iMyId = myId;
 
     return m_pNodeConf->Initialize(myId, serversConfPath);
 }

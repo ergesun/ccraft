@@ -26,6 +26,12 @@
             LOGFFUN << "lseek file " << (filePath) << " failed with errmsg " << strerror(err);      \
         }
 
+#define FSyncFileWithFatalLOG(fd, filePath)                                                         \
+        if (-1 == fsync((fd))) {                                                                    \
+            auto err = errno;                                                                       \
+            LOGFFUN << "fdatasync file " << (filePath) << " failed with errmsg " << strerror(err);  \
+        }
+
 #define FDataSyncFileWithFatalLOG(fd, filePath)                                                     \
         if (-1 == fdatasync((fd))) {                                                                \
             auto err = errno;                                                                       \

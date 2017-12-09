@@ -16,16 +16,17 @@
 #include "../rflog/realtime-disk-rflogger.h"
 #include "../../codegen/node-raft.pb.h"
 #include "../../common/global-vars.h"
+#include "../../net/rcv-message.h"
 
 #include "service-manager.h"
 #include "elector-manager-service.h"
 #include "server-rpc-service.h"
 #include "raft-consensus.h"
+#include "../../rpc/response.h"
 
 namespace ccraft {
 namespace server {
-RaftConsensus::RaftConsensus() : m_iMyId((uint32_t)FLAGS_server_id),
-                                 m_random(ccsys::Random::Range(FLAGS_start_election_rand_latency_low,
+RaftConsensus::RaftConsensus() : m_random(ccsys::Random::Range(FLAGS_start_election_rand_latency_low,
                                                                 FLAGS_start_election_rand_latency_high)) {
     m_iRequestVoteTimeoutInterval = uint32_t(FLAGS_raft_election_interval * FLAGS_raft_election_timeout_percent);
     m_pTimer = new ccsys::Timer();
@@ -34,13 +35,6 @@ RaftConsensus::RaftConsensus() : m_iMyId((uint32_t)FLAGS_server_id),
     m_moniterRVTimeoTimerCb = std::bind(&RaftConsensus::on_request_vote_timeout, this, std::placeholders::_1);
     m_monitorRVTimeoTimerEvent = {nullptr, &m_moniterRVTimeoTimerCb};
 
-    m_pElectorManager = dynamic_cast<ElectorManagerService*>(ServiceManager::GetService(ServiceType::ElectorManager));
-    assert(m_pElectorManager);
-
-    auto selfConf = m_pElectorManager->GetSelfServerConf();
-    m_pSrvRpcService = new ServerRpcService(selfConf.m_iPortForServer,
-                                            (uint16_t)m_pElectorManager->GetOtherServersConf().size(),
-                                            this);
     initialize();
 }
 
@@ -61,6 +55,14 @@ bool RaftConsensus::Start() {
     }
 
     m_bStopped = false;
+    m_pElectorManager = dynamic_cast<ElectorManagerService*>(ServiceManager::GetService(ServiceType::ElectorManager));
+    assert(m_pElectorManager);
+
+    auto selfConf = m_pElectorManager->GetSelfServerConf();
+    m_iMyId = selfConf.id;
+    m_pSrvRpcService = new ServerRpcService(selfConf.portForServer,
+                                            (uint16_t)m_pElectorManager->GetOtherServersConf().size(),
+                                            this);
     if (!m_pSrvRpcService->Start()) {
         LOGEFUN << "Cannot start ServerRpcService.";
         return false;
@@ -109,11 +111,33 @@ void RaftConsensus::OnMessageSent(rpc::ARpcClient::SentRet &&sentRet) {
         LOGWFUN << "send rpc(id = " << sentRet.handlerId << ") to " << sentRet.peer << " failed because send msg queue is full!";
     }
 
-
+    // 如果追求性能，可以考虑写一个spin的rw lock.
+    ccsys::WriteLock wl(&m_sentMsgsIdRwMtx);
+    m_sentMsgsId.insert(sentRet.msgId);
 }
 
-void RaftConsensus::OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) {
+void RaftConsensus::OnRecvRpcResult(std::shared_ptr<net::NotifyMessage> sspNM) {
+    if (sspNM) {
+        switch (sspNM->GetType()) {
+            case net::NotifyMessageType::Message: {
+                auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());
+                auto rm = mnm->GetContent();
+                if (LIKELY(rm)) {
+                    if (!is_valid_msg_id(rm)) {
+                        return;
+                    }
 
+                    auto buffer = rm->GetDataBuffer();
+                } else {
+                    LOGWFUN << "recv message is empty!";
+                }
+                break;
+            }
+            default: {
+                // skip.
+            }
+        }
+    }
 }
 
 void RaftConsensus::initialize() {
@@ -205,17 +229,25 @@ void RaftConsensus::save_rf_state() {
 }
 
 void RaftConsensus::start_new_election() {
+    // 这里没有阻塞动作，除非选举超时设置的太短，否则没有加锁的必要
     LOGITAG;
-    m_roleType = NodeRoleType::Candidate;
-    ++m_iCurrentTerm;
-    if (m_iVoteFor != m_iMyId) {
-        save_rf_state();
-    }
-
-    m_iVoteFor = m_iMyId;
+    prepare_new_election_env();
+    save_rf_state();
     broadcast_request_vote(m_pElectorManager->GetOtherServersConf());
     subscribe_leader_hb_timer_tick();
     subscribe_request_vote_timeout_tick();
+}
+
+void RaftConsensus::prepare_new_election_env() {
+    {
+        ccsys::WriteLock rl(&m_sentMsgsIdRwMtx);
+        m_sentMsgsId.clear();
+    }
+
+    ccsys::WriteLock wl(&m_envRwLock);
+    m_roleType = NodeRoleType::Candidate;
+    ++m_iCurrentTerm;
+    m_iVoteFor = m_iMyId;
 }
 
 inline void RaftConsensus::subscribe_leader_hb_timer_tick() {
@@ -254,7 +286,52 @@ void RaftConsensus::broadcast_request_vote(const std::map<uint32_t, common::RfSe
 
     rpc::SP_PB_MSG spPbMsg(pq);
     for (auto const &srv : otherSrvs) {
-        m_pSrvRpcService->RequestVoteAsync(spPbMsg, srv.second.GetAddrForServer());
+        auto addrForServer = net::net_peer_info_t(srv.second.addr,
+                                                  srv.second.portForServer, net::SocketProtocol::Tcp);
+        m_pSrvRpcService->RequestVoteAsync(spPbMsg, std::move(addrForServer));
+    }
+}
+
+bool RaftConsensus::is_valid_msg_id(const net::RcvMessage *rm) {
+    NodeRoleType nrt;
+    {
+        ccsys::ReadLock rl(&m_envRwLock);
+        nrt = m_roleType;
+    }
+
+    auto buffer = rm->GetDataBuffer();
+    auto rpcCode = ByteOrderUtils::ReadUInt16(buffer->GetPos());
+    if (RpcCode::OK != (RpcCode)rpcCode) {
+        LOGEFUN << "Get response error rpc code " << rpcCode << " from peer " << rm->GetPeerInfo();
+        return false;
+    }
+
+    buffer->MoveHeadBack(sizeof(RpcCodeType));
+    switch (nrt) {
+        case NodeRoleType::Leader:
+        case NodeRoleType::Candidate:{
+            ccsys::ReadLock rl(&m_sentMsgsIdRwMtx);
+            return m_sentMsgsId.find(rm->GetId()) != m_sentMsgsId.end();
+        }
+        default:{
+            return false;
+        }
+    }
+}
+
+void RaftConsensus::handle_response_message(net::RcvMessage *rm) {
+    ccsys::ReadLock rl(&m_envRwLock);
+    switch (m_roleType) {
+        case NodeRoleType::Leader: {
+            break;
+        }
+        case NodeRoleType::Candidate:{
+
+            break;
+        }
+        case NodeRoleType::Follower:{
+            break;
+        }
     }
 }
 } // namespace server

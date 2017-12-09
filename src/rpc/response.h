@@ -15,7 +15,7 @@
 
 namespace ccraft {
 namespace rpc {
-typedef uint16_t CodeType;
+typedef uint16_t RpcCodeType;
 class RpcResponse : public net::SndMessage {
 public:
     RpcResponse(SP_PB_MSG msg) :

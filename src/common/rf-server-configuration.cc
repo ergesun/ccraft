@@ -38,7 +38,7 @@ bool RfServerConfiguration::Initialize(uint32_t myId, std::string &path) {
         }
 
         if (uint32_t(id) == myId) {
-            if (m_selfServer.m_iId == uint32_t(id)) {
+            if (m_selfServer.id == uint32_t(id)) {
                 LOGFFUN << "Server id " << id << " is duplicate!";
             }
             m_selfServer = RfServer(uint32_t(id), std::move(addr), portForServer, portForClient);

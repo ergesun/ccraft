@@ -34,7 +34,7 @@ bool NBSocketService::Start(uint16_t ioThreadsCnt, NonBlockingEventModel m) {
         return true;
     }
     m_bStopped = false;
-    hw_rw_memory_barrier();
+    hw_sw_memory_barrier();
     m_pEventManager = new PosixEventManager(m_sp, m_nlt, m_conf.memPool, MAX_EVENTS, ioThreadsCnt,
                                             std::bind(&NBSocketService::on_stack_connect, this, _1),
                                             std::bind(&NBSocketService::on_logic_connect, this, _1),
@@ -48,7 +48,7 @@ bool NBSocketService::Stop() {
         return true;
     }
     m_bStopped = true;
-    hw_rw_memory_barrier();
+    hw_sw_memory_barrier();
     if (!m_pEventManager->Stop()) {
         return false;
     }

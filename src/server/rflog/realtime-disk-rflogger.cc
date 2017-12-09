@@ -116,8 +116,8 @@ void RtDiskRfLogger::Sync() {
     }
 
     WriteFileFullyWithFatalLOG(m_iFd, (char*)(b.GetStart()), len, m_sLogFilePath.c_str());
-    // Now we don't need flush file metadata real-time.
-    FDataSyncFileWithFatalLOG(m_iFd, m_sLogFilePath.c_str());
+    // Now we don't need flush file metadata real-time? to use FDataSync?
+    FSyncFileWithFatalLOG(m_iFd, m_sLogFilePath.c_str());
     m_iFileSize += len;
 }
 

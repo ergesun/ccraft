@@ -35,7 +35,6 @@ private:
 
 private:
     common::RfServerConfiguration             *m_pNodeConf = nullptr;
-    uint32_t                                   m_iMyId = 0;
 };
 } // namespace server
 } // namespace ccraft

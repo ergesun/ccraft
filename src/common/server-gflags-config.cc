@@ -37,11 +37,11 @@ DEFINE_int32(internal_rpc_io_threads_cnt, 0, "设置用于node间通信的rpc服
 /**
  * rf node
  */
-DEFINE_int32(server_id, 0, "设置server id，从0开始。");
+DEFINE_int32(server_id, 0, "设置server id，大于0的整数，应包含在conf/servers的第一列中。");
 DEFINE_string(data_dir, "/tmp/ccraft", "数据存放目录。");
 DEFINE_string(rflogger_type, "realtime-disk", "rflogger类型。");
 DEFINE_int32(raft_election_interval, 30, "raft leader超时的时间间隔，单位:second。");
-DEFINE_double(raft_election_timeout_percent, 0.7, "raft发出选举到成功之前的超时时间，为百分比，通过乘以raft_election_interval得到最终结果。");
+DEFINE_double(raft_election_timeout_percent, 0.8, "raft发出选举到成功之前的超时时间，为百分比，通过乘以raft_election_interval得到最终结果。");
 DEFINE_string(servers_conf_path, "/tmp/ccraft/conf/servers", "集群server地址信息。");
 DEFINE_int32(leader_hb_timeout_duration, 30, "选举超时时间。即如果这段时间内没有收到leader的心跳则发起选举。单位:second。");
 DEFINE_int32(start_election_rand_latency_low, 200, "开始选举的随机延迟时间的下限。单位:ms。");

@@ -32,7 +32,7 @@ bool PosixEventManager::Start(NonBlockingEventModel m) {
     }
 
     m_bStopped = false;
-    hw_rw_memory_barrier();
+    hw_sw_memory_barrier();
     if (SocketProtocol::Tcp == m_sp) {
         if (m_sspNat.get()) {
             auto ew = new EventWorker(m_iMaxEvents, m);
@@ -64,7 +64,7 @@ bool PosixEventManager::Stop() {
         return true;
     }
     m_bStopped = true;
-    hw_rw_memory_barrier();
+    hw_sw_memory_barrier();
     if (m_sspNat.get()) {
         // 释放listen的worker及其相关资源
         auto listenEW = m_pListenWorkerEventLoopCtx.second;

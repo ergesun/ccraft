@@ -51,7 +51,7 @@ bool ARpcClient::Start() {
     }
 
     m_bStopped = false;
-    hw_rw_memory_barrier();
+    hw_sw_memory_barrier();
 
     return true;
 }
@@ -66,7 +66,7 @@ bool ARpcClient::Stop() {
     }
 
     m_bStopped = true;
-    hw_rw_memory_barrier();
+    hw_sw_memory_barrier();
 
     return true;
 }
@@ -86,7 +86,7 @@ bool ARpcClient::registerRpc(std::string &&rpcName, uint16_t id) {
 
 void ARpcClient::finishRegisterRpc() {
     m_bRegistered = true;
-    hw_rw_memory_barrier();
+    hw_sw_memory_barrier();
 }
 
 ARpcClient::SentRet ARpcClient::sendMessage(std::string &&rpcName, SP_PB_MSG msg, net::net_peer_info_t &&peer) {

@@ -44,14 +44,14 @@ ServerInternalMessenger::ServerInternalMessenger(CreateServerInternalMessengerPa
         .logicPort = createParam.port,
         .netMgrType = net::NetStackWorkerMgrType::Unique,
         .memPool = m_pMemPool,
-        .msgCallbackHandler = std::bind(&INodeInternalRpcHandler::OnRecvRpcCallbackMsg, this, std::placeholders::_1),
+        .msgCallbackHandler = std::bind(&INodeInternalRpcHandler::OnRecvRpcResult, this, std::placeholders::_1),
         .connectTimeout = connTimeout
     };
     m_pSocketService = net::SocketServiceFactory::CreateService(nc);
     m_pSyncClient = new RfSrvInternalRpcClientSync(m_pSocketService, createParam.clientWaitResponseTimeout,
                                                 createParam.clientRpcWorkThreadsCnt, m_pMemPool);
     m_pAsyncClient = new RfSrvInternalRpcClientAsync(m_pSocketService,
-                                                     std::bind(&INodeInternalRpcHandler::OnRecvRpcCallbackMsg, createParam.nodeInternalRpcHandler, std::placeholders::_1),
+                                                     std::bind(&INodeInternalRpcHandler::OnRecvRpcResult, createParam.nodeInternalRpcHandler, std::placeholders::_1),
                                                      m_pMemPool);
     m_pServer = new RfSrvInternalRpcServerSync(this, createParam.serverRpcWorkThreadsCnt, m_pSocketService, m_pMemPool);
 }
@@ -74,7 +74,7 @@ bool ServerInternalMessenger::Start() {
     }
 
     m_bStopped = false;
-    hw_rw_memory_barrier();
+    hw_sw_memory_barrier();
     m_pSocketService->Start(m_iIOThreadsCnt, net::NonBlockingEventModel::Posix);
     m_pDispatchTp = new ccsys::ThreadPool<std::shared_ptr<net::NotifyMessage>>(m_iDispatchTpCnt);
     if (!m_pSyncClient->Start()) {
@@ -90,7 +90,7 @@ bool ServerInternalMessenger::Stop() {
     }
 
     m_bStopped = true;
-    hw_rw_memory_barrier();
+    hw_sw_memory_barrier();
     m_pSyncClient->Stop();
     m_pServer->Stop();
     m_pSocketService->Stop();
@@ -160,7 +160,7 @@ void ServerInternalMessenger::dispatch_msg(std::shared_ptr<net::NotifyMessage> s
     }
 }
 
-void ServerInternalMessenger::OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) {
+void ServerInternalMessenger::OnRecvRpcResult(std::shared_ptr<net::NotifyMessage> sspNM) {
     if (UNLIKELY(m_bStopped)) {
         return;
     }

@@ -51,7 +51,7 @@ bool RpcServer::Start() {
     }
 
     m_bStopped = false;
-    hw_rw_memory_barrier();
+    hw_sw_memory_barrier();
     m_pWorkThreadPool = new ccsys::ThreadPool<std::shared_ptr<net::NotifyMessage>>(m_iWorkThreadsCnt);
 
     return true;
@@ -63,7 +63,7 @@ bool RpcServer::Stop() {
     }
 
     m_bStopped = true;
-    hw_rw_memory_barrier();
+    hw_sw_memory_barrier();
     DELETE_PTR(m_pWorkThreadPool);
     return true;
 }
@@ -81,7 +81,7 @@ bool RpcServer::RegisterRpc(uint16_t id, IRpcHandler *handler) {
 
 void RpcServer::FinishRegisterRpc() {
     m_bRegistered = true;
-    hw_rw_memory_barrier();
+    hw_sw_memory_barrier();
 }
 
 void RpcServer::HandleMessage(std::shared_ptr<net::NotifyMessage> sspNM) {

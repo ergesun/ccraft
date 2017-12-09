@@ -8,55 +8,45 @@
 
 #include <string>
 
-#include "../net/common-def.h"
-
 namespace ccraft {
 namespace common {
 struct RfServer {
     RfServer() = default;
     RfServer(uint32_t id, std::string &&addr, uint16_t portForServer, uint16_t portForClient) :
-        m_iId(id), m_sAddr(std::move(addr)), m_iPortForServer(portForServer), m_iPortForClient(portForClient) {}
+        id(id), addr(std::move(addr)), portForServer(portForServer), portForClient(portForClient) {}
 
     RfServer(uint32_t id, std::string &addr, uint16_t portForServer, uint16_t portForClient) :
-        m_iId(id), m_sAddr(addr), m_iPortForServer(portForServer), m_iPortForClient(portForClient) {}
+        id(id), addr(addr), portForServer(portForServer), portForClient(portForClient) {}
 
     RfServer(const RfServer &rs) {
-        this->m_iId            = rs.m_iId;
-        this->m_sAddr          = rs.m_sAddr;
-        this->m_iPortForServer = rs.m_iPortForServer;
-        this->m_iPortForClient = rs.m_iPortForClient;
+        this->id            = rs.id;
+        this->addr          = rs.addr;
+        this->portForServer = rs.portForServer;
+        this->portForClient = rs.portForClient;
     }
 
     RfServer(RfServer &&rs) noexcept {
-        this->m_iId            = rs.m_iId;
-        this->m_sAddr          = std::move(rs.m_sAddr);
-        this->m_iPortForServer = rs.m_iPortForServer;
-        this->m_iPortForClient = rs.m_iPortForClient;
+        this->id            = rs.id;
+        this->addr          = std::move(rs.addr);
+        this->portForServer = rs.portForServer;
+        this->portForClient = rs.portForClient;
     }
 
     RfServer& operator=(const RfServer &rs) = default;
 
     RfServer& operator=(RfServer &&rs) noexcept {
-        this->m_iId            = rs.m_iId;
-        this->m_sAddr          = std::move(rs.m_sAddr);
-        this->m_iPortForServer = rs.m_iPortForServer;
-        this->m_iPortForClient = rs.m_iPortForClient;
+        this->id            = rs.id;
+        this->addr          = std::move(rs.addr);
+        this->portForServer = rs.portForServer;
+        this->portForClient = rs.portForClient;
 
         return *this;
     }
 
-    net::net_peer_info_t GetAddrForServer() const {
-        return net::net_peer_info_t(m_sAddr, m_iPortForServer, net::SocketProtocol::Tcp);
-    }
-
-    net::net_peer_info_t GetAddrForClient() const {
-        return net::net_peer_info_t(m_sAddr, m_iPortForClient, net::SocketProtocol::Tcp);
-    }
-
-    uint32_t              m_iId              = 0;
-    std::string           m_sAddr;
-    uint16_t              m_iPortForServer   = 0;
-    uint16_t              m_iPortForClient   = 0;
+    uint32_t              id              = 0;
+    std::string           addr;
+    uint16_t              portForServer   = 0;
+    uint16_t              portForClient   = 0;
 };
 } // namespace rfcommon
 } // namespace ccraft

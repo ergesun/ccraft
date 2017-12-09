@@ -14,9 +14,10 @@
 #include "../../ccsys/cctime.h"
 #include "../../ccsys/random.h"
 #include "../../common/rf-server.h"
-
 #include "../../rpc/abstract-rpc-client.h"
+
 #include "iserver-internal-rpc-handler.h"
+#include "../../ccsys/rw-mutex.h"
 
 #define RFLOG_DIR          "rflogs"
 #define RFLOG_FILE_NAME    "rflog"
@@ -25,6 +26,9 @@
 //         RFSTATE_MAGIC_NO        r f s t
 #define    RFSTATE_MAGIC_NO      0x72667374
 #define    RFSTATE_MAGIC_NO_LEN  4
+
+using namespace google;
+using namespace ccraft::rpc;
 
 /**
  * TODO(sunchao): 考虑有没有必要摒弃流水线模式，改成一个peer独占一个线程玩心跳以及选举。
@@ -45,15 +49,17 @@ public:
     bool Stop() override;
 
     // INodeInternalRpcHandler IF
-    rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
-    rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
-    void OnMessageSent(rpc::ARpcClient::SentRet &&sentRet);
-    void OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) override;
+    SP_PB_MSG OnAppendRfLog(SP_PB_MSG sspMsg) override;
+    SP_PB_MSG OnRequestVote(SP_PB_MSG sspMsg) override;
+    void OnMessageSent(ARpcClient::SentRet &&sentRet);
+    void OnRecvRpcResult(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
 private:
     void initialize();
+    // TODO(sunchao): move to logger
     void save_rf_state();
     void start_new_election();
+    void prepare_new_election_env();
     inline void subscribe_leader_hb_timer_tick();
     /**
      * leader心跳超时。
@@ -67,8 +73,15 @@ private:
     void on_request_vote_timeout(void *ctx);
     void broadcast_request_vote(const std::map<uint32_t, common::RfServer> &otherSrvs);
 
+    bool is_valid_msg_id(const net::RcvMessage *rm);
+    void handle_response_message(net::RcvMessage *rm);
+//    void handle_heartbeat_response(protocol::RequestVoteResponse *rvr);
+//    void handle_request_vote_response();
 private:
     bool                           m_bStopped                    = true;
+    // 先用大粒度锁锁环境。
+    // TODO(sunchao): 优化并发锁的控制。
+    ccsys::RwMutex                 m_envRwLock;
     NodeRoleType                   m_roleType                    = NodeRoleType::Follower;
     uint32_t                       m_iCurrentTerm                = 0;
     uint32_t                       m_iMyId                       = 0;
@@ -88,11 +101,14 @@ private:
     ccsys::Timer::TimerCallback    m_moniterRVTimeoTimerCb;
     ccsys::Random                  m_random;
     uint32_t                       m_iRequestVoteTimeoutInterval = 0;
+    ccsys::RwMutex                          m_sentMsgsIdRwMtx;
+    std::unordered_set<net::Message::Id>    m_sentMsgsId;
+
     /**
      * 关联关系，无需本类释放。
      */
-    ElectorManagerService         *m_pElectorManager             = nullptr;
-    ServerRpcService              *m_pSrvRpcService              = nullptr;
+    ElectorManagerService                  *m_pElectorManager             = nullptr;
+    ServerRpcService                       *m_pSrvRpcService              = nullptr;
 }; // class RaftConsensus
 } // namespace server
 } // namespace ccraft

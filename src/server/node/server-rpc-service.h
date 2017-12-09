@@ -55,7 +55,7 @@ public:
     void RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
 
-    void OnRecvRpcCallbackMsg(std::shared_ptr<net::NotifyMessage> sspNM) override;
+    void OnRecvRpcResult(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
 private:
     RaftConsensus                    *m_pRaftConsensus          = nullptr;
