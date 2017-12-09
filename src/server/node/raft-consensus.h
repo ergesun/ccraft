@@ -31,6 +31,8 @@ using namespace google;
 using namespace ccraft::rpc;
 
 /**
+ * 没有采用相对简单并且peer少的时候线程上线文切换少的方式比如说一个peer一个线程处理的方式，而是采用流水线的形式，
+ * 一是为了扩展(适配multi raft或者压根就是peer较多呢？)，二是为了更难以便考验自己。
  * TODO(sunchao): 考虑有没有必要摒弃流水线模式，改成一个peer独占一个线程玩心跳以及选举。
  */
 namespace ccraft {
@@ -52,7 +54,7 @@ public:
     SP_PB_MSG OnAppendRfLog(SP_PB_MSG sspMsg) override;
     SP_PB_MSG OnRequestVote(SP_PB_MSG sspMsg) override;
     void OnMessageSent(ARpcClient::SentRet &&sentRet);
-    void OnRecvRpcResult(std::shared_ptr<net::NotifyMessage> sspNM) override;
+    void OnRecvRpcReturnResult(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
 private:
     void initialize();
@@ -74,7 +76,7 @@ private:
     void broadcast_request_vote(const std::map<uint32_t, common::RfServer> &otherSrvs);
 
     bool is_valid_msg_id(const net::RcvMessage *rm);
-    void handle_response_message(net::RcvMessage *rm);
+    void handle_response_message(const net::RcvMessage *rm);
 //    void handle_heartbeat_response(protocol::RequestVoteResponse *rvr);
 //    void handle_request_vote_response();
 private:

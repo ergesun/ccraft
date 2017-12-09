@@ -90,7 +90,7 @@ public:
     rpc::ARpcClient::SentRet RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
 
-    void OnRecvRpcResult(std::shared_ptr<net::NotifyMessage> sspNM) override;
+    void OnRecvRpcReturnResult(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
 private:
     void dispatch_msg(std::shared_ptr<net::NotifyMessage> sspNM);

@@ -12,7 +12,7 @@ TypicalRpcHandler::Handle(SP_PB_MSG req) {
     return m_handle(req);
 }
 
-SP_PB_MSG TypicalRpcHandler::CreateRequest() {
+SP_PB_MSG TypicalRpcHandler::CreateMessage() {
     return m_requestCreator();
 }
 } // namespace rpc

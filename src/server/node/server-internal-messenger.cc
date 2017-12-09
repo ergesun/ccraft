@@ -44,14 +44,14 @@ ServerInternalMessenger::ServerInternalMessenger(CreateServerInternalMessengerPa
         .logicPort = createParam.port,
         .netMgrType = net::NetStackWorkerMgrType::Unique,
         .memPool = m_pMemPool,
-        .msgCallbackHandler = std::bind(&INodeInternalRpcHandler::OnRecvRpcResult, this, std::placeholders::_1),
+        .msgCallbackHandler = std::bind(&INodeInternalRpcHandler::OnRecvRpcReturnResult, this, std::placeholders::_1),
         .connectTimeout = connTimeout
     };
     m_pSocketService = net::SocketServiceFactory::CreateService(nc);
     m_pSyncClient = new RfSrvInternalRpcClientSync(m_pSocketService, createParam.clientWaitResponseTimeout,
                                                 createParam.clientRpcWorkThreadsCnt, m_pMemPool);
     m_pAsyncClient = new RfSrvInternalRpcClientAsync(m_pSocketService,
-                                                     std::bind(&INodeInternalRpcHandler::OnRecvRpcResult, createParam.nodeInternalRpcHandler, std::placeholders::_1),
+                                                     std::bind(&INodeInternalRpcHandler::OnRecvRpcReturnResult, createParam.nodeInternalRpcHandler, std::placeholders::_1),
                                                      m_pMemPool);
     m_pServer = new RfSrvInternalRpcServerSync(this, createParam.serverRpcWorkThreadsCnt, m_pSocketService, m_pMemPool);
 }
@@ -160,7 +160,7 @@ void ServerInternalMessenger::dispatch_msg(std::shared_ptr<net::NotifyMessage> s
     }
 }
 
-void ServerInternalMessenger::OnRecvRpcResult(std::shared_ptr<net::NotifyMessage> sspNM) {
+void ServerInternalMessenger::OnRecvRpcReturnResult(std::shared_ptr<net::NotifyMessage> sspNM) {
     if (UNLIKELY(m_bStopped)) {
         return;
     }

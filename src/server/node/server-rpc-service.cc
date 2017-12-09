@@ -89,8 +89,8 @@ rpc::SP_PB_MSG ServerRpcService::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
     return m_pNodeInternalMessenger->OnRequestVote(sspMsg);
 }
 
-void ServerRpcService::OnRecvRpcResult(std::shared_ptr<net::NotifyMessage> sspNM) {
-    m_pRaftConsensus->OnRecvRpcResult(sspNM);
+void ServerRpcService::OnRecvRpcReturnResult(std::shared_ptr<net::NotifyMessage> sspNM) {
+    m_pRaftConsensus->OnRecvRpcReturnResult(sspNM);
 }
 } // namespace server
 } // namespace ccraft

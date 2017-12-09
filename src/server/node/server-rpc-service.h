@@ -8,12 +8,13 @@
 
 #include <unordered_map>
 
-#include "iservice.h"
 #include "../../ccsys/thread-pool.h"
 #include "../../net/common-def.h"
 #include "../../net/notify-message.h"
 #include "../../rpc/common-def.h"
 #include "../../rpc/abstract-rpc-client.h"
+
+#include "iservice.h"
 #include "iserver-internal-rpc-handler.h"
 
 #include "common-def.h"
@@ -55,7 +56,7 @@ public:
     void RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg) override;
 
-    void OnRecvRpcResult(std::shared_ptr<net::NotifyMessage> sspNM) override;
+    void OnRecvRpcReturnResult(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
 private:
     RaftConsensus                    *m_pRaftConsensus          = nullptr;

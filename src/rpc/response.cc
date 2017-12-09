@@ -11,31 +11,36 @@
 namespace ccraft {
 namespace rpc {
 uint32_t RpcResponse::getDerivePayloadLength() {
-    if (m_pMsg.get()) {
-        return 1 + sizeof(RpcCodeType) + m_pMsg->ByteSize();
-    } else {
-        return 1 + sizeof(RpcCodeType);
+    auto baseSize = RpcResponseBase::getDerivePayloadLength();
+    if (m_pMsg) {
+        return baseSize + m_pMsg->ByteSize();
     }
+
+    return baseSize;
 }
 
 void RpcResponse::encodeDerive(common::Buffer *b) {
     *(b->GetPos()) = (uchar)((uint8_t)(MessageType::Response));
-    b->MoveHeadBack(1);
+    b->MoveHeadBack(sizeof(MessageTypeType));
     ByteOrderUtils::WriteUInt16(b->GetPos(), (RpcCodeType)m_code);
     b->MoveHeadBack(sizeof(RpcCodeType));
-    if (m_pMsg.get()) {
+    ByteOrderUtils::WriteUInt16(b->GetPos(), m_ht);
+    b->MoveHeadBack(sizeof(HandlerType));
+    if (m_pMsg) {
         common::ProtoBufUtils::Serialize(m_pMsg.get(), b);
     }
 }
 
 uint32_t RpcErrorResponse::getDerivePayloadLength() {
-    return 1 + sizeof(RpcCodeType);
+    return sizeof(MessageTypeType) + sizeof(RpcCodeType) + sizeof(HandlerType);
 }
 
 void RpcErrorResponse::encodeDerive(common::Buffer *b) {
     *(b->GetPos()) = (uchar)((uint8_t)(MessageType::Response));
-    b->MoveHeadBack(1);
+    b->MoveHeadBack(sizeof(MessageTypeType));
     ByteOrderUtils::WriteUInt16(b->GetPos(), (RpcCodeType)m_code);
+    b->MoveHeadBack(sizeof(RpcCodeType));
+    ByteOrderUtils::WriteUInt16(b->GetPos(), m_ht);
 }
 } // namespace rpc
 } // namespace ccraft

@@ -16,9 +16,9 @@ namespace ccraft {
 namespace rpc {
 uint32_t RpcRequest::getDerivePayloadLength() {
     if (m_sspMsg.get()) {
-        return 1 + sizeof(uint16_t) + m_sspMsg->ByteSize();
+        return sizeof(MessageTypeType) + sizeof(uint16_t) + m_sspMsg->ByteSize();
     } else {
-        return 1 + sizeof(uint16_t);
+        return sizeof(MessageTypeType) + sizeof(uint16_t);
     }
 }
 

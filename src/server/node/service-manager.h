@@ -11,6 +11,7 @@
 #include <condition_variable>
 
 #include "../../ccsys/spin-lock.h"
+
 #include "common-def.h"
 
 namespace ccraft {

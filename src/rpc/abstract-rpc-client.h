@@ -34,10 +34,10 @@ class NotifyMessage;
 }
 namespace rpc {
 /**
-* [Message format]
-*    client -> server :  |net common header(Message::HeaderSize() bytes)|msg type|[handler id(2bytes)|protobuf msg(n bytes)]|
-*    server -> client :  |net common header(Message::HeaderSize() bytes)|msg type|[rpc code(2bytes)|protobuf msg(n bytes or 0 bytes if no return value)]|
-*/
+ * [Message format]
+ *    client -> server :  |net common header(Message::HeaderSize() bytes)|msg type|[handler id(2bytes)|protobuf msg(n bytes)]|
+ *    server -> client :  |net common header(Message::HeaderSize() bytes)|msg type|[rpc code(2bytes)|[handler id(2bytes)|protobuf msg(n bytes or 0 if no return value)]|
+ */
 /**
 * Rpc client base class.
 */

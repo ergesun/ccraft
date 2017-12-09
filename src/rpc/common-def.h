@@ -23,6 +23,10 @@ enum class MessageType {
     Response    = 1
 };
 
+typedef uint8_t MessageTypeType;
+
+typedef uint16_t HandlerType;
+
 enum class RpcCode {
     // server side
     OK                   = 0,

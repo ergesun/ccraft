@@ -101,24 +101,24 @@ void RpcServer::proc_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
                 LOGDFUN2("handle message for handler id ", handlerId);
                 if (!handler) {
                     LOGEFUN << "there is no handler for handler id " << handlerId;
-                    m_pSocketService->SendMessage(new RpcErrorResponse(RpcCode::ErrorNoHandler));
+                    m_pSocketService->SendMessage(new RpcErrorResponse(RpcCode::ErrorNoHandler, handlerId));
                     return;
                 }
 
-                auto request = handler->CreateRequest();
-                if (!request.get()) {
+                auto request = handler->CreateMessage();
+                if (!request) {
                     LOGEFUN << "cannot create request for handler id " << handlerId;
-                    m_pSocketService->SendMessage(new RpcErrorResponse(RpcCode::ErrorInternal));
+                    m_pSocketService->SendMessage(new RpcErrorResponse(RpcCode::ErrorInternal, handlerId));
                     return;
                 }
                 if (!common::ProtoBufUtils::Deserialize(reqBuf, request.get())) {
                     LOGEFUN << "cannot parse request for handler id " << handlerId;
-                    m_pSocketService->SendMessage(new RpcErrorResponse(RpcCode::ErrorMsg));
+                    m_pSocketService->SendMessage(new RpcErrorResponse(RpcCode::ErrorMsg, handlerId));
                     return;
                 }
 
                 auto res = handler->Handle(request);
-                auto respMessage = new RpcResponse(res);
+                auto respMessage = new RpcResponse(res, handlerId);
                 respMessage->SetId(rm->GetId());
                 respMessage->SetMemPool(m_pRpcMemPool);
                 respMessage->SetPeerInfo(rm->GetPeerInfo());

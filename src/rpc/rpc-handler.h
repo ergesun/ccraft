@@ -36,7 +36,7 @@ public:
      * @param sm 本端的响应消息体。
      */
     virtual SP_PB_MSG Handle(SP_PB_MSG req) = 0;
-    virtual SP_PB_MSG CreateRequest() = 0;
+    virtual SP_PB_MSG CreateMessage() = 0;
 };
 
 /**
@@ -54,7 +54,7 @@ public:
     }
 
     SP_PB_MSG Handle(SP_PB_MSG req) override;
-    SP_PB_MSG CreateRequest() override;
+    SP_PB_MSG CreateMessage() override;
 
 private:
     RpcHandle             m_handle;

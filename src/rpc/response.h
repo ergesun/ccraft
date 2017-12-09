@@ -16,32 +16,34 @@
 namespace ccraft {
 namespace rpc {
 typedef uint16_t RpcCodeType;
-class RpcResponse : public net::SndMessage {
+class RpcResponseBase : public net::SndMessage {
 public:
-    RpcResponse(SP_PB_MSG msg) :
-        m_code(RpcCode::OK), m_pMsg(msg) {}
+    RpcResponseBase(RpcCode code, HandlerType ht) :
+            m_code(code), m_ht(ht) {}
+
+protected:
+    uint32_t getDerivePayloadLength() override;
+    void encodeDerive(common::Buffer *b) override;
+
+protected:
+    RpcCode          m_code;
+    HandlerType      m_ht;
+};
+
+class RpcResponse : public RpcResponseBase {
+public:
+    RpcResponse(SP_PB_MSG msg, HandlerType ht) :
+            RpcResponseBase(RpcCode::OK, ht), m_pMsg(msg) {}
 
 protected:
     uint32_t getDerivePayloadLength() override;
     void encodeDerive(common::Buffer *b) override;
 
 private:
-    RpcCode        m_code;
     SP_PB_MSG      m_pMsg = nullptr;
 };
 
-class RpcErrorResponse : public net::SndMessage {
-public:
-    RpcErrorResponse(RpcCode code) :
-        m_code(code) {}
-
-protected:
-    uint32_t getDerivePayloadLength() override;
-    void encodeDerive(common::Buffer *b) override;
-
-private:
-    RpcCode          m_code;
-};
+typedef RpcResponseBase RpcErrorResponse;
 } // namespace rpc
 } // namespace ccraft
 

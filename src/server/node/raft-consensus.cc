@@ -7,22 +7,22 @@
 
 #include "../../common/common-def.h"
 #include "../../common/server-gflags-config.h"
-#include "../../fsio/file-utils.h"
+#include "../../common/global-vars.h"
 #include "../../common/codec-utils.h"
-#include "../../fsio/io-utils.h"
 #include "../../common/buffer.h"
 #include "../../common/protobuf-utils.h"
+#include "../../fsio/file-utils.h"
+#include "../../fsio/io-utils.h"
 #include "../../codegen/raft-state.pb.h"
-#include "../rflog/realtime-disk-rflogger.h"
 #include "../../codegen/node-raft.pb.h"
-#include "../../common/global-vars.h"
 #include "../../net/rcv-message.h"
+#include "../../rpc/response.h"
 
+#include "../rflog/realtime-disk-rflogger.h"
 #include "service-manager.h"
 #include "elector-manager-service.h"
 #include "server-rpc-service.h"
 #include "raft-consensus.h"
-#include "../../rpc/response.h"
 
 namespace ccraft {
 namespace server {
@@ -116,7 +116,7 @@ void RaftConsensus::OnMessageSent(rpc::ARpcClient::SentRet &&sentRet) {
     m_sentMsgsId.insert(sentRet.msgId);
 }
 
-void RaftConsensus::OnRecvRpcResult(std::shared_ptr<net::NotifyMessage> sspNM) {
+void RaftConsensus::OnRecvRpcReturnResult(std::shared_ptr<net::NotifyMessage> sspNM) {
     if (sspNM) {
         switch (sspNM->GetType()) {
             case net::NotifyMessageType::Message: {
@@ -127,7 +127,7 @@ void RaftConsensus::OnRecvRpcResult(std::shared_ptr<net::NotifyMessage> sspNM) {
                         return;
                     }
 
-                    auto buffer = rm->GetDataBuffer();
+                    handle_response_message(rm);
                 } else {
                     LOGWFUN << "recv message is empty!";
                 }
@@ -319,10 +319,11 @@ bool RaftConsensus::is_valid_msg_id(const net::RcvMessage *rm) {
     }
 }
 
-void RaftConsensus::handle_response_message(net::RcvMessage *rm) {
+void RaftConsensus::handle_response_message(const net::RcvMessage *rm) {
     ccsys::ReadLock rl(&m_envRwLock);
     switch (m_roleType) {
         case NodeRoleType::Leader: {
+
             break;
         }
         case NodeRoleType::Candidate:{

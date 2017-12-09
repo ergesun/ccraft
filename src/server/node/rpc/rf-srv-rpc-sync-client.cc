@@ -17,6 +17,7 @@
 #include "exceptions.h"
 
 #include "rf-srv-rpc-sync-client.h"
+#include "../../../rpc/response.h"
 
 using ccraft::rpc::RpcCode;
 
@@ -30,14 +31,13 @@ std::shared_ptr<protocol::RpcName##Response>                                    
                                                                                                         \
         auto ctx = m_rpcCtxPool.Get();                                                                  \
         ctx->peer = std::move(ret.peer);                                                                \
-        ctx->handlerId = ret.handlerId;                                                                 \
         ctx->msgId = ret.msgId;                                                                         \
         auto sspNM = recv_message(ctx);                                                                 \
         auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());                              \
         auto rm = mnm->GetContent();                                                                    \
         auto RpcName##Resp__Impl_DEF_TMP = new protocol::RpcName##Response();                           \
         auto buf = rm->GetDataBuffer();                                                                 \
-        buf->MoveHeadBack(sizeof(uint16_t));                                                            \
+        buf->MoveHeadBack(sizeof(rpc::HandlerType));                                                    \
         common::ProtoBufUtils::Deserialize(buf, RpcName##Resp__Impl_DEF_TMP);                           \
         return std::shared_ptr<protocol::RpcName##Response>(RpcName##Resp__Impl_DEF_TMP);               \
     }
@@ -204,13 +204,14 @@ std::shared_ptr<net::NotifyMessage> RfSrvInternalRpcClientSync::recv_message(Rpc
         }
     }
 
-    auto handlerId = rc->handlerId;
     auto sspNM = rc->ssp_nm;
     m_rpcCtxPool.Put(rc);
     auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());
     auto rm = mnm->GetContent();
-    auto pos = rm->GetDataBuffer()->GetPos();
-    auto serverCode = ByteOrderUtils::ReadUInt16(pos);
+    auto buffer = rm->GetDataBuffer();
+    auto serverCode = ByteOrderUtils::ReadUInt16(buffer->GetPos());
+    buffer->MoveHeadBack(sizeof(rpc::RpcCodeType));
+    auto handlerId = ByteOrderUtils::ReadUInt16(buffer->GetPos());
     switch ((RpcCode)serverCode) {
         case RpcCode::ErrorNoHandler:{
             throw BadRpcHandlerIdException(serverCode, handlerId);

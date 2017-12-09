@@ -56,7 +56,6 @@ private:
         std::condition_variable             *cv        = nullptr;
         std::mutex                          *mtx       = nullptr;
         net::net_peer_info_t                 peer;
-        uint16_t                             handlerId = 0;
         uint64_t                             msgId     = 0;
         bool                                 complete  = false;
         State                                state     = State::Ok;
