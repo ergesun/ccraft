@@ -13,11 +13,11 @@
 #include "../../ccsys/timer.h"
 #include "../../ccsys/cctime.h"
 #include "../../ccsys/random.h"
-#include "../../common/rf-server.h"
-#include "../../rpc/abstract-rpc-client.h"
-
-#include "iserver-internal-rpc-handler.h"
 #include "../../ccsys/rw-mutex.h"
+#include "../../common/rf-server.h"
+
+#include "inode-internal-rpc-handler.h"
+#include "iservice-rpc-callback-handler.h"
 
 #define RFLOG_DIR          "rflogs"
 #define RFLOG_FILE_NAME    "rflog"
@@ -42,7 +42,7 @@ class IRfLogger;
 namespace server {
 class ServerRpcService;
 class ElectorManagerService;
-class RaftConsensus : public IService, public INodeInternalRpcHandler {
+class RaftConsensus : public IService, public INodeInternalRpcHandler, public IServiceRpcCallbackHandler {
 public:
     RaftConsensus();
     ~RaftConsensus() override;
@@ -51,10 +51,14 @@ public:
     bool Stop() override;
 
     // INodeInternalRpcHandler IF
-    SP_PB_MSG OnAppendRfLog(SP_PB_MSG sspMsg) override;
+    SP_PB_MSG OnAppendEntries(SP_PB_MSG sspMsg) override;
     SP_PB_MSG OnRequestVote(SP_PB_MSG sspMsg) override;
-    void OnMessageSent(ARpcClient::SentRet &&sentRet);
     void OnRecvRpcReturnResult(std::shared_ptr<net::NotifyMessage> sspNM) override;
+
+    // IServiceRpcCallbackHandler IF
+    void OnMessageSent(ARpcClient::SentRet &&sentRet) override;
+    void OnRecvRequestVoteRetRes(protocol::RequestVoteResponse *resp) override;
+    void OnRecvAppendEntriesRetRes(protocol::AppendEntriesResponse *resp) override;
 
 private:
     void initialize();
@@ -76,9 +80,7 @@ private:
     void broadcast_request_vote(const std::map<uint32_t, common::RfServer> &otherSrvs);
 
     bool is_valid_msg_id(const net::RcvMessage *rm);
-    void handle_response_message(const net::RcvMessage *rm);
-//    void handle_heartbeat_response(protocol::RequestVoteResponse *rvr);
-//    void handle_request_vote_response();
+
 private:
     bool                           m_bStopped                    = true;
     // 先用大粒度锁锁环境。

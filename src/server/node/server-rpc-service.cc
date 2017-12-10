@@ -52,17 +52,17 @@ bool ServerRpcService::Stop() {
     return m_pNodeInternalMessenger->Stop();
 }
 
-std::shared_ptr<protocol::AppendRfLogResponse> ServerRpcService::AppendRfLogSync(rpc::SP_PB_MSG req,
+std::shared_ptr<protocol::AppendEntriesResponse> ServerRpcService::AppendEntriesSync(rpc::SP_PB_MSG req,
                                                                                         net::net_peer_info_t &&peer) {
-    return m_pNodeInternalMessenger->AppendRfLogSync(req, std::move(peer));
+    return m_pNodeInternalMessenger->AppendEntriesSync(req, std::move(peer));
 }
 
-rpc::ARpcClient::SentRet ServerRpcService::AppendRfLogAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
-    return m_pNodeInternalMessenger->AppendRfLogAsync(req, std::move(peer));
+rpc::ARpcClient::SentRet ServerRpcService::AppendEntriesAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
+    return m_pNodeInternalMessenger->AppendEntriesAsync(req, std::move(peer));
 }
 
-rpc::SP_PB_MSG ServerRpcService::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
-    return m_pNodeInternalMessenger->OnAppendRfLog(sspMsg);
+rpc::SP_PB_MSG ServerRpcService::OnAppendEntries(rpc::SP_PB_MSG sspMsg) {
+    return m_pNodeInternalMessenger->OnAppendEntries(sspMsg);
 }
 
 std::shared_ptr<protocol::RequestVoteResponse> ServerRpcService::RequestVoteSync(rpc::SP_PB_MSG req,
@@ -90,7 +90,25 @@ rpc::SP_PB_MSG ServerRpcService::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
 }
 
 void ServerRpcService::OnRecvRpcReturnResult(std::shared_ptr<net::NotifyMessage> sspNM) {
-    m_pRaftConsensus->OnRecvRpcReturnResult(sspNM);
+    if (UNLIKELY(!sspNM)) {
+        return;
+    }
+
+    switch (sspNM->GetType()) {
+        case net::NotifyMessageType::Message: {
+            auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());
+            auto rm = mnm->GetContent();
+            if (LIKELY(rm)) {
+
+            } else {
+                LOGWFUN << "recv message is empty!";
+            }
+            break;
+        }
+        default: {
+            // skip.
+        }
+    }
 }
 } // namespace server
 } // namespace ccraft

@@ -47,7 +47,7 @@ message RfLogEntry {
     bytes          data         = 4;
 }
 
-message AppendRfLogRequest {
+message AppendEntriesRequest {
     uint32                term         = 1;
     uint32                leaderId     = 2;
     uint32                prevLogIndex = 3;
@@ -56,7 +56,7 @@ message AppendRfLogRequest {
     uint32                leaderCommit = 6;
 }
 
-message AppendRfLogResponse {
+message AppendEntriesResponse {
     uint32 term    = 1;
     bool   success = 2;
 }

@@ -88,24 +88,24 @@ TEST(RpcTest, ClientServerTest) {
         .sp = ccraft::net::SocketProtocol::Tcp
     };
 
-    auto appendRfLogRequest = new ccraft::protocol::AppendRfLogRequest();
-    appendRfLogRequest->set_term(1234);
-    appendRfLogRequest->set_leaderid(1);
-    appendRfLogRequest->set_prevlogindex(22);
-    appendRfLogRequest->set_prevlogterm(1233);
-    appendRfLogRequest->add_entries();
-    auto entry = appendRfLogRequest->mutable_entries(0);
+    auto appendEntriesRequest = new ccraft::protocol::AppendEntriesRequest();
+    appendEntriesRequest->set_term(1234);
+    appendEntriesRequest->set_leaderid(1);
+    appendEntriesRequest->set_prevlogindex(22);
+    appendEntriesRequest->set_prevlogterm(1233);
+    appendEntriesRequest->add_entries();
+    auto entry = appendEntriesRequest->mutable_entries(0);
     entry->set_term(1233);
     entry->set_index(25);
     entry->set_type(ccraft::protocol::RfLogEntryType::CONFIGURATION);
     entry->set_data("test entry data!");
 
     auto tmpPeer = peer;
-    std::shared_ptr<ccraft::protocol::AppendRfLogResponse> appendRfLogSspResp;
-    EXPECT_NO_THROW(appendRfLogSspResp = g_pClient->AppendRfLog(ccraft::rpc::SP_PB_MSG(appendRfLogRequest), std::move(tmpPeer)));
-    EXPECT_EQ(appendRfLogSspResp->term(), 1111);
-    EXPECT_EQ(appendRfLogSspResp->success(), true);
-    std::cout << "server resp: term = " << appendRfLogSspResp->term() << ", ok = " << appendRfLogSspResp->success() << std::endl;
+    std::shared_ptr<ccraft::protocol::AppendEntriesResponse> appendEntriesSspResp;
+    EXPECT_NO_THROW(appendEntriesSspResp = g_pClient->AppendEntries(ccraft::rpc::SP_PB_MSG(appendEntriesRequest), std::move(tmpPeer)));
+    EXPECT_EQ(appendEntriesSspResp->term(), 1111);
+    EXPECT_EQ(appendEntriesSspResp->success(), true);
+    std::cout << "server resp: term = " << appendEntriesSspResp->term() << ", ok = " << appendEntriesSspResp->success() << std::endl;
 
     auto reqVoteRequest = new ccraft::protocol::RequestVoteRequest();
     reqVoteRequest->set_term(1234);

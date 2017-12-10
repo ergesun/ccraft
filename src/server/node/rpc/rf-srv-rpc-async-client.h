@@ -8,9 +8,6 @@
 
 #include "../../../rpc/abstract-rpc-client.h"
 
-#define RpcAppendRfLog "AppendRfLog"
-#define RpcRequestVote "RequestVote"
-
 /**
  * 返回值SentRet的msgId为INVALID_MSG_ID(0)表示发送失败，原因为发送队列满了。
  */
@@ -19,7 +16,7 @@
 
 namespace ccraft {
 namespace protocol {
-class AppendRfLogResponse;
+class AppendEntriesResponse;
 class RequestVoteResponse;
 }
 
@@ -32,7 +29,7 @@ public:
     }
 
     // Define Rpc start
-    DefineRfNodeAsyncRpcWithPeer(AppendRfLog);
+    DefineRfNodeAsyncRpcWithPeer(AppendEntries);
     DefineRfNodeAsyncRpcWithPeer(RequestVote);
     // Define Rpc end
 

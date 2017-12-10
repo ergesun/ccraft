@@ -22,11 +22,11 @@ using ccraft::rpc::RpcCode;
 
 namespace ccraft {
 namespace server {
-ImplRfNodeAsyncRpcWithPeer(AppendRfLog)
+ImplRfNodeAsyncRpcWithPeer(AppendEntries)
 ImplRfNodeAsyncRpcWithPeer(RequestVote)
 
 bool RfSrvInternalRpcClientAsync::register_rpc_handlers() {
-    if (!registerRpc(RpcAppendRfLog, APPEND_RFLOG_RPC_ID)) {
+    if (!registerRpc(RpcAppendEntries, APPEND_ENTRIES_RPC_ID)) {
         return false;
     }
 

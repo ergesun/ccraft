@@ -44,11 +44,11 @@ std::shared_ptr<protocol::RpcName##Response>                                    
 
 namespace ccraft {
 namespace server {
-ImplRfNodeSyncRpcWithPeer(AppendRfLog)
+ImplRfNodeSyncRpcWithPeer(AppendEntries)
 ImplRfNodeSyncRpcWithPeer(RequestVote)
 
 bool RfSrvInternalRpcClientSync::register_rpc_handlers() {
-    if (!registerRpc(RpcAppendRfLog, APPEND_RFLOG_RPC_ID)) {
+    if (!registerRpc(RpcAppendEntries, APPEND_ENTRIES_RPC_ID)) {
         return false;
     }
 

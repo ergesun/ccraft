@@ -7,7 +7,7 @@
 #include "../../../rpc/rpc-handler.h"
 #include "../../../codegen/node-raft.pb.h"
 
-#include "../iserver-internal-rpc-handler.h"
+#include "../inode-internal-rpc-handler.h"
 #include "common-def.h"
 
 #include "rf-srv-rpc-sync-server.h"
@@ -41,9 +41,9 @@ void RfSrvInternalRpcServerSync::HandleMessage(std::shared_ptr<net::NotifyMessag
 
 void RfSrvInternalRpcServerSync::register_rpc_handlers() {
     // internal communication
-    auto appendRfLogHandler = new rpc::TypicalRpcHandler(std::bind(&RfSrvInternalRpcServerSync::on_append_rflog, this, std::placeholders::_1),
+    auto appendEntriesHandler = new rpc::TypicalRpcHandler(std::bind(&RfSrvInternalRpcServerSync::on_append_rflog, this, std::placeholders::_1),
                                               std::bind(&RfSrvInternalRpcServerSync::create_append_rflog_request, this));
-    m_pRpcServer->RegisterRpc(APPEND_RFLOG_RPC_ID, appendRfLogHandler);
+    m_pRpcServer->RegisterRpc(APPEND_ENTRIES_RPC_ID, appendEntriesHandler);
     auto requestVoteHandler = new rpc::TypicalRpcHandler(std::bind(&RfSrvInternalRpcServerSync::on_request_vote, this, std::placeholders::_1),
                                               std::bind(&RfSrvInternalRpcServerSync::create_request_vote_request, this));
     m_pRpcServer->RegisterRpc(REQUEST_VOTE_RPC_ID, requestVoteHandler);
@@ -52,11 +52,11 @@ void RfSrvInternalRpcServerSync::register_rpc_handlers() {
 }
 
 rpc::SP_PB_MSG RfSrvInternalRpcServerSync::on_append_rflog(rpc::SP_PB_MSG sspMsg) {
-    return m_pHandler->OnAppendRfLog(sspMsg);
+    return m_pHandler->OnAppendEntries(sspMsg);
 }
 
 rpc::SP_PB_MSG RfSrvInternalRpcServerSync::create_append_rflog_request() {
-    return rpc::SP_PB_MSG(new protocol::AppendRfLogRequest());
+    return rpc::SP_PB_MSG(new protocol::AppendEntriesRequest());
 }
 
 rpc::SP_PB_MSG RfSrvInternalRpcServerSync::on_request_vote(rpc::SP_PB_MSG sspMsg) {

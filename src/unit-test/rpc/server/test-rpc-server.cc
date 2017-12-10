@@ -38,8 +38,8 @@ void TestRpcServer::HandleMessage(std::shared_ptr<net::NotifyMessage> sspNM) {
 
 void TestRpcServer::register_rpc_handlers() {
     // internal communication
-    auto appendLogHandler = new rpc::TypicalRpcHandler(std::bind(&TestRpcServer::on_append_rflog, this, std::placeholders::_1),
-                                                       std::bind(&TestRpcServer::create_append_rflog_request, this));
+    auto appendLogHandler = new rpc::TypicalRpcHandler(std::bind(&TestRpcServer::on_append_entries, this, std::placeholders::_1),
+                                                       std::bind(&TestRpcServer::create_append_entries_request, this));
     m_pRpcServer->RegisterRpc(1, appendLogHandler);
     auto requestVoteHandler = new rpc::TypicalRpcHandler(std::bind(&TestRpcServer::on_request_vote, this, std::placeholders::_1),
                                                        std::bind(&TestRpcServer::create_request_vote_request, this));
@@ -47,17 +47,17 @@ void TestRpcServer::register_rpc_handlers() {
     m_pRpcServer->FinishRegisterRpc();
 }
 
-rpc::SP_PB_MSG TestRpcServer::on_append_rflog(rpc::SP_PB_MSG sspMsg) {
-    auto appendRfLogRequest = dynamic_cast<protocol::AppendRfLogRequest*>(sspMsg.get());
-    EXPECT_EQ(1234, appendRfLogRequest->term());
-    EXPECT_EQ(1, appendRfLogRequest->leaderid());
-    EXPECT_EQ(22, appendRfLogRequest->prevlogindex());
-    EXPECT_EQ(1233, appendRfLogRequest->prevlogterm());
-    std::cout << "client req: term = " << appendRfLogRequest->term()
-              << ", leader id = " << appendRfLogRequest->leaderid()
-              << ", prev log idx = " << appendRfLogRequest->prevlogindex()
-              << ", prev log term = " << appendRfLogRequest->prevlogterm() << std::endl;
-    auto entry = appendRfLogRequest->mutable_entries(0);
+rpc::SP_PB_MSG TestRpcServer::on_append_entries(rpc::SP_PB_MSG sspMsg) {
+    auto appendEntriesRequest = dynamic_cast<protocol::AppendEntriesRequest*>(sspMsg.get());
+    EXPECT_EQ(1234, appendEntriesRequest->term());
+    EXPECT_EQ(1, appendEntriesRequest->leaderid());
+    EXPECT_EQ(22, appendEntriesRequest->prevlogindex());
+    EXPECT_EQ(1233, appendEntriesRequest->prevlogterm());
+    std::cout << "client req: term = " << appendEntriesRequest->term()
+              << ", leader id = " << appendEntriesRequest->leaderid()
+              << ", prev log idx = " << appendEntriesRequest->prevlogindex()
+              << ", prev log term = " << appendEntriesRequest->prevlogterm() << std::endl;
+    auto entry = appendEntriesRequest->mutable_entries(0);
     EXPECT_EQ(1233, entry->term());
     EXPECT_EQ(25, entry->index());
     EXPECT_EQ(1, entry->type());
@@ -66,15 +66,15 @@ rpc::SP_PB_MSG TestRpcServer::on_append_rflog(rpc::SP_PB_MSG sspMsg) {
     std::string entryData = std::move(*(entry->release_data()));
     std::cout << "entry 0 data = " << entryData.c_str() << std::endl;
 
-    auto response = new protocol::AppendRfLogResponse();
+    auto response = new protocol::AppendEntriesResponse();
     response->set_term(1111);
     response->set_success(true);
 
     return rpc::SP_PB_MSG(response);
 }
 
-rpc::SP_PB_MSG TestRpcServer::create_append_rflog_request() {
-    return rpc::SP_PB_MSG(new protocol::AppendRfLogRequest());
+rpc::SP_PB_MSG TestRpcServer::create_append_entries_request() {
+    return rpc::SP_PB_MSG(new protocol::AppendEntriesRequest());
 }
 
 rpc::SP_PB_MSG TestRpcServer::on_request_vote(rpc::SP_PB_MSG sspMsg) {

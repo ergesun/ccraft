@@ -98,17 +98,17 @@ bool ServerInternalMessenger::Stop() {
     return true;
 }
 
-std::shared_ptr<protocol::AppendRfLogResponse> ServerInternalMessenger::AppendRfLogSync(rpc::SP_PB_MSG req,
+std::shared_ptr<protocol::AppendEntriesResponse> ServerInternalMessenger::AppendEntriesSync(rpc::SP_PB_MSG req,
                                                                                  net::net_peer_info_t &&peer) {
-    return m_pSyncClient->AppendRfLog(req, std::move(peer));
+    return m_pSyncClient->AppendEntries(req, std::move(peer));
 }
 
-rpc::ARpcClient::SentRet ServerInternalMessenger::AppendRfLogAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
-    return m_pAsyncClient->AppendRfLog(req, std::move(peer));
+rpc::ARpcClient::SentRet ServerInternalMessenger::AppendEntriesAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
+    return m_pAsyncClient->AppendEntries(req, std::move(peer));
 }
 
-rpc::SP_PB_MSG ServerInternalMessenger::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
-    return m_pNodeINRpcHandler->OnAppendRfLog(sspMsg);
+rpc::SP_PB_MSG ServerInternalMessenger::OnAppendEntries(rpc::SP_PB_MSG sspMsg) {
+    return m_pNodeINRpcHandler->OnAppendEntries(sspMsg);
 }
 
 std::shared_ptr<protocol::RequestVoteResponse> ServerInternalMessenger::RequestVoteSync(rpc::SP_PB_MSG req,

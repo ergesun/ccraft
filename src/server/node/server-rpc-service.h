@@ -15,13 +15,13 @@
 #include "../../rpc/abstract-rpc-client.h"
 
 #include "iservice.h"
-#include "iserver-internal-rpc-handler.h"
+#include "inode-internal-rpc-handler.h"
 
 #include "common-def.h"
 
 namespace ccraft {
 namespace protocol {
-    class AppendRfLogResponse;
+    class AppendEntriesResponse;
     class RequestVoteResponse;
 }
 
@@ -48,9 +48,9 @@ public:
     bool Start() override;
     bool Stop() override;
 
-    std::shared_ptr<protocol::AppendRfLogResponse> AppendRfLogSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
-    rpc::ARpcClient::SentRet AppendRfLogAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
-    rpc::SP_PB_MSG OnAppendRfLog(rpc::SP_PB_MSG sspMsg) override;
+    std::shared_ptr<protocol::AppendEntriesResponse> AppendEntriesSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    rpc::ARpcClient::SentRet AppendEntriesAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
+    rpc::SP_PB_MSG OnAppendEntries(rpc::SP_PB_MSG sspMsg) override;
 
     std::shared_ptr<protocol::RequestVoteResponse> RequestVoteSync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);
     void RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer);

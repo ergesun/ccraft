@@ -89,9 +89,9 @@ bool RaftConsensus::Stop() {
     return true;
 }
 
-rpc::SP_PB_MSG RaftConsensus::OnAppendRfLog(rpc::SP_PB_MSG sspMsg) {
-    auto appendRfLogRequest = dynamic_cast<protocol::AppendRfLogRequest*>(sspMsg.get());
-    auto response = new protocol::AppendRfLogResponse();
+rpc::SP_PB_MSG RaftConsensus::OnAppendEntries(rpc::SP_PB_MSG sspMsg) {
+    auto appendEntriesRequest = dynamic_cast<protocol::AppendEntriesRequest*>(sspMsg.get());
+    auto response = new protocol::AppendEntriesResponse();
     response->set_term(1111);
     response->set_success(true);
 
@@ -117,27 +117,15 @@ void RaftConsensus::OnMessageSent(rpc::ARpcClient::SentRet &&sentRet) {
 }
 
 void RaftConsensus::OnRecvRpcReturnResult(std::shared_ptr<net::NotifyMessage> sspNM) {
-    if (sspNM) {
-        switch (sspNM->GetType()) {
-            case net::NotifyMessageType::Message: {
-                auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());
-                auto rm = mnm->GetContent();
-                if (LIKELY(rm)) {
-                    if (!is_valid_msg_id(rm)) {
-                        return;
-                    }
+    // skip.
+}
 
-                    handle_response_message(rm);
-                } else {
-                    LOGWFUN << "recv message is empty!";
-                }
-                break;
-            }
-            default: {
-                // skip.
-            }
-        }
-    }
+void RaftConsensus::OnRecvRequestVoteRetRes(protocol::RequestVoteResponse *resp) {
+
+}
+
+void RaftConsensus::OnRecvAppendEntriesRetRes(protocol::AppendEntriesResponse *resp) {
+
 }
 
 void RaftConsensus::initialize() {
@@ -315,23 +303,6 @@ bool RaftConsensus::is_valid_msg_id(const net::RcvMessage *rm) {
         }
         default:{
             return false;
-        }
-    }
-}
-
-void RaftConsensus::handle_response_message(const net::RcvMessage *rm) {
-    ccsys::ReadLock rl(&m_envRwLock);
-    switch (m_roleType) {
-        case NodeRoleType::Leader: {
-
-            break;
-        }
-        case NodeRoleType::Candidate:{
-
-            break;
-        }
-        case NodeRoleType::Follower:{
-            break;
         }
     }
 }

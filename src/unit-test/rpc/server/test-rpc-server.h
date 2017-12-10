@@ -23,12 +23,12 @@ public:
 
 private:
     void register_rpc_handlers();
-    rpc::SP_PB_MSG on_append_rflog(rpc::SP_PB_MSG sspMsg);
+    rpc::SP_PB_MSG on_append_entries(rpc::SP_PB_MSG sspMsg);
     /**
      * for rpc lib to deserialize client request.
      * @return
      */
-    rpc::SP_PB_MSG create_append_rflog_request();
+    rpc::SP_PB_MSG create_append_entries_request();
     rpc::SP_PB_MSG on_request_vote(rpc::SP_PB_MSG sspMsg);
     /**
      * for rpc lib to deserialize client request.

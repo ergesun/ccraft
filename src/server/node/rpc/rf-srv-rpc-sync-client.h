@@ -15,15 +15,12 @@
 #include "../../../common/resource-pool.h"
 #include "../../../net/common-def.h"
 
-#define RpcAppendRfLog "AppendRfLog"
-#define RpcRequestVote "RequestVote"
-
 #define DefineRfNodeSyncRpcWithPeer(RpcName)                                                                 \
     std::shared_ptr<protocol::RpcName##Response> RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer)
 
 namespace ccraft {
 namespace protocol {
-class AppendRfLogResponse;
+class AppendEntriesResponse;
 class RequestVoteResponse;
 }
 
@@ -69,7 +66,7 @@ public:
         rpc::ARpcClient(ss, memPool), m_timeout(timeout) {}
 
     // Define Rpc start
-    DefineRfNodeSyncRpcWithPeer(AppendRfLog);
+    DefineRfNodeSyncRpcWithPeer(AppendEntries);
     DefineRfNodeSyncRpcWithPeer(RequestVote);
     // Define Rpc end
 

@@ -6,7 +6,10 @@
 #ifndef CCRAFT_NODE_COMMON_DEF_H
 #define CCRAFT_NODE_COMMON_DEF_H
 
-#define APPEND_RFLOG_RPC_ID            1
-#define REQUEST_VOTE_RPC_ID            2
+#define APPEND_ENTRIES_RPC_ID            1
+#define REQUEST_VOTE_RPC_ID              2
+
+#define RpcAppendEntries "AppendEntries"
+#define RpcRequestVote   "RequestVote"
 
 #endif //CCRAFT_NODE_COMMON_DEF_H
