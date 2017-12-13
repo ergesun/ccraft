@@ -98,7 +98,7 @@ public:
     }
 
 private:
-    RwMutex   *const m_pRwMutex        = nullptr;
+    RwMutex   *const m_pRwMutex      = nullptr;
     volatile   bool  m_bOwnLock      = false;
 };
 
@@ -106,6 +106,8 @@ class WriteLock {
 public:
     WriteLock(RwMutex *const m) : m_pRwMutex(m) {
         assert(m_pRwMutex);
+        m_pRwMutex->WLock();
+        m_bOwnLock = true;
     }
 
     WriteLock(RwMutex *const m, bool defer_lock) : m_pRwMutex(m) {
@@ -142,7 +144,7 @@ public:
     }
 
 private:
-    RwMutex   *const m_pRwMutex        = nullptr;
+    RwMutex   *const m_pRwMutex      = nullptr;
     volatile   bool  m_bOwnLock      = false;
 };
 }
