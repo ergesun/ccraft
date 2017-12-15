@@ -30,7 +30,7 @@ ServerRpcService::ServerRpcService(uint16_t port, uint16_t rpcThreadsCnt, RaftCo
         .netIOThreadsCnt = (uint16_t)FLAGS_internal_rpc_io_threads_cnt,
         .port = port,
         .memPool = nullptr,
-        FLAGS_net_server_connect_timeout
+        .connectTimeout = FLAGS_net_server_connect_timeout
     };
 
     m_pNodeInternalMessenger = new ServerInternalMessenger(cnimp);
