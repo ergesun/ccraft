@@ -33,7 +33,6 @@ public:
         item = std::move(m_queue.front());
         m_queue.pop();
         if (0 != m_iQueueMaxSize) {
-            l.unlock();
             m_cond.notify_one();
         }
 
@@ -48,7 +47,6 @@ public:
         auto item = std::move(m_queue.front());
         m_queue.pop();
         if (0 != m_iQueueMaxSize) {
-            l.unlock();
             m_cond.notify_one();
         }
         return item;
@@ -62,7 +60,6 @@ public:
         item = std::move(m_queue.front());
         m_queue.pop();
         if (0 != m_iQueueMaxSize) {
-            l.unlock();
             m_cond.notify_one();
         }
     }
@@ -79,7 +76,6 @@ public:
         }
 
         m_queue.push(item);
-        l.unlock();
         m_cond.notify_one();
         return true;
     }
@@ -96,7 +92,6 @@ public:
         }
 
         m_queue.push(std::move(item));
-        l.unlock();
         m_cond.notify_one();
 
         return true;
@@ -113,7 +108,6 @@ public:
         }
 
         m_queue.push(item);
-        l.unlock();
         m_cond.notify_one();
     }
 
@@ -128,7 +122,6 @@ public:
         }
 
         m_queue.push(std::move(item));
-        l.unlock();
         m_cond.notify_one();
     }
 
@@ -147,6 +140,8 @@ public:
         while (!m_queue.empty()) {
             m_queue.pop();
         }
+
+        m_cond.notify_all();
     }
 
 private:
