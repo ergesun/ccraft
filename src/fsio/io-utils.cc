@@ -75,6 +75,8 @@ ssize_t IOUtils::ReadFully_V2(int fd, char **buf, size_t size) {
     }
 
     if (-1 == n) {
+        auto err = errno;
+        printf("err = %s\n", strerror(err));
         DELETE_ARR_PTR(*buf);
 
         return -1;

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(ccraft)
 
 # debug/release编译控制
-set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -g -ggdb")
+set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3")
 
 # 自定义宏

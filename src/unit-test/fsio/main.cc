@@ -13,5 +13,8 @@ int main(int argc, char **argv) {
     return RUN_ALL_TESTS();
 }
 
-TEST(FsioTest, ClockTest) {
+TEST(FsioTest, FSTest) {
+}
+
+TEST(FsioTest, IOTest) {
 }

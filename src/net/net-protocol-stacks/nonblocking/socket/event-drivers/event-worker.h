@@ -24,7 +24,7 @@ class EventWorker {
 public:
     struct EpollAddEvent {
         EpollAddEvent(AFileEventHandler *h, int32_t curMask, int32_t m)
-        : socketEventHandler(h), cur_mask(curMask), mask(m) {}
+                    : socketEventHandler(h), cur_mask(curMask), mask(m) {}
         AFileEventHandler *socketEventHandler = nullptr;
         int32_t cur_mask;
         int32_t mask;
@@ -57,12 +57,7 @@ public:
 
     void AddExternalEpAddEvent(AFileEventHandler *socketEventHandler, int32_t cur_mask, int32_t mask) {
         ccsys::SpinLock l(&m_slEEAddEpEv);
-        EpollAddEvent eae = {
-            .socketEventHandler = socketEventHandler,
-            .cur_mask = cur_mask,
-            .mask = mask
-        };
-        m_lAddEpExtEvents.push_back(eae);
+        m_lAddEpExtEvents.push_back(EpollAddEvent(socketEventHandler, cur_mask, mask));
     }
 
     std::list<EventWorker::EpollAddEvent> GetExternalEpAddEvents() {
