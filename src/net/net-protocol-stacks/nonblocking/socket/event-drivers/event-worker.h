@@ -52,17 +52,12 @@ public:
         std::list<NetEvent> tmp;
         tmp.swap(m_lRwOpExtEvents);
 
-        return std::move(tmp);
+        return tmp;
     }
 
     void AddExternalEpAddEvent(AFileEventHandler *socketEventHandler, int32_t cur_mask, int32_t mask) {
         ccsys::SpinLock l(&m_slEEAddEpEv);
-        EpollAddEvent eae = {
-            .socketEventHandler = socketEventHandler,
-            .cur_mask = cur_mask,
-            .mask = mask
-        };
-        m_lAddEpExtEvents.push_back(eae);
+        m_lAddEpExtEvents.emplace_back(EpollAddEvent(socketEventHandler, cur_mask, mask));
     }
 
     std::list<EventWorker::EpollAddEvent> GetExternalEpAddEvents() {
@@ -70,7 +65,7 @@ public:
         std::list<EpollAddEvent> tmp;
         tmp.swap(m_lAddEpExtEvents);
 
-        return std::move(tmp);
+        return tmp;
     }
 
     /**
@@ -87,7 +82,7 @@ public:
         std::set<AFileEventHandler*> tmp;
         tmp.swap(m_lDelEpExtEvents);
 
-        return std::move(tmp);
+        return tmp;
     }
 
     /**

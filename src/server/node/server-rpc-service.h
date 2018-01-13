@@ -21,8 +21,8 @@
 
 namespace ccraft {
 namespace protocol {
-    class AppendEntriesResponse;
-    class RequestVoteResponse;
+class AppendEntriesResponse;
+class RequestVoteResponse;
 }
 
 namespace server {

@@ -6,7 +6,7 @@
 #ifndef CCRAFT_COMMON_REFERENCE_COUNTER_H
 #define CCRAFT_COMMON_REFERENCE_COUNTER_H
 
-#include <stdint-gcc.h>
+//#include <stdint-gcc.h>
 
 namespace ccraft {
 namespace common {

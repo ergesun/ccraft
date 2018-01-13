@@ -41,8 +41,8 @@ void RfSrvInternalRpcServerSync::HandleMessage(std::shared_ptr<net::NotifyMessag
 
 void RfSrvInternalRpcServerSync::register_rpc_handlers() {
     // internal communication
-    auto appendEntriesHandler = new rpc::TypicalRpcHandler(std::bind(&RfSrvInternalRpcServerSync::on_append_rflog, this, std::placeholders::_1),
-                                              std::bind(&RfSrvInternalRpcServerSync::create_append_rflog_request, this));
+    auto appendEntriesHandler = new rpc::TypicalRpcHandler(std::bind(&RfSrvInternalRpcServerSync::on_append_entries, this, std::placeholders::_1),
+                                              std::bind(&RfSrvInternalRpcServerSync::create_append_entries_request, this));
     m_pRpcServer->RegisterRpc(APPEND_ENTRIES_RPC_ID, appendEntriesHandler);
     auto requestVoteHandler = new rpc::TypicalRpcHandler(std::bind(&RfSrvInternalRpcServerSync::on_request_vote, this, std::placeholders::_1),
                                               std::bind(&RfSrvInternalRpcServerSync::create_request_vote_request, this));
@@ -51,11 +51,11 @@ void RfSrvInternalRpcServerSync::register_rpc_handlers() {
     m_pRpcServer->FinishRegisterRpc();
 }
 
-rpc::SP_PB_MSG RfSrvInternalRpcServerSync::on_append_rflog(rpc::SP_PB_MSG sspMsg) {
+rpc::SP_PB_MSG RfSrvInternalRpcServerSync::on_append_entries(rpc::SP_PB_MSG sspMsg) {
     return m_pHandler->OnAppendEntries(sspMsg);
 }
 
-rpc::SP_PB_MSG RfSrvInternalRpcServerSync::create_append_rflog_request() {
+rpc::SP_PB_MSG RfSrvInternalRpcServerSync::create_append_entries_request() {
     return rpc::SP_PB_MSG(new protocol::AppendEntriesRequest());
 }
 

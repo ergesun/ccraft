@@ -27,13 +27,13 @@ public:
      * @param sspMsg
      * @return
      */
-    virtual rpc::SP_PB_MSG OnAppendEntries(rpc::SP_PB_MSG sspMsg)                  = 0;
+    virtual rpc::SP_PB_MSG OnAppendEntries(rpc::SP_PB_MSG sspMsg)                 = 0;
     /**
      * 收到RequestVote请求。
      * @param sspMsg
      * @return
      */
-    virtual rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg)                  = 0;
+    virtual rpc::SP_PB_MSG OnRequestVote(rpc::SP_PB_MSG sspMsg)                   = 0;
 }; // class INodeInternalRpcHandler
 } // namespace server
 } // namespace ccraft

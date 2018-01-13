@@ -43,7 +43,7 @@ private:
     SP_PB_MSG      m_pMsg = nullptr;
 };
 
-typedef RpcResponseBase RpcErrorResponse;
+//typedef RpcResponseBase RpcErrorResponse;
 } // namespace rpc
 } // namespace ccraft
 

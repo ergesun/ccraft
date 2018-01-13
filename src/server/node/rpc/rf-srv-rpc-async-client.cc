@@ -9,21 +9,13 @@
 #include "../../../rpc/common-def.h"
 
 #include "common-def.h"
-#include "exceptions.h"
-
 #include "rf-srv-rpc-async-client.h"
-
-using ccraft::rpc::RpcCode;
-
-#define ImplRfNodeAsyncRpcWithPeer(RpcName)                                                                              \
-    rpc::ARpcClient::SentRet RfSrvInternalRpcClientAsync::RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {     \
-        return sendMessage(#RpcName, std::move(req), std::move(peer));                                                   \
-    }
 
 namespace ccraft {
 namespace server {
-ImplRfNodeAsyncRpcWithPeer(AppendEntries)
-ImplRfNodeAsyncRpcWithPeer(RequestVote)
+
+ImplStandardAsyncRpc(RfSrvInternalRpcClientAsync, AppendEntries)
+ImplStandardAsyncRpc(RfSrvInternalRpcClientAsync, RequestVote)
 
 bool RfSrvInternalRpcClientAsync::register_rpc_handlers() {
     if (!registerRpc(RpcAppendEntries, APPEND_ENTRIES_RPC_ID)) {

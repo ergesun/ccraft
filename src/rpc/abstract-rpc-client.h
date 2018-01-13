@@ -3,8 +3,8 @@
  * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
  */
 
-#ifndef CCRAFT_RPC_CLIENT_H
-#define CCRAFT_RPC_CLIENT_H
+#ifndef CCRAFT_RPC_ARPC_CLIENT_H
+#define CCRAFT_RPC_ARPC_CLIENT_H
 
 #include <cstdint>
 #include <string>
@@ -16,6 +16,8 @@
 #include "../common/blocking-queue.h"
 #include "../net/common-def.h"
 #include "../server/node/iservice.h"
+
+#include "common-def.h"
 #include "imessage-handler.h"
 
 namespace google {
@@ -33,6 +35,17 @@ class ISocketService;
 class NotifyMessage;
 }
 namespace rpc {
+/**
+ * 返回值SentRet的msgId为INVALID_MSG_ID(0)表示发送失败，原因为发送队列满了。
+ */
+#define DefineStandardAsyncRpc(RpcName)                                                        \
+    rpc::ARpcClient::SentRet RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer)
+
+#define ImplStandardAsyncRpc(ClassName, RpcName)                                                                    \
+    rpc::ARpcClient::SentRet ClassName::RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {                  \
+        return rpc::ARpcClient::SendMessageAsync(#RpcName, std::move(req), std::move(peer));                        \
+    }
+
 /**
  * [Message format]
  *    client -> server :  |net common header(Message::HeaderSize() bytes)|msg type|[handler id(2bytes)|protobuf msg(n bytes)]|
@@ -71,17 +84,17 @@ public:
     bool Start() override;
     bool Stop() override;
 
-    void HandleMessage(std::shared_ptr<net::NotifyMessage> sspNM) override;
-
-protected:
-    bool registerRpc(std::string &&rpcName, uint16_t id);
-    void finishRegisterRpc();
     /**
      * @param rpcName
      * @param msg
      * @return SentRet::msgId如果是INVALID_MSG_ID(0)则失败，否则成功。
      */
-    SentRet sendMessage(std::string &&rpcName, std::shared_ptr<google::protobuf::Message> msg, net::net_peer_info_t &&peer);
+    SentRet SendMessageAsync(std::string &&rpcName, rpc::SP_PB_MSG msg, net::net_peer_info_t &&peer);
+    void HandleMessage(std::shared_ptr<net::NotifyMessage> sspNM) override final;
+
+protected:
+    bool registerRpc(std::string &&rpcName, uint16_t id);
+    void finishRegisterRpc();
 
     virtual bool onStart() = 0;
     virtual bool onStop() = 0;
@@ -101,4 +114,4 @@ private:
 } // namespace rpc
 } // namespace ccraft
 
-#endif //CCRAFT_RPC_CLIENT_H
+#endif //CCRAFT_RPC_ARPC_CLIENT_H

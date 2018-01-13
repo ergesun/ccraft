@@ -12,7 +12,7 @@
 
 namespace ccraft {
 namespace common {
-class RfServer;
+struct RfServer;
 class RfServerConfiguration;
 }
 namespace server {

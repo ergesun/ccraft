@@ -101,19 +101,19 @@ void RpcServer::proc_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
                 LOGDFUN2("handle message for handler id ", handlerId);
                 if (!handler) {
                     LOGEFUN << "there is no handler for handler id " << handlerId;
-                    m_pSocketService->SendMessage(new RpcErrorResponse(RpcCode::ErrorNoHandler, handlerId));
+                    m_pSocketService->SendMessage(new RpcResponseBase(RpcCode::ErrorNoHandler, handlerId));
                     return;
                 }
 
                 auto request = handler->CreateMessage();
                 if (!request) {
                     LOGEFUN << "cannot create request for handler id " << handlerId;
-                    m_pSocketService->SendMessage(new RpcErrorResponse(RpcCode::ErrorInternal, handlerId));
+                    m_pSocketService->SendMessage(new RpcResponseBase(RpcCode::ErrorInternal, handlerId));
                     return;
                 }
                 if (!common::ProtoBufUtils::Deserialize(reqBuf, request.get())) {
                     LOGEFUN << "cannot parse request for handler id " << handlerId;
-                    m_pSocketService->SendMessage(new RpcErrorResponse(RpcCode::ErrorMsg, handlerId));
+                    m_pSocketService->SendMessage(new RpcResponseBase(RpcCode::ErrorMsg, handlerId));
                     return;
                 }
 

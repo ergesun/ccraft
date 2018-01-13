@@ -6,7 +6,6 @@
 #include "../ccsys/timer.h"
 #include "../common/common-def.h"
 #include "../common/global-vars.h"
-#include "../common/codec-utils.h"
 #include "../common/buffer.h"
 #include "../net/socket-service-factory.h"
 #include "../net/net-protocol-stacks/msg-worker-managers/unique-worker-manager.h"
@@ -71,25 +70,8 @@ bool ARpcClient::Stop() {
     return true;
 }
 
-void ARpcClient::HandleMessage(std::shared_ptr<net::NotifyMessage> sspNM) {
-    onRecvMessage(sspNM);
-}
 
-bool ARpcClient::registerRpc(std::string &&rpcName, uint16_t id) {
-    if (m_bRegistered) {
-        return false;
-    }
-
-    m_hmapRpcs[std::move(rpcName)] = id;
-    return true;
-}
-
-void ARpcClient::finishRegisterRpc() {
-    m_bRegistered = true;
-    hw_sw_memory_barrier();
-}
-
-ARpcClient::SentRet ARpcClient::sendMessage(std::string &&rpcName, SP_PB_MSG msg, net::net_peer_info_t &&peer) {
+ARpcClient::SentRet ARpcClient::SendMessageAsync(std::string &&rpcName, SP_PB_MSG msg, net::net_peer_info_t &&peer) {
     if (m_hmapRpcs.end() == m_hmapRpcs.find(rpcName)) {
         throw BadRpcException((uint16_t)RpcCode::ErrorNoRegisteredRpc, std::move(rpcName));
     }
@@ -109,6 +91,24 @@ ARpcClient::SentRet ARpcClient::sendMessage(std::string &&rpcName, SP_PB_MSG msg
     sr.handlerId = handlerId;
 
     return sr;
+}
+
+void ARpcClient::HandleMessage(std::shared_ptr<net::NotifyMessage> sspNM) {
+    onRecvMessage(sspNM);
+}
+
+bool ARpcClient::registerRpc(std::string &&rpcName, uint16_t id) {
+    if (m_bRegistered) {
+        return false;
+    }
+
+    m_hmapRpcs[std::move(rpcName)] = id;
+    return true;
+}
+
+void ARpcClient::finishRegisterRpc() {
+    m_bRegistered = true;
+    hw_sw_memory_barrier();
 }
 } // namespace rpc
 } // namespace ccraft

@@ -16,23 +16,13 @@ namespace server {
 ServerRpcService::ServerRpcService(uint16_t port, uint16_t rpcThreadsCnt, RaftConsensus *pRaftConsensus) :
     m_pRaftConsensus(pRaftConsensus) {
     assert(m_pRaftConsensus);
-    ccsys::cctime clientWaitTimeOut = {
-        .sec = FLAGS_internal_rpc_client_wait_timeout_secs,
-        .nsec = FLAGS_internal_rpc_client_wait_timeout_nsecs
-    };
-
-    CreateServerInternalMessengerParam cnimp = {
-        .nodeInternalRpcHandler = this,
-        .clientRpcWorkThreadsCnt = (uint16_t)FLAGS_internal_rpc_client_threads_cnt,
-        .clientWaitResponseTimeout = clientWaitTimeOut,
-        .serverRpcWorkThreadsCnt = (uint16_t)FLAGS_internal_rpc_server_threads_cnt,
-        .mngerDispatchWorkThreadsCnt = (uint16_t)FLAGS_internal_rpc_messenger_threads_cnt,
-        .netIOThreadsCnt = (uint16_t)FLAGS_internal_rpc_io_threads_cnt,
-        .port = port,
-        .memPool = nullptr,
-        FLAGS_net_server_connect_timeout
-    };
-
+    ccsys::cctime clientWaitTimeOut(FLAGS_internal_rpc_client_wait_timeout_secs,
+                                    FLAGS_internal_rpc_client_wait_timeout_nsecs);
+    CreateServerInternalMessengerParam cnimp(this, (uint16_t)FLAGS_internal_rpc_client_threads_cnt,
+                                             clientWaitTimeOut, (uint16_t)FLAGS_internal_rpc_server_threads_cnt,
+                                             (uint16_t)FLAGS_internal_rpc_messenger_threads_cnt,
+                                             (uint16_t)FLAGS_internal_rpc_io_threads_cnt,
+                                             port, nullptr, FLAGS_net_server_connect_timeout);
     m_pNodeInternalMessenger = new ServerInternalMessenger(cnimp);
     m_pExecRpcTp = new ccsys::ThreadPool<RpcTask>(rpcThreadsCnt);
 }
@@ -76,12 +66,7 @@ void ServerRpcService::RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t
         m_pRaftConsensus->OnMessageSent(std::move(sr));
     };
 
-    RpcTask rt = {
-        .msg = req,
-        .pSim = m_pNodeInternalMessenger,
-        .peer = std::move(peer)
-    };
-
+    RpcTask rt(req, m_pNodeInternalMessenger, std::move(peer));
     m_pExecRpcTp->AddTask(send_req_vote, rt);
 }
 

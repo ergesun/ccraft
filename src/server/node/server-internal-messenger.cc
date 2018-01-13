@@ -38,15 +38,9 @@ ServerInternalMessenger::ServerInternalMessenger(CreateServerInternalMessengerPa
         .tv_sec = createParam.connectTimeout / 1000,
         .tv_usec = (createParam.connectTimeout % 1000) * 1000
     };
-    net::NssConfig nc = {
-        .sp = net::SocketProtocol::Tcp,
-        .sspNat = sspNat,
-        .logicPort = createParam.port,
-        .netMgrType = net::NetStackWorkerMgrType::Unique,
-        .memPool = m_pMemPool,
-        .msgCallbackHandler = std::bind(&INodeInternalRpcHandler::OnRecvRpcReturnResult, this, std::placeholders::_1),
-        .connectTimeout = connTimeout
-    };
+    net::NssConfig nc(net::SocketProtocol::Tcp, sspNat, createParam.port, net::NetStackWorkerMgrType::Unique,
+                      m_pMemPool, std::bind(&INodeInternalRpcHandler::OnRecvRpcReturnResult, this, std::placeholders::_1),
+                      connTimeout);
     m_pSocketService = net::SocketServiceFactory::CreateService(nc);
     m_pSyncClient = new RfSrvInternalRpcClientSync(m_pSocketService, createParam.clientWaitResponseTimeout,
                                                 createParam.clientRpcWorkThreadsCnt, m_pMemPool);

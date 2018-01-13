@@ -12,4 +12,6 @@
 #define RpcAppendEntries "AppendEntries"
 #define RpcRequestVote   "RequestVote"
 
+//namespace ccraft
+
 #endif //CCRAFT_NODE_COMMON_DEF_H

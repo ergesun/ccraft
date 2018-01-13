@@ -6,13 +6,8 @@
 #ifndef CCRAFT_RF_NODE_RPC_ASYNC_CLIENT_H
 #define CCRAFT_RF_NODE_RPC_ASYNC_CLIENT_H
 
+#include "../../../rpc/common-def.h"
 #include "../../../rpc/abstract-rpc-client.h"
-
-/**
- * 返回值SentRet的msgId为INVALID_MSG_ID(0)表示发送失败，原因为发送队列满了。
- */
-#define DefineRfNodeAsyncRpcWithPeer(RpcName)                                                        \
-    rpc::ARpcClient::SentRet RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer)
 
 namespace ccraft {
 namespace protocol {
@@ -29,8 +24,8 @@ public:
     }
 
     // Define Rpc start
-    DefineRfNodeAsyncRpcWithPeer(AppendEntries);
-    DefineRfNodeAsyncRpcWithPeer(RequestVote);
+    DefineStandardAsyncRpc(AppendEntries);
+    DefineStandardAsyncRpc(RequestVote);
     // Define Rpc end
 
 protected:

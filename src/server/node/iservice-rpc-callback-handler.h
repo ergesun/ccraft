@@ -1,6 +1,7 @@
-//
-// Created by root on 17-12-10.
-//
+/**
+ * This work copyright Chao Sun(qq:296449610) and licensed under
+ * a Creative Commons Attribution 3.0 Unported License(https://creativecommons.org/licenses/by/3.0/).
+ */
 
 #ifndef CCRAFT_ISERVICE_RPC_CALLBACK_HANDLER_H
 #define CCRAFT_ISERVICE_RPC_CALLBACK_HANDLER_H
