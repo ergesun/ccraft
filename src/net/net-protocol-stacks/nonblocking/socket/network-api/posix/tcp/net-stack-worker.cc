@@ -319,6 +319,7 @@ void PosixTcpNetStackWorker::handshake(RcvMessage *rm) {
                 auto port = ByteOrderUtils::ReadUInt16(buffer->GetPos());
                 std::string addrStr = GetEventHandler()->GetSocketDescriptor()->GetRealPeerInfo().nat.addr;
                 net_peer_info_t npt(net_addr_t(std::move(addrStr), port), SocketProtocol::Tcp);
+
                 // set peer info to logic info.
                 this->GetEventHandler()->GetSocketDescriptor()->SetLogicPeerInfo(std::move(npt));
                 auto crm = new ConnectResponseMessage(m_pMemPool, ConnectResponseMessage::Status::OK, "");

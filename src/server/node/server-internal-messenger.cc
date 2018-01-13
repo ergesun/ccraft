@@ -38,6 +38,7 @@ ServerInternalMessenger::ServerInternalMessenger(CreateServerInternalMessengerPa
         .tv_sec = createParam.connectTimeout / 1000,
         .tv_usec = (createParam.connectTimeout % 1000) * 1000
     };
+
     net::NssConfig nc(net::SocketProtocol::Tcp, sspNat, createParam.port, net::NetStackWorkerMgrType::Unique,
                       m_pMemPool, std::bind(&INodeInternalRpcHandler::OnRecvRpcReturnResult, this, std::placeholders::_1),
                       connTimeout);

@@ -24,7 +24,7 @@ class EventWorker {
 public:
     struct EpollAddEvent {
         EpollAddEvent(AFileEventHandler *h, int32_t curMask, int32_t m)
-        : socketEventHandler(h), cur_mask(curMask), mask(m) {}
+                    : socketEventHandler(h), cur_mask(curMask), mask(m) {}
         AFileEventHandler *socketEventHandler = nullptr;
         int32_t cur_mask;
         int32_t mask;
