@@ -16,6 +16,8 @@ namespace rpc {
 class RpcException : public std::exception {
 public:
     RpcException() = default;
+    RpcException(std::string &what) : m_sWhat(what) {}
+    RpcException(std::string &&what) : m_sWhat(std::move(what)) {}
 
 protected:
     std::string m_sWhat;
@@ -40,7 +42,6 @@ public:
 private:
     uint16_t m_iCode;
     std::string m_sRpcName;
-    std::string m_sWhat;
 };
 
 class BadRpcHandlerIdException : public RpcException {

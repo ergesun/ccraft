@@ -23,8 +23,10 @@ public:
         rpc::ARpcSyncClient(ss, timeout, workThreadsCnt, memPool) {}
 
     // Define Rpc start
-    DefineStandardSyncRpc(AppendEntries);
-    DefineStandardSyncRpc(RequestVote);
+    DefineStandardSyncRpcWithNoMsgId(AppendEntries);
+    DefineStandardSyncRpcWithNoMsgId(RequestVote);
+    DefineStandardSyncRpcWithMsgId(AppendEntries);
+    DefineStandardSyncRpcWithMsgId(RequestVote);
     // Define Rpc end
 
 protected:

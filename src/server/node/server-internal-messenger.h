@@ -15,9 +15,14 @@
 #include "inode-internal-rpc-handler.h"
 
 namespace ccraft {
+namespace rpc {
+class IMessageHandler;
+}
+
 namespace ccsys {
 class MemPool;
 }
+
 namespace net {
 class ISocketService;
 class NotifyMessage;
@@ -55,7 +60,7 @@ struct CreateServerInternalMessengerParam {
 
     INodeInternalRpcHandler   *nodeInternalRpcHandler;
     uint16_t                   clientRpcWorkThreadsCnt;
-    ccsys::cctime            clientWaitResponseTimeout;
+    ccsys::cctime              clientWaitResponseTimeout;
     uint16_t                   serverRpcWorkThreadsCnt;
     uint16_t                   mngerDispatchWorkThreadsCnt;
     uint16_t                   netIOThreadsCnt;
@@ -64,7 +69,7 @@ struct CreateServerInternalMessengerParam {
     int32_t                    connectTimeout;
 };
 
-// TODO(sunchao): 考虑有必要再对messenger抽象不.
+// TODO(sunchao): 把messenger抽象一下，将AbstractRpcMessenger放到rpc模块，把dispatcher部分抽象出来。否则现在的缺点是rpc message type协议头的处理在应用层了。
 class ServerInternalMessenger : public IService, public INodeInternalRpcHandler {
 public:
     /**
@@ -93,24 +98,31 @@ public:
     void OnRecvRpcReturnResult(std::shared_ptr<net::NotifyMessage> sspNM) override;
 
 private:
+    void add_msg_to_mapper(net::Message::Id id, rpc::IMessageHandler* handler, net::net_peer_info_t &peer);
+    rpc::IMessageHandler* remove_msg_from_msg_handler_map(net::Message::Id id);
+    rpc::IMessageHandler* remove_msg_from_map(net::Message::Id id, net::net_peer_info_t &peer);
+    void clear_peer_msg_map(net::net_peer_info_t &peer);
     void dispatch_msg(std::shared_ptr<net::NotifyMessage> sspNM);
 
 private:
-    uint16_t                                                    m_iIOThreadsCnt  = 0;
-    uint16_t                                                    m_iPort          = 0;
-    bool                                                        m_bStopped       = true;
+    uint16_t                                                                             m_iIOThreadsCnt  = 0;
+    uint16_t                                                                             m_iPort          = 0;
+    bool                                                                                 m_bStopped       = true;
     /**
      * 关联关系，无需本类释放。
      */
-    INodeInternalRpcHandler                                    *m_pNodeINRpcHandler  = nullptr;
-    net::ISocketService                                        *m_pSocketService     = nullptr;
-    RfSrvInternalRpcClientSync                                 *m_pSyncClient        = nullptr;
-    RfSrvInternalRpcClientAsync                                *m_pAsyncClient       = nullptr;
-    RfSrvInternalRpcServerSync                                 *m_pServer            = nullptr;
-    bool                                                        m_bOwnMemPool        = false;
-    ccsys::MemPool                                             *m_pMemPool           = nullptr;
-    uint16_t                                                    m_iDispatchTpCnt     = 0;
-    ccsys::ThreadPool<std::shared_ptr<net::NotifyMessage>>     *m_pDispatchTp        = nullptr;
+    INodeInternalRpcHandler                                                             *m_pNodeINRpcHandler  = nullptr;
+    net::ISocketService                                                                 *m_pSocketService     = nullptr;
+    RfSrvInternalRpcClientSync                                                          *m_pSyncClient        = nullptr;
+    RfSrvInternalRpcClientAsync                                                         *m_pAsyncClient       = nullptr;
+    RfSrvInternalRpcServerSync                                                          *m_pServer            = nullptr;
+    bool                                                                                 m_bOwnMemPool        = false;
+    ccsys::MemPool                                                                      *m_pMemPool           = nullptr;
+    uint16_t                                                                             m_iDispatchTpCnt     = 0;
+    ccsys::ThreadPool<std::shared_ptr<net::NotifyMessage>>                              *m_pDispatchTp        = nullptr;
+    std::unordered_map<net::Message::Id, rpc::IMessageHandler*>                          m_msgHandlerMapper;
+    std::unordered_map<net::net_peer_info_t, std::unordered_set<net::Message::Id>>       m_addrMsgMapper;
+    ccsys::spin_lock_t                                                                   m_slMsgMapper        = UNLOCKED;
 };
 } // namespace server
 } // namespace ccraft

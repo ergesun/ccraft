@@ -31,6 +31,21 @@ std::shared_ptr<net::NotifyMessage> ARpcSyncClient::sendMessage(std::string &&rp
     return recvMessage(ctx);
 }
 
+std::shared_ptr<net::NotifyMessage> ARpcSyncClient::sendMessage(std::string &&rpcName, net::Message::Id id,
+                                                                std::shared_ptr<google::protobuf::Message> msg,
+                                                                net::net_peer_info_t &&peer) {
+    auto sr = ARpcClient::SendMessageAsync(std::move(rpcName), id, std::move(msg), std::move(peer));
+    if (0 == sr.msgId) {
+        return std::shared_ptr<net::NotifyMessage>(nullptr);
+    }
+
+    auto ctx = m_rpcCtxPool.Get();
+    ctx->peer = std::move(sr.peer);
+    ctx->msgId = sr.msgId;
+
+    return recvMessage(ctx);
+}
+
 void ARpcSyncClient::onRecvMessage(std::shared_ptr<net::NotifyMessage> sspNM) {
     switch (sspNM->GetType()) {
         case net::NotifyMessageType::Message: {

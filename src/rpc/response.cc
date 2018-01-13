@@ -20,8 +20,6 @@ uint32_t RpcResponse::getDerivePayloadLength() {
 }
 
 void RpcResponse::encodeDerive(common::Buffer *b) {
-    *(b->GetPos()) = (uchar)((uint8_t)(MessageType::Response));
-    b->MoveHeadBack(sizeof(MessageTypeType));
     ByteOrderUtils::WriteUInt16(b->GetPos(), (RpcCodeType)m_code);
     b->MoveHeadBack(sizeof(RpcCodeType));
     ByteOrderUtils::WriteUInt16(b->GetPos(), m_ht);
@@ -32,12 +30,10 @@ void RpcResponse::encodeDerive(common::Buffer *b) {
 }
 
 uint32_t RpcResponseBase::getDerivePayloadLength() {
-    return sizeof(MessageTypeType) + sizeof(RpcCodeType) + sizeof(HandlerType);
+    return sizeof(RpcCodeType) + sizeof(HandlerType);
 }
 
 void RpcResponseBase::encodeDerive(common::Buffer *b) {
-    *(b->GetPos()) = (uchar)((uint8_t)(MessageType::Response));
-    b->MoveHeadBack(sizeof(MessageTypeType));
     ByteOrderUtils::WriteUInt16(b->GetPos(), (RpcCodeType)m_code);
     b->MoveHeadBack(sizeof(RpcCodeType));
     ByteOrderUtils::WriteUInt16(b->GetPos(), m_ht);

@@ -70,10 +70,11 @@ protected:
 private:
     static void encode_header(common::Buffer *b, Header &h);
 #ifdef WITH_MSG_ID
-    static Id get_new_id();
+public:
+    static Id GetNewId();
 
 private:
-    static ccsys::spin_lock_t              s_idLock;
+    static ccsys::spin_lock_t               s_idLock;
     static Id                               s_lastId;
 #endif
 };

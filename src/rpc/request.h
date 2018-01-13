@@ -24,6 +24,10 @@ public:
                uint16_t handlerId, std::shared_ptr<google::protobuf::Message> &&msg) :
         net::SndMessage(mp, std::move(peerInfo)), m_iHandlerId(handlerId), m_sspMsg(std::move(msg)) {}
 
+    RpcRequest(ccsys::MemPool *mp, net::Message::Id id, net::net_peer_info_t &&peerInfo,
+               uint16_t handlerId, std::shared_ptr<google::protobuf::Message> &&msg) :
+        net::SndMessage(mp, std::move(peerInfo), id), m_iHandlerId(handlerId), m_sspMsg(std::move(msg)) {}
+
 protected:
     uint32_t getDerivePayloadLength() override;
     void encodeDerive(common::Buffer *b) override;

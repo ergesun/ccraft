@@ -93,6 +93,28 @@ ARpcClient::SentRet ARpcClient::SendMessageAsync(std::string &&rpcName, SP_PB_MS
     return sr;
 }
 
+ARpcClient::SentRet ARpcClient::SendMessageAsync(std::string &&rpcName, net::Message::Id id,
+                                                SP_PB_MSG msg, net::net_peer_info_t &&peer) {
+    if (m_hmapRpcs.end() == m_hmapRpcs.find(rpcName)) {
+        throw BadRpcException((uint16_t)RpcCode::ErrorNoRegisteredRpc, std::move(rpcName));
+    }
+
+    SentRet sr;
+    net::net_peer_info_t rcPeer = peer;
+    auto handlerId = m_hmapRpcs[rpcName];
+    auto rr = new RpcRequest(m_pMemPool, id, std::move(peer), handlerId, std::move(msg));
+    if (UNLIKELY(!m_pSocketService->SendMessage(rr))) {
+        DELETE_PTR(rr);
+        return sr;
+    }
+
+    sr.peer = std::move(rcPeer);
+    sr.msgId = id;
+    sr.handlerId = handlerId;
+
+    return sr;
+}
+
 void ARpcClient::HandleMessage(std::shared_ptr<net::NotifyMessage> sspNM) {
     onRecvMessage(sspNM);
 }

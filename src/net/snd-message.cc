@@ -22,13 +22,13 @@ Message::Id SndMessage::s_lastId = 0;
 
 SndMessage::SndMessage() {
 #ifdef WITH_MSG_ID
-    m_header.id = get_new_id();
+    m_header.id = GetNewId();
 #endif
 }
 
 SndMessage::SndMessage(ccsys::MemPool *mp, net_peer_info_t &&peerInfo) : Message(mp) {
 #ifdef WITH_MSG_ID
-    m_header.id = get_new_id();
+    m_header.id = GetNewId();
 #endif
     m_peerInfo = std::move(peerInfo);
 }
@@ -86,7 +86,7 @@ void SndMessage::encode_header(common::Buffer *b, Header &h) {
 }
 
 #if WITH_MSG_ID
-Message::Id SndMessage::get_new_id() {
+Message::Id SndMessage::GetNewId() {
     ccsys::SpinLock l(&s_idLock);
 #if BULK_MSG_ID
     ++s_lastId.seq;

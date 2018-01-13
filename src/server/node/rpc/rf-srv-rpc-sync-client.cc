@@ -17,8 +17,10 @@
 
 namespace ccraft {
 namespace server {
-ImplStandardSyncRpc(RfSrvInternalRpcClientSync, AppendEntries)
-ImplStandardSyncRpc(RfSrvInternalRpcClientSync, RequestVote)
+ImplStandardSyncRpcWithNoMsgId(RfSrvInternalRpcClientSync, AppendEntries)
+ImplStandardSyncRpcWithNoMsgId(RfSrvInternalRpcClientSync, RequestVote)
+ImplStandardSyncRpcWithMsgId(RfSrvInternalRpcClientSync, AppendEntries)
+ImplStandardSyncRpcWithMsgId(RfSrvInternalRpcClientSync, RequestVote)
 
 bool RfSrvInternalRpcClientSync::register_rpc_handlers() {
     if (!registerRpc(RpcAppendEntries, APPEND_ENTRIES_RPC_ID)) {

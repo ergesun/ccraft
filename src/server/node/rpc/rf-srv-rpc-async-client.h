@@ -24,8 +24,10 @@ public:
     }
 
     // Define Rpc start
-    DefineStandardAsyncRpc(AppendEntries);
-    DefineStandardAsyncRpc(RequestVote);
+    DefineStandardAsyncRpcWithNoMsgId(AppendEntries);
+    DefineStandardAsyncRpcWithNoMsgId(RequestVote);
+    DefineStandardAsyncRpcWithMsgId(AppendEntries);
+    DefineStandardAsyncRpcWithMsgId(RequestVote);
     // Define Rpc end
 
 protected:

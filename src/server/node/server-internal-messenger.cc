@@ -10,6 +10,7 @@
 #include "../../net/net-protocol-stacks/msg-worker-managers/unique-worker-manager.h"
 #include "../../net/rcv-message.h"
 #include "../../rpc/common-def.h"
+#include "../../rpc/exceptions.h"
 
 #include "rpc/rf-srv-rpc-sync-client.h"
 #include "rpc/rf-srv-rpc-async-client.h"
@@ -76,6 +77,10 @@ bool ServerInternalMessenger::Start() {
         return false;
     }
 
+    if (!m_pAsyncClient->Start()) {
+        return false;
+    }
+
     return m_pServer->Start();
 }
 
@@ -87,6 +92,7 @@ bool ServerInternalMessenger::Stop() {
     m_bStopped = true;
     hw_sw_memory_barrier();
     m_pSyncClient->Stop();
+    m_pAsyncClient->Stop();
     m_pServer->Stop();
     m_pSocketService->Stop();
     DELETE_PTR(m_pDispatchTp);
@@ -95,11 +101,15 @@ bool ServerInternalMessenger::Stop() {
 
 std::shared_ptr<protocol::AppendEntriesResponse> ServerInternalMessenger::AppendEntriesSync(rpc::SP_PB_MSG req,
                                                                                  net::net_peer_info_t &&peer) {
-    return m_pSyncClient->AppendEntries(req, std::move(peer));
+    auto id = net::SndMessage::GetNewId();
+    add_msg_to_mapper(id, m_pSyncClient, peer);
+    return m_pSyncClient->AppendEntries(id, req, std::move(peer));
 }
 
 rpc::ARpcClient::SentRet ServerInternalMessenger::AppendEntriesAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
-    return m_pAsyncClient->AppendEntries(req, std::move(peer));
+    auto id = net::SndMessage::GetNewId();
+    add_msg_to_mapper(id, m_pAsyncClient, peer);
+    return m_pAsyncClient->AppendEntries(id, req, std::move(peer));
 }
 
 rpc::SP_PB_MSG ServerInternalMessenger::OnAppendEntries(rpc::SP_PB_MSG sspMsg) {
@@ -108,15 +118,77 @@ rpc::SP_PB_MSG ServerInternalMessenger::OnAppendEntries(rpc::SP_PB_MSG sspMsg) {
 
 std::shared_ptr<protocol::RequestVoteResponse> ServerInternalMessenger::RequestVoteSync(rpc::SP_PB_MSG req,
                                                                                  net::net_peer_info_t &&peer) {
-    return m_pSyncClient->RequestVote(req, std::move(peer));
+    auto id = net::SndMessage::GetNewId();
+    add_msg_to_mapper(id, m_pSyncClient, peer);
+    return m_pSyncClient->RequestVote(id, req, std::move(peer));
 }
 
 rpc::ARpcClient::SentRet ServerInternalMessenger::RequestVoteAsync(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {
+    auto id = net::SndMessage::GetNewId();
+    add_msg_to_mapper(id, m_pAsyncClient, peer);
     return m_pAsyncClient->RequestVote(req, std::move(peer));
 }
 
 rpc::SP_PB_MSG ServerInternalMessenger::OnRequestVote(rpc::SP_PB_MSG sspMsg) {
     return m_pNodeINRpcHandler->OnRequestVote(sspMsg);
+}
+
+void ServerInternalMessenger::add_msg_to_mapper(net::Message::Id id, rpc::IMessageHandler *handler, net::net_peer_info_t &peer) {
+    ccsys::SpinLock l(&m_slMsgMapper);
+    if (m_msgHandlerMapper.end() != m_msgHandlerMapper.find(id)) {
+        throw rpc::RpcException("Message id is conflict, if you send a high frequency of messages, you should use BIG_MSG_ID or BULK_MSG_ID in net module.");
+    }
+
+    m_msgHandlerMapper[id] = handler;
+    auto iter = m_addrMsgMapper.find(peer);
+    if (m_addrMsgMapper.end() != iter) {
+        iter->second.insert(id);
+    } else {
+        auto s = std::unordered_set<net::Message::Id>();
+        m_addrMsgMapper[peer] = s;
+        s.insert(id);
+    }
+}
+
+rpc::IMessageHandler* ServerInternalMessenger::remove_msg_from_msg_handler_map(net::Message::Id id) {
+    auto iter = m_msgHandlerMapper.find(id);
+    if (m_msgHandlerMapper.end() != iter) {
+        return nullptr;
+    }
+
+    return iter->second;
+}
+
+rpc::IMessageHandler* ServerInternalMessenger::remove_msg_from_map(net::Message::Id id,
+                                                                   net::net_peer_info_t &peer) {
+    ccsys::SpinLock l(&m_slMsgMapper);
+    rpc::IMessageHandler *handler = nullptr;
+    if (!(handler = remove_msg_from_msg_handler_map(id))) {
+        return nullptr;
+    }
+
+    auto iter = m_addrMsgMapper.find(peer);
+    if (m_addrMsgMapper.end() == iter) {
+        return nullptr;
+    }
+
+    iter->second.erase(id);
+    return handler;
+}
+
+void ServerInternalMessenger::clear_peer_msg_map(net::net_peer_info_t &peer) {
+    ccsys::SpinLock l(&m_slMsgMapper);
+    auto iter = m_addrMsgMapper.find(peer);
+    if (m_addrMsgMapper.end() == iter || 0 == iter->second.size()) {
+        return;
+    }
+
+    for (auto id : iter->second) {
+        remove_msg_from_msg_handler_map(id);
+    }
+
+    iter->second.clear();
+    m_addrMsgMapper.erase(peer);
 }
 
 void ServerInternalMessenger::dispatch_msg(std::shared_ptr<net::NotifyMessage> sspNM) {
@@ -129,15 +201,15 @@ void ServerInternalMessenger::dispatch_msg(std::shared_ptr<net::NotifyMessage> s
             auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());
             auto rm = mnm->GetContent();
             if (LIKELY(rm)) {
-                auto buf = rm->GetDataBuffer();
-                auto messageType = (rpc::MessageType)(*(buf->GetPos()));
-                buf->MoveHeadBack(1);
-                if (rpc::MessageType::Request == messageType) {
+                auto id = rm->GetId();
+                auto peer = rm->GetPeerInfo();
+                auto clientHandler = remove_msg_from_map(id, peer);
+                if (clientHandler) {
+                    clientHandler->HandleMessage(sspNM);
+                    LOGDFUN1("dispatch message type = Response.");
+                } else {
                     m_pServer->HandleMessage(sspNM);
                     LOGDFUN1("dispatch message type = Request.");
-                } else {
-                    m_pSyncClient->HandleMessage(sspNM);
-                    LOGDFUN1("dispatch message type = Response.");
                 }
             } else {
                 LOGWFUN << "recv message is empty!";
@@ -145,12 +217,20 @@ void ServerInternalMessenger::dispatch_msg(std::shared_ptr<net::NotifyMessage> s
             break;
         }
         case net::NotifyMessageType::Worker: {
-            m_pSyncClient->HandleMessage(sspNM);
-            m_pServer->HandleMessage(sspNM);
+            auto *wnm = dynamic_cast<ccraft::net::WorkerNotifyMessage*>(sspNM.get());
+            if (wnm) {
+                auto peer = wnm->GetPeer();
+                clear_peer_msg_map(peer);
+                LOGIFUN << "worker notify message , rc = " << (int)wnm->GetCode() << ", message = " << wnm->What() << std::endl;
+            }
             break;
         }
         case net::NotifyMessageType::Server: {
-            LOGFFUN << "Messenger port = " << m_iPort << " cannot start to work.";
+            auto *snm = dynamic_cast<ccraft::net::ServerNotifyMessage*>(sspNM.get());
+            if (snm) {
+                std::cout << "server notify message , rc = " << (int)snm->GetCode() << ", message = " << snm->What() << std::endl;
+            }
+            break;
         }
     }
 }
@@ -162,5 +242,7 @@ void ServerInternalMessenger::OnRecvRpcReturnResult(std::shared_ptr<net::NotifyM
 
     m_pDispatchTp->AddTask(std::bind(&ServerInternalMessenger::dispatch_msg, this, std::placeholders::_1), sspNM);
 }
+
+
 } // namespace server
 } // namespace ccraft

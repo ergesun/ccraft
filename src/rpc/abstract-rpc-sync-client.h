@@ -15,24 +15,46 @@
 
 #include "abstract-rpc-client.h"
 
-#define DefineStandardSyncRpc(RpcName)                                                                   \
+#define DefineStandardSyncRpcWithNoMsgId(RpcName)                                                                   \
     std::shared_ptr<protocol::RpcName##Response> RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer)
 
-#define ImplStandardSyncRpc(ClassName, RpcName)                                                         \
-std::shared_ptr<protocol::RpcName##Response>                                                            \
-    ClassName::RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {                               \
-        auto sspNM = sendMessage(#RpcName, std::move(req), std::move(peer));                            \
-        if (!sspNM) {                                                                                   \
-        }                                                                                               \
-                                                                                                        \
-        auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());                              \
-        auto rm = mnm->GetContent();                                                                    \
-        auto RpcName##Resp__Impl_DEF_TMP = new protocol::RpcName##Response();                           \
-        auto buf = rm->GetDataBuffer();                                                                 \
-        buf->MoveHeadBack(sizeof(rpc::HandlerType));                                                    \
-        common::ProtoBufUtils::Deserialize(buf, RpcName##Resp__Impl_DEF_TMP);                           \
-        return std::shared_ptr<protocol::RpcName##Response>(RpcName##Resp__Impl_DEF_TMP);               \
+#define ImplStandardSyncRpcWithNoMsgId(ClassName, RpcName)                                                         \
+std::shared_ptr<protocol::RpcName##Response>                                                                       \
+    ClassName::RpcName(rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {                                          \
+        auto sspNM = sendMessage(#RpcName, std::move(req), std::move(peer));                                       \
+        if (!sspNM) {                                                                                              \
+            throw RpcClientIsBusyException();                                                                      \
+        }                                                                                                          \
+                                                                                                                   \
+        auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());                                         \
+        auto rm = mnm->GetContent();                                                                               \
+        auto RpcName##Resp__Impl_DEF_TMP = new protocol::RpcName##Response();                                      \
+        auto buf = rm->GetDataBuffer();                                                                            \
+        buf->MoveHeadBack(sizeof(rpc::HandlerType));                                                               \
+        common::ProtoBufUtils::Deserialize(buf, RpcName##Resp__Impl_DEF_TMP);                                      \
+        return std::shared_ptr<protocol::RpcName##Response>(RpcName##Resp__Impl_DEF_TMP);                          \
     }
+
+#define DefineStandardSyncRpcWithMsgId(RpcName)                                                                                 \
+    std::shared_ptr<protocol::RpcName##Response> RpcName(net::Message::Id id, rpc::SP_PB_MSG req, net::net_peer_info_t &&peer)
+
+#define ImplStandardSyncRpcWithMsgId(ClassName, RpcName)                                                           \
+std::shared_ptr<protocol::RpcName##Response>                                                                       \
+    ClassName::RpcName(net::Message::Id id, rpc::SP_PB_MSG req, net::net_peer_info_t &&peer) {                     \
+        auto sspNM = sendMessage(#RpcName, id, std::move(req), std::move(peer));                                   \
+        if (!sspNM) {                                                                                              \
+            throw RpcClientIsBusyException();                                                                      \
+        }                                                                                                          \
+                                                                                                                   \
+        auto *mnm = dynamic_cast<net::MessageNotifyMessage*>(sspNM.get());                                         \
+        auto rm = mnm->GetContent();                                                                               \
+        auto RpcName##Resp__Impl_DEF_TMP = new protocol::RpcName##Response();                                      \
+        auto buf = rm->GetDataBuffer();                                                                            \
+        buf->MoveHeadBack(sizeof(rpc::HandlerType));                                                               \
+        common::ProtoBufUtils::Deserialize(buf, RpcName##Resp__Impl_DEF_TMP);                                      \
+        return std::shared_ptr<protocol::RpcName##Response>(RpcName##Resp__Impl_DEF_TMP);                          \
+    }
+
 
 namespace ccraft {
 namespace net {
@@ -88,6 +110,13 @@ protected:
      * @return 如果get()为null则失败，否则成功。
      */
     std::shared_ptr<net::NotifyMessage> sendMessage(std::string &&rpcName, SP_PB_MSG msg, net::net_peer_info_t &&peer);
+
+    /**
+     * @param rpcName
+     * @param msg
+     * @return 如果get()为null则失败，否则成功。
+     */
+    std::shared_ptr<net::NotifyMessage> sendMessage(std::string &&rpcName, net::Message::Id id, SP_PB_MSG msg, net::net_peer_info_t &&peer);
 
 private:
     common::ResourcePool<RpcCtx>                                   m_rpcCtxPool = common::ResourcePool<RpcCtx>(200);

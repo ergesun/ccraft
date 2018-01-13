@@ -18,13 +18,6 @@ namespace ccraft {
 namespace rpc {
 typedef std::shared_ptr<google::protobuf::Message> SP_PB_MSG;
 
-enum class MessageType {
-    Request     = 0,
-    Response    = 1
-};
-
-typedef uint8_t MessageTypeType;
-
 typedef uint16_t HandlerType;
 
 enum class RpcCode {

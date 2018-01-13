@@ -106,7 +106,7 @@ TEST(NetTest, ServerTest) {
 void recv_msg(std::shared_ptr<ccraft::net::NotifyMessage> sspNM) {
     switch (sspNM->GetType()) {
         case ccraft::net::NotifyMessageType::Message: {
-            ccraft::net::MessageNotifyMessage *mnm = dynamic_cast<ccraft::net::MessageNotifyMessage*>(sspNM.get());
+            auto *mnm = dynamic_cast<ccraft::net::MessageNotifyMessage*>(sspNM.get());
             auto rm = mnm->GetContent();
             if (rm) {
                 auto respBuf = rm->GetDataBuffer();
@@ -124,14 +124,14 @@ void recv_msg(std::shared_ptr<ccraft::net::NotifyMessage> sspNM) {
             break;
         }
         case ccraft::net::NotifyMessageType::Worker: {
-            ccraft::net::WorkerNotifyMessage *wnm = dynamic_cast<ccraft::net::WorkerNotifyMessage*>(sspNM.get());
+            auto *wnm = dynamic_cast<ccraft::net::WorkerNotifyMessage*>(sspNM.get());
             if (wnm) {
                 std::cout << "worker notify message , rc = " << (int)wnm->GetCode() << ", message = " << wnm->What() << std::endl;
             }
             break;
         }
         case ccraft::net::NotifyMessageType::Server: {
-            ccraft::net::ServerNotifyMessage *snm = dynamic_cast<ccraft::net::ServerNotifyMessage*>(sspNM.get());
+            auto *snm = dynamic_cast<ccraft::net::ServerNotifyMessage*>(sspNM.get());
             if (snm) {
                 std::cout << "server notify message , rc = " << (int)snm->GetCode() << ", message = " << snm->What() << std::endl;
             }

@@ -29,8 +29,8 @@ namespace rpc {
 class IRpcHandler;
 /**
  * [Message format]
- *    client -> server :  |net common header(Message::HeaderSize() bytes)|msg type|[handler id(2bytes)|protobuf msg(n bytes)]|
- *    server -> client :  |net common header(Message::HeaderSize() bytes)|msg type|[rpc code(2bytes)|[handler id(2bytes)|protobuf msg(n bytes or 0 if no return value)]|
+ *    client -> server :  |net common header(Message::HeaderSize() bytes)|[handler id(2bytes)|protobuf msg(n bytes)]|
+ *    server -> client :  |net common header(Message::HeaderSize() bytes)|[rpc code(2bytes)|[handler id(2bytes)|protobuf msg(n bytes or 0 if no return value)]|
  */
 class RpcServer : public IService, public IMessageHandler {
 public:
